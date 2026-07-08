@@ -12,7 +12,6 @@ import {
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { DashboardPreview } from '@/components/dashboard-preview'
-import { FlyingBird } from '@/components/flying-bird'
 
 const trustBadges = [
   { label: '100% Free', icon: BadgeCheck },
@@ -160,19 +159,13 @@ export function Hero() {
 
       {/* Cinematic landscape band */}
       <div className="relative mt-16 sm:mt-20">
-        <div className="relative h-[360px] w-full overflow-hidden sm:h-[440px]">
-          <motion.img
+        <div className="relative h-[360px] w-full sm:h-[440px]">
+          <img
             src="/images/hero-landscape.png"
             alt="Misty rolling hills at sunrise"
-            initial={{ scale: 1.08 }}
-            whileInView={{ scale: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 1.6, ease }}
             className="absolute inset-0 size-full object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-b from-background via-transparent to-background/40" />
-          {/* Gliding bird */}
-          <FlyingBird className="left-0 top-10 sm:top-16" duration={28} delay={2} drift={36} size="w-14" />
           {/* Giant wordmark */}
           <div className="absolute inset-x-0 bottom-16 flex justify-center px-4">
             <motion.span

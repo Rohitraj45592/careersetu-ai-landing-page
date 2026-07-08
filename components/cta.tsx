@@ -26,17 +26,13 @@ export function Cta() {
           className="pointer-events-none absolute -bottom-20 -left-10 size-64 rounded-full bg-accent/15 blur-3xl"
         />
         <div className="relative">
-          <motion.div
-            animate={{ y: [0, -8, 0] }}
-            transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
-          >
-            <BrandMark className="mx-auto size-10" />
-          </motion.div>
+          <BrandMark className="mx-auto size-10" />
           <h2 className="mx-auto mt-6 max-w-2xl text-balance font-display text-4xl font-semibold tracking-tight text-primary-foreground sm:text-5xl">
-            Ready to accelerate your placement journey?
+            Your dream placement is closer than you think.
           </h2>
           <p className="mx-auto mt-4 max-w-lg text-pretty text-lg leading-relaxed text-primary-foreground/75">
-            Join thousands of students using CareerSetu AI.
+            Join 10,000+ students using CareerSetu AI to get hired faster. Free to
+            start, no credit card required.
           </p>
           <div className="mt-9 flex flex-col justify-center gap-3 sm:flex-row">
             <Button
@@ -45,7 +41,7 @@ export function Cta() {
               nativeButton={false}
               render={<a href="#" />}
             >
-              Get Started Free
+              Analyze My Resume
               <ArrowRight className="transition-transform group-hover:translate-x-0.5" />
             </Button>
             <Button
