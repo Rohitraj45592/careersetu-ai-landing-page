@@ -31,7 +31,29 @@ const ease = [0.22, 1, 0.36, 1] as const
 
 export function Hero() {
   return (
-    <section className="relative overflow-hidden pt-32 sm:pt-36">
+    <section className="relative overflow-hidden bg-[#f7f3ed] pt-32 sm:pt-36">
+      {/* Background Glow */}
+<div className="absolute inset-0 -z-10 overflow-hidden">
+  <div className="absolute left-1/2 top-20 h-[650px] w-[650px] -translate-x-1/2 rounded-full bg-gradient-to-r from-amber-100 via-orange-100 to-transparent blur-3xl opacity-70" />
+
+  <div className="absolute -left-32 top-48 h-96 w-96 rounded-full bg-yellow-100 blur-[140px] opacity-40" />
+
+  <div className="absolute right-0 top-10 h-[420px] w-[420px] rounded-full bg-orange-100 blur-[160px] opacity-40" />
+</div>
+      {/* Premium Atmosphere */}
+<div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
+  {/* Top sunlight */}
+  <div className="absolute left-1/2 top-0 h-[500px] w-[900px] -translate-x-1/2 rounded-full bg-gradient-to-b from-amber-100/70 via-orange-100/30 to-transparent blur-3xl" />
+
+  {/* Left glow */}
+  <div className="absolute -left-32 top-40 h-[420px] w-[420px] rounded-full bg-yellow-100/50 blur-[140px]" />
+
+  {/* Right glow */}
+  <div className="absolute right-0 top-20 h-[360px] w-[360px] rounded-full bg-orange-100/40 blur-[120px]" />
+
+  {/* Soft vignette */}
+  <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,transparent_0%,rgba(247,243,237,0.08)_70%,rgba(247,243,237,0.28)_100%)]" />
+</div>
       {/* Content */}
       <div className="relative z-10 mx-auto grid max-w-6xl gap-12 px-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:items-center lg:gap-8">
         {/* Left */}
@@ -41,20 +63,27 @@ export function Hero() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, ease }}
           >
-            <span className="inline-flex items-center gap-2 rounded-full border border-border bg-white/70 px-3.5 py-1.5 text-xs font-medium text-foreground backdrop-blur-sm">
-              <span className="flex size-1.5 rounded-full bg-accent" />
-              Your AI Career Copilot
-            </span>
+           <span className="inline-flex items-center gap-2 rounded-full border border-white/70 bg-white/75 px-4 py-2 text-xs font-medium text-slate-700 shadow-lg backdrop-blur-xl">
+  <span className="relative flex h-2 w-2">
+    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
+    <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500"></span>
+  </span>
+
+  AI Career Copilot • Resume • Interview • Roadmap
+</span>
           </motion.div>
 
           <motion.h1
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.08, ease }}
-            className="mt-5 text-balance font-display text-5xl font-semibold leading-[0.98] tracking-tight text-foreground sm:text-6xl xl:text-7xl"
-          >
-            Crack Placements with <span className="text-accent">AI.</span>
-          </motion.h1>
+  initial={{ opacity: 0, y: 24 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ duration: 0.7, delay: 0.08, ease }}
+  className="mt-5 text-balance font-display text-5xl font-semibold leading-[0.98] tracking-tight text-foreground sm:text-6xl xl:text-7xl"
+>
+  Unlock Your Dream Career with{" "}
+  <span className="bg-gradient-to-r from-violet-600 via-blue-500 to-cyan-500 bg-clip-text text-transparent">
+    AI
+  </span>
+</motion.h1>
 
           <motion.p
             initial={{ opacity: 0, y: 24 }}
@@ -149,11 +178,21 @@ export function Hero() {
           className="relative"
         >
           <motion.div
-            animate={{ y: [0, -10, 0] }}
-            transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
-          >
-            <DashboardPreview />
-          </motion.div>
+  animate={{
+    y: [0, -12, 0],
+    rotate: [0, 0.6, 0, -0.6, 0],
+    scale: [1, 1.01, 1],
+  }}
+  transition={{
+    duration: 8,
+    repeat: Infinity,
+    ease: 'easeInOut',
+  }}
+  style={{ transformOrigin: 'center center' }}
+  className="drop-shadow-[0_35px_60px_rgba(0,0,0,0.18)]"
+>
+  <DashboardPreview />
+</motion.div>
         </motion.div>
       </div>
 
