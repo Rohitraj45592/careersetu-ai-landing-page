@@ -99,12 +99,22 @@
 }
 
 /* Soaring eagle animation (cinematic landscape band) */
+/* Horizontal flight + a gentle curved arc across the sky */
 @keyframes eagle-cross {
   0% {
-    transform: translate3d(-22vw, 0, 0);
+    transform: translate3d(-22vw, 10px, 0);
+  }
+  25% {
+    transform: translate3d(14vw, -14px, 0);
+  }
+  50% {
+    transform: translate3d(50vw, 6px, 0);
+  }
+  75% {
+    transform: translate3d(86vw, -12px, 0);
   }
   100% {
-    transform: translate3d(122vw, 0, 0);
+    transform: translate3d(122vw, 8px, 0);
   }
 }
 
@@ -114,22 +124,22 @@
     transform: translate3d(0, 0, 0);
   }
   50% {
-    transform: translate3d(0, -22px, 0);
+    transform: translate3d(0, -16px, 0);
   }
 }
 
 @keyframes eagle-tilt {
   0%,
   100% {
-    transform: rotate(-4deg);
+    transform: rotate(-3deg);
   }
   50% {
-    transform: rotate(4deg);
+    transform: rotate(3deg);
   }
 }
 
 .eagle-cross {
-  animation: eagle-cross 11s linear infinite;
+  animation: eagle-cross 15s ease-in-out infinite;
   will-change: transform;
 }
 
@@ -139,8 +149,11 @@
 }
 
 .eagle-tilt {
+  /* Subtle soaring tilt + soft warm sunrise light to match the environment */
   animation: eagle-tilt 6s ease-in-out infinite;
-  will-change: transform;
+  filter: saturate(1.05) brightness(1.03) sepia(0.18)
+    drop-shadow(0 6px 10px rgba(255, 176, 92, 0.28));
+  will-change: transform, filter;
 }
 
 @media (prefers-reduced-motion: reduce) {
