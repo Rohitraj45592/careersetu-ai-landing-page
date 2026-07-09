@@ -97,3 +97,76 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Soaring eagle animation (cinematic landscape band) */
+@keyframes eagle-cross {
+  0% {
+    transform: translate3d(-22vw, 0, 0);
+  }
+  100% {
+    transform: translate3d(122vw, 0, 0);
+  }
+}
+
+@keyframes eagle-glide {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(0, -22px, 0);
+  }
+}
+
+@keyframes eagle-flap-left {
+  0%,
+  100% {
+    transform: rotate(6deg);
+  }
+  50% {
+    transform: rotate(-24deg);
+  }
+}
+
+@keyframes eagle-flap-right {
+  0%,
+  100% {
+    transform: rotate(-6deg);
+  }
+  50% {
+    transform: rotate(24deg);
+  }
+}
+
+.eagle-cross {
+  animation: eagle-cross 11s linear infinite;
+  will-change: transform;
+}
+
+.eagle-glide {
+  animation: eagle-glide 5s ease-in-out infinite;
+  will-change: transform;
+}
+
+.eagle-wing-left {
+  transform-box: fill-box;
+  transform-origin: 100% 40%;
+  animation: eagle-flap-left 2.6s ease-in-out infinite;
+  will-change: transform;
+}
+
+.eagle-wing-right {
+  transform-box: fill-box;
+  transform-origin: 0% 40%;
+  animation: eagle-flap-right 2.6s ease-in-out infinite;
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .eagle-cross,
+  .eagle-glide,
+  .eagle-wing-left,
+  .eagle-wing-right {
+    animation: none;
+  }
+}

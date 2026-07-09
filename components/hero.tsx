@@ -12,6 +12,7 @@ import {
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { DashboardPreview } from '@/components/dashboard-preview'
+import { SoaringEagle } from '@/components/soaring-eagle'
 
 const trustBadges = [
   { label: '100% Free', icon: BadgeCheck },
@@ -166,8 +167,10 @@ export function Hero() {
             className="absolute inset-0 size-full object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-b from-background via-transparent to-background/40" />
+          {/* Soaring eagle — flies behind the wordmark, never covering the letters */}
+          <SoaringEagle />
           {/* Giant wordmark */}
-          <div className="absolute inset-x-0 bottom-16 flex justify-center px-4">
+          <div className="absolute inset-x-0 bottom-16 z-10 flex justify-center px-4">
             <motion.span
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
