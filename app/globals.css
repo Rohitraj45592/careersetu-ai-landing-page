@@ -118,23 +118,13 @@
   }
 }
 
-@keyframes eagle-flap-left {
+@keyframes eagle-tilt {
   0%,
   100% {
-    transform: rotate(6deg);
+    transform: rotate(-4deg);
   }
   50% {
-    transform: rotate(-24deg);
-  }
-}
-
-@keyframes eagle-flap-right {
-  0%,
-  100% {
-    transform: rotate(-6deg);
-  }
-  50% {
-    transform: rotate(24deg);
+    transform: rotate(4deg);
   }
 }
 
@@ -148,25 +138,15 @@
   will-change: transform;
 }
 
-.eagle-wing-left {
-  transform-box: fill-box;
-  transform-origin: 100% 40%;
-  animation: eagle-flap-left 2.6s ease-in-out infinite;
-  will-change: transform;
-}
-
-.eagle-wing-right {
-  transform-box: fill-box;
-  transform-origin: 0% 40%;
-  animation: eagle-flap-right 2.6s ease-in-out infinite;
+.eagle-tilt {
+  animation: eagle-tilt 6s ease-in-out infinite;
   will-change: transform;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .eagle-cross,
   .eagle-glide,
-  .eagle-wing-left,
-  .eagle-wing-right {
+  .eagle-tilt {
     animation: none;
   }
 }
