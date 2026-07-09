@@ -31,8 +31,8 @@ interface EagleAnimationProps {
  * the visual through `src` (WebM, Lottie, GLB-driven video, or image sequence).
  */
 export function EagleAnimation({
-  src = '/media/eagle.png',
-  kind = 'image',
+  src = '/media/eagle.webm',
+  kind = 'video',
   className,
 }: EagleAnimationProps) {
   return (
