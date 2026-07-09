@@ -43,10 +43,10 @@ export function EagleAnimation({
       className="pointer-events-none absolute inset-0 z-0 overflow-hidden"
     >
       {/* Horizontal flight — moves the whole rig across the viewport width */}
-      <div className={`eagle-cross absolute top-[22%] left-0 ${className ?? ''}`}>
+      <div className={`eagle-cross absolute top-[40%] left-0 ${className ?? ''}`}>
         {/* Vertical glide + subtle rotation, layered so the motions compound */}
         <div className="eagle-glide">
-          <div className="eagle-tilt h-[90px] w-[110px] sm:h-[120px] sm:w-[150px] lg:h-[150px] lg:w-[190px]">
+          <div className="eagle-tilt h-[135px] w-[165px] sm:h-[180px] sm:w-[225px] lg:h-[225px] lg:w-[285px]">
             {/* ───────────────────────────────────────────────
                 ASSET PLACEHOLDER
                 Drop your transparent eagle asset in via `src`.
