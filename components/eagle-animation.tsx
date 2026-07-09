@@ -5,12 +5,16 @@ type EagleAsset = 'video' | 'lottie' | 'image'
 interface EagleAnimationProps {
   /**
    * External transparent animation asset.
-   * - WebM / MP4  -> pass kind="video"
+   * - WebM / MP4  -> pass kind="video" (use this for true wing-flap animation)
    * - Lottie JSON -> pass kind="lottie" (rendered via <lottie-player>)
    * - Image / GIF / APNG / image sequence sprite -> pass kind="image"
+   *
+   * Defaults to the bundled photorealistic transparent eagle photo. To enable
+   * real wing flapping + feather movement, pass a transparent WebM/Lottie/GLB:
+   *   <EagleAnimation src="/media/eagle.webm" kind="video" />
    */
   src?: string
-  /** How the asset should be rendered. Defaults to "video". */
+  /** How the asset should be rendered. Defaults to "image". */
   kind?: EagleAsset
   /** Optional className passthrough for the flying wrapper. */
   className?: string
@@ -26,7 +30,11 @@ interface EagleAnimationProps {
  * The component intentionally contains NO eagle artwork of its own — you supply
  * the visual through `src` (WebM, Lottie, GLB-driven video, or image sequence).
  */
-export function EagleAnimation({ src, kind = 'video', className }: EagleAnimationProps) {
+export function EagleAnimation({
+  src = '/media/eagle.png',
+  kind = 'image',
+  className,
+}: EagleAnimationProps) {
   return (
     // Full-bleed track: the flight path spans from outside the left edge
     // to outside the right edge of the parent section.
@@ -38,7 +46,7 @@ export function EagleAnimation({ src, kind = 'video', className }: EagleAnimatio
       <div className={`eagle-cross absolute top-[22%] left-0 ${className ?? ''}`}>
         {/* Vertical glide + subtle rotation, layered so the motions compound */}
         <div className="eagle-glide">
-          <div className="eagle-tilt h-[70px] w-[110px] sm:h-[90px] sm:w-[150px] lg:h-[110px] lg:w-[180px]">
+          <div className="eagle-tilt h-[90px] w-[110px] sm:h-[120px] sm:w-[150px] lg:h-[150px] lg:w-[190px]">
             {/* ───────────────────────────────────────────────
                 ASSET PLACEHOLDER
                 Drop your transparent eagle asset in via `src`.
