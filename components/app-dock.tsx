@@ -44,10 +44,15 @@ export function AppDock() {
   return (
     <section
       aria-label="CareerSetu AI quick navigation"
-      className="relative z-20 mx-auto max-w-5xl px-4 pb-16 sm:pb-24"
+      className="relative z-20 mx-auto max-w-4xl px-4 pb-16 sm:pb-24"
     >
       <Reveal>
-        <div className="relative overflow-hidden rounded-[2rem] border border-white/40 bg-white/45 p-4 shadow-lift backdrop-blur-2xl sm:p-6">
+        {/* Subtle continuous float */}
+        <motion.div
+          animate={{ y: [0, -5, 0] }}
+          transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
+          className="relative overflow-hidden rounded-[1.875rem] border border-white/40 bg-white/40 px-4 py-3 shadow-[0_20px_60px_-20px_rgba(30,20,60,0.28)] backdrop-blur-xl sm:px-5 sm:py-4"
+        >
           {/* subtle top sheen */}
           <div
             aria-hidden
@@ -56,37 +61,37 @@ export function AppDock() {
 
           {/* Top bar */}
           <div className="flex items-center justify-between gap-4">
-            <div className="flex items-center gap-2.5">
-              <span className="flex size-8 items-center justify-center rounded-xl bg-accent text-accent-foreground shadow-soft">
-                <Sparkles className="size-4" />
+            <div className="flex items-center gap-2">
+              <span className="flex size-7 items-center justify-center rounded-lg bg-accent text-accent-foreground shadow-soft">
+                <Sparkles className="size-3.5" />
               </span>
-              <span className="font-display text-base font-semibold tracking-tight text-foreground">
+              <span className="font-display text-sm font-semibold tracking-tight text-foreground">
                 CareerSetu AI
               </span>
             </div>
 
-            <div className="flex items-center gap-3 text-foreground/70">
+            <div className="flex items-center gap-2.5 text-foreground/70">
               <button
                 type="button"
                 aria-label="Search"
-                className="flex size-8 items-center justify-center rounded-full transition-colors hover:bg-white/60 hover:text-foreground"
+                className="flex size-7 items-center justify-center rounded-full transition-colors hover:bg-white/60 hover:text-foreground"
               >
-                <Search className="size-4" />
+                <Search className="size-3.5" />
               </button>
-              <Wifi className="size-4" aria-hidden />
-              <span className="text-sm font-medium tabular-nums text-foreground/80">
+              <Wifi className="size-3.5" aria-hidden />
+              <span className="text-xs font-medium tabular-nums text-foreground/75">
                 09:41
               </span>
             </div>
           </div>
 
           {/* Divider */}
-          <div className="mt-4 h-px w-full bg-border/60" />
+          <div className="mt-3 h-px w-full bg-border/50" />
 
           {/* Dock items */}
           <nav
             aria-label="App sections"
-            className="mt-5 grid grid-cols-4 gap-2 sm:flex sm:items-start sm:justify-between sm:gap-1"
+            className="mt-4 grid grid-cols-4 gap-x-3 gap-y-4 sm:flex sm:items-start sm:justify-between sm:gap-2"
           >
             {items.map((item, i) => {
               const isActive = active === item.label
@@ -96,29 +101,27 @@ export function AppDock() {
                   href={item.href}
                   onClick={() => setActive(item.label)}
                   aria-current={isActive ? 'page' : undefined}
-                  initial={{ opacity: 0, y: 16 }}
+                  initial={{ opacity: 0, y: 12 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: 0.04 * i, ease }}
-                  whileHover={{ y: -6 }}
-                  whileTap={{ scale: 0.94 }}
-                  className={cn(
-                    'group flex flex-col items-center gap-2 rounded-2xl px-2 py-2.5 text-center outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-white/50 sm:w-[11%]',
-                  )}
+                  transition={{ duration: 0.45, delay: 0.035 * i, ease }}
+                  whileHover={{ y: -3 }}
+                  whileTap={{ scale: 0.96 }}
+                  className="group flex flex-col items-center gap-1.5 rounded-xl px-1 py-1 text-center outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-white/50"
                 >
                   <span
                     className={cn(
-                      'flex size-12 items-center justify-center rounded-2xl border shadow-soft transition-all duration-300',
+                      'flex size-10 items-center justify-center rounded-[0.9rem] border transition-all duration-300',
                       isActive
-                        ? 'border-transparent bg-accent text-accent-foreground shadow-lift'
-                        : 'border-white/50 bg-white/70 text-foreground/70 group-hover:border-accent/30 group-hover:bg-white group-hover:text-accent-strong group-hover:shadow-lift',
+                        ? 'scale-105 border-accent/40 bg-white/80 text-accent-strong shadow-[0_0_0_3px_color-mix(in_oklab,var(--accent)_18%,transparent),0_8px_24px_-8px_color-mix(in_oklab,var(--accent)_45%,transparent)]'
+                        : 'border-white/50 bg-white/65 text-foreground/70 shadow-soft group-hover:border-accent/25 group-hover:bg-white/85 group-hover:text-accent-strong',
                     )}
                   >
-                    <item.icon className="size-5" />
+                    <item.icon className="size-[18px]" />
                   </span>
                   <span
                     className={cn(
-                      'text-[11px] font-medium leading-tight transition-colors sm:text-xs',
+                      'text-[10px] font-medium leading-tight transition-colors sm:text-[11px]',
                       isActive
                         ? 'text-accent-strong'
                         : 'text-muted-foreground group-hover:text-foreground',
@@ -130,7 +133,7 @@ export function AppDock() {
               )
             })}
           </nav>
-        </div>
+        </motion.div>
       </Reveal>
     </section>
   )
