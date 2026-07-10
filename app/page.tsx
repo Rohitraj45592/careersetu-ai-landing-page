@@ -1,6 +1,7 @@
 import { SiteNav } from '@/components/site-nav'
 import { Hero } from '@/components/hero'
 import { LogoCloud } from '@/components/logo-cloud'
+import { AppDock } from '@/components/app-dock'
 import { Features } from '@/components/features'
 import { HowItWorks } from '@/components/how-it-works'
 import { UseCases } from '@/components/use-cases'
@@ -17,6 +18,7 @@ export default function Page() {
       <SiteNav />
       <Hero />
       <LogoCloud />
+      <AppDock />
       <Features />
       <HowItWorks />
       <UseCases />
