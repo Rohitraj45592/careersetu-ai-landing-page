@@ -29,6 +29,8 @@ const faqs = [
   },
 ]
 
+const ease = [0.22, 1, 0.36, 1] as const
+
 export function Faq() {
   const [open, setOpen] = useState<number | null>(0)
 
@@ -44,23 +46,41 @@ export function Faq() {
         {faqs.map((item, i) => {
           const isOpen = open === i
           return (
-            <div
+            <motion.div
               key={item.q}
-              className="overflow-hidden rounded-2xl border border-border bg-card shadow-soft"
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: '-40px' }}
+              transition={{ duration: 0.5, delay: i * 0.05, ease }}
+              className={cn(
+                'overflow-hidden rounded-2xl border bg-card transition-colors duration-300',
+                isOpen
+                  ? 'border-accent/40 shadow-lift'
+                  : 'border-border shadow-soft hover:border-accent/25',
+              )}
             >
               <button
                 type="button"
                 onClick={() => setOpen(isOpen ? null : i)}
-                className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left"
+                className="flex w-full items-center justify-between gap-4 px-5 py-4.5 text-left"
                 aria-expanded={isOpen}
               >
                 <span className="font-medium text-foreground">{item.q}</span>
-                <Plus
+                <span
                   className={cn(
-                    'size-5 shrink-0 text-accent-strong transition-transform duration-300',
-                    isOpen && 'rotate-45',
+                    'flex size-7 shrink-0 items-center justify-center rounded-full transition-colors duration-300',
+                    isOpen
+                      ? 'bg-accent text-accent-foreground'
+                      : 'bg-accent-soft text-accent-strong',
                   )}
-                />
+                >
+                  <Plus
+                    className={cn(
+                      'size-4 transition-transform duration-300',
+                      isOpen && 'rotate-45',
+                    )}
+                  />
+                </span>
               </button>
               <AnimatePresence initial={false}>
                 {isOpen && (
@@ -68,7 +88,7 @@ export function Faq() {
                     initial={{ height: 0, opacity: 0 }}
                     animate={{ height: 'auto', opacity: 1 }}
                     exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+                    transition={{ duration: 0.32, ease }}
                   >
                     <p className="px-5 pb-5 leading-relaxed text-muted-foreground">
                       {item.a}
@@ -76,7 +96,7 @@ export function Faq() {
                   </motion.div>
                 )}
               </AnimatePresence>
-            </div>
+            </motion.div>
           )
         })}
       </div>

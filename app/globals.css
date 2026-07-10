@@ -97,12 +97,17 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+ /* Eagle Animation */
+
   .eagle-cross {
   animation: eagleCross 16s cubic-bezier(0.42, 0, 0.58, 1) infinite;
   will-change: transform;
   transform: translate3d(0,0,0);
   backface-visibility: hidden;
 }
+
 
 .eagle-glide {
   animation: eagleGlide 4s ease-in-out infinite;
@@ -143,5 +148,46 @@
     transform: rotate(2deg);
   }
 }
+
+
+@keyframes marquee-x {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@layer utilities {
+  .animate-marquee {
+    animation: marquee-x var(--marquee-duration, 45s) linear infinite;
+    will-change: transform;
+  }
+  .marquee-group:hover .animate-marquee {
+    animation-play-state: paused;
+  }
+  .mask-fade-x {
+    -webkit-mask-image: linear-gradient(
+      to right,
+      transparent,
+      #000 8%,
+      #000 92%,
+      transparent
+    );
+    mask-image: linear-gradient(
+      to right,
+      transparent,
+      #000 8%,
+      #000 92%,
+      transparent
+    );
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-marquee {
+    animation: none;
+  }
 }
 

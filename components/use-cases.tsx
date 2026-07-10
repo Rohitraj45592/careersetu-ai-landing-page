@@ -1,27 +1,44 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { GraduationCap, RefreshCw, Building2, Check } from 'lucide-react'
+import {
+  GraduationCap,
+  Rocket,
+  Sparkles,
+  RefreshCw,
+  Check,
+  ArrowRight,
+} from 'lucide-react'
 import { SectionHeading } from '@/components/section-heading'
 
 const cases = [
   {
     icon: GraduationCap,
-    title: 'Final-year students',
-    description: 'Walk into campus placements with a polished resume and interview confidence.',
-    points: ['ATS-ready resume', 'Company-specific prep', 'Mock interview practice'],
+    title: 'Students',
+    tagline: 'Build the right foundation early',
+    description: 'Discover in-demand skills and start building a standout profile from day one.',
+    points: ['Skill discovery', 'Learning roadmap', 'Beginner projects'],
+  },
+  {
+    icon: Sparkles,
+    title: 'Final year',
+    tagline: 'Own your campus placements',
+    description: 'Walk into placements with a polished resume and real interview confidence.',
+    points: ['ATS-ready resume', 'Company-specific prep', 'Mock interviews'],
+  },
+  {
+    icon: Rocket,
+    title: 'Freshers',
+    tagline: 'Break into your first role',
+    description: 'Stand out in a crowded market with sharp positioning and portfolio proof.',
+    points: ['Portfolio guidance', 'Recruiter feedback', 'Application tracking'],
   },
   {
     icon: RefreshCw,
-    title: 'Career switchers',
-    description: 'Map your existing skills to a new domain and close the gaps that matter.',
-    points: ['Transferable skill mapping', 'Targeted learning plan', 'Portfolio guidance'],
-  },
-  {
-    icon: Building2,
-    title: 'Placement cells',
-    description: 'Help every student in your cohort become interview-ready at scale.',
-    points: ['Cohort dashboards', 'Progress analytics', 'Bulk resume reviews'],
+    title: 'Career switch',
+    tagline: 'Move into a new domain',
+    description: 'Map existing skills to a new field and close the gaps that actually matter.',
+    points: ['Transferable skills', 'Targeted learning', 'Domain roadmap'],
   },
 ]
 
@@ -36,7 +53,7 @@ export function UseCases() {
         description="Whether you are starting out or switching lanes, CareerSetu AI meets you where you are."
       />
 
-      <div className="mt-14 grid gap-4 md:grid-cols-3">
+      <div className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {cases.map((c, i) => (
           <motion.div
             key={c.title}
@@ -45,15 +62,23 @@ export function UseCases() {
             viewport={{ once: true, margin: '-60px' }}
             transition={{ duration: 0.6, delay: i * 0.08, ease }}
             whileHover={{ y: -6 }}
-            className="rounded-3xl border border-border bg-card p-7 shadow-soft transition-shadow hover:shadow-lift"
+            className="group relative flex flex-col overflow-hidden rounded-3xl border border-border bg-card p-6 shadow-soft transition-shadow duration-300 hover:shadow-lift"
           >
-            <span className="flex size-11 items-center justify-center rounded-2xl bg-accent-soft text-accent-strong">
+            {/* accent wash reveals on hover */}
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-x-0 top-0 h-1 origin-left scale-x-0 bg-accent transition-transform duration-300 group-hover:scale-x-100"
+            />
+            <span className="flex size-11 items-center justify-center rounded-2xl bg-accent-soft text-accent-strong transition-colors duration-300 group-hover:bg-accent group-hover:text-accent-foreground">
               <c.icon className="size-5" />
             </span>
-            <h3 className="mt-5 font-display text-xl font-semibold text-foreground">
+            <h3 className="mt-5 font-display text-lg font-semibold text-foreground">
               {c.title}
             </h3>
-            <p className="mt-2 leading-relaxed text-muted-foreground">{c.description}</p>
+            <p className="mt-0.5 text-sm font-medium text-accent-strong">{c.tagline}</p>
+            <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+              {c.description}
+            </p>
             <ul className="mt-5 space-y-2.5 border-t border-border pt-5">
               {c.points.map((p) => (
                 <li key={p} className="flex items-center gap-2.5 text-sm text-foreground">
@@ -64,6 +89,13 @@ export function UseCases() {
                 </li>
               ))}
             </ul>
+            <a
+              href="#"
+              className="mt-6 inline-flex items-center gap-1.5 text-sm font-medium text-foreground opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+            >
+              Explore
+              <ArrowRight className="size-4" />
+            </a>
           </motion.div>
         ))}
       </div>
