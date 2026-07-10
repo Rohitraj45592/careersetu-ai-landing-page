@@ -1,5 +1,6 @@
 'use client'
 
+import { EagleAnimation } from '@/components/eagle-animation'
 import { motion } from 'framer-motion'
 import {
   ArrowRight,
@@ -193,18 +194,33 @@ export function Hero() {
 >
   <DashboardPreview />
 </motion.div>
+
         </motion.div>
       </div>
 
       {/* Cinematic landscape band */}
-      <div className="relative mt-16 sm:mt-20">
+      <div className="relative mt-20 overflow-hidden">
         <div className="relative h-[360px] w-full sm:h-[440px]">
           <img
             src="/images/hero-landscape.png"
             alt="Misty rolling hills at sunrise"
-            className="absolute inset-0 size-full object-cover"
+            className="absolute inset-0 h-full w-full object-cover scale-110"
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-background via-transparent to-background/40" />
+          <img
+  src="/images/hero-landscape.png"
+  alt="Misty rolling hills at sunrise"
+  className="absolute inset-0 h-full w-full object-cover scale-110"
+/>
+
+<EagleAnimation
+  src="/videos/eagle.webm"
+  kind="video"
+/>
+
+<div className="absolute inset-0 bg-gradient-to-b from-[#f7f3ed] via-transparent to-[#f7f3ed]/30" />
+ 
+
+          <div className="absolute inset-0 bg-gradient-to-b from-[#f7f3ed] via-transparent to-[#f7f3ed]/30" />
           {/* Giant wordmark */}
           <div className="absolute inset-x-0 bottom-16 flex justify-center px-4">
             <motion.span
@@ -212,7 +228,7 @@ export function Hero() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 1, ease }}
-              className="select-none text-center font-display text-[15vw] font-semibold leading-none tracking-tight text-white/80 mix-blend-overlay"
+              className="select-none text-center font-display text-[15vw] font-semibold leading-none tracking-tight text-white/80"
             >
               CareerSetu AI
             </motion.span>
