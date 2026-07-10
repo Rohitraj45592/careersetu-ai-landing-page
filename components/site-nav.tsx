@@ -65,7 +65,7 @@ export function SiteNav() {
             size="lg"
             className="rounded-full px-4 font-medium text-foreground hover:bg-secondary"
             nativeButton={false}
-            render={<a href="#" />}
+            render={<a href="/login" />}
           >
             Log In
           </Button>
@@ -73,7 +73,7 @@ export function SiteNav() {
             size="lg"
             className="group rounded-full bg-primary px-4 font-medium text-primary-foreground shadow-soft transition-transform hover:-translate-y-0.5 hover:bg-primary/90"
             nativeButton={false}
-            render={<a href="#" />}
+            render={<a href="/signup" />}
           >
             Get Started Free
             <ArrowRight className="transition-transform group-hover:translate-x-0.5" />
@@ -116,7 +116,7 @@ export function SiteNav() {
               size="lg"
               className="w-full rounded-full"
               nativeButton={false}
-            render={<a href="#" />}
+            render={<a href="/login" />}
             >
               Log In
             </Button>
@@ -124,7 +124,7 @@ export function SiteNav() {
               size="lg"
               className="w-full rounded-full bg-primary text-primary-foreground"
               nativeButton={false}
-            render={<a href="#" />}
+            render={<a href="/signup" />}
             >
               Get Started Free
             </Button>
