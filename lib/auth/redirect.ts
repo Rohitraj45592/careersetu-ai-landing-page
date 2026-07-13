@@ -8,7 +8,7 @@
  *
  * Client-only: relies on window.location.
  */
-export function getAuthCallbackUrl(next = '/dashboard') {
+export function getAuthCallbackUrl(next = '/dashboard-v2')  {
   const base =
     process.env.NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL ??
     `${window.location.origin}/auth/callback`

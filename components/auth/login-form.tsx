@@ -18,7 +18,7 @@ import { loginSchema, type LoginValues } from '@/lib/validations/auth'
 export function LoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const redirectTo = searchParams.get('redirectedFrom') ?? '/dashboard'
+  const redirectTo = searchParams.get('redirectedFrom') ?? '/dashboard-v2'
   const [formError, setFormError] = useState<string | null>(null)
 
   const {

@@ -65,7 +65,7 @@ export async function updateSession(request: NextRequest) {
   const isAuthOnly = AUTH_ONLY_PATHS.includes(pathname)
   if (isAuthOnly && user) {
     const url = request.nextUrl.clone()
-    url.pathname = '/dashboard'
+    url.pathname = '/dashboard-v2'
     url.search = ''
     return NextResponse.redirect(url)
   }
