@@ -1,5 +1,5 @@
 import HeroStats from "./hero-stats";
-import MountainIllustration from "./mountain-illustration";
+import ProfileOrbitAvatar from "./profile-orbit-avatar";
 
 export default function Hero() {
   return (
@@ -34,9 +34,9 @@ export default function Hero() {
           </div>
           <HeroStats />
         </div>
-      
-       
-      <MountainIllustration />
+        <div className="flex items-center justify-center">
+          <ProfileOrbitAvatar />
+        </div>
       </div>
     </section>
   );
