@@ -34,7 +34,10 @@ export default function Hero() {
           </div>
           <HeroStats />
         </div>
-        <div className="flex items-center justify-center">
+        <div
+          className="relative flex min-h-[380px] items-center justify-center overflow-hidden rounded-[24px] bg-neutral-50 bg-cover bg-center"
+          style={{ backgroundImage: "url(/images/dashboard/mountain-backdrop.png)" }}
+        >
           <ProfileOrbitAvatar />
         </div>
       </div>
