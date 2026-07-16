@@ -28,6 +28,7 @@ const items = [
   {
     title: "Resume Studio",
     icon: FileText,
+    href: "/dashboard-v2/resume-studio",
   },
   {
     title: "Job Hub",
