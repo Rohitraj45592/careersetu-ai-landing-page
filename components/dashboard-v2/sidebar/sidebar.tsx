@@ -33,6 +33,7 @@ const items = [
   {
     title: "Job Hub",
     icon: BriefcaseBusiness,
+    href: "/dashboard-v2/job-hub",
   },
   {
     title: "Roadmap",
