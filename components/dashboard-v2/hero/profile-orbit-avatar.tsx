@@ -43,7 +43,7 @@ export default function ProfileOrbitAvatar() {
       ref={ref}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
-      className="relative flex h-[280px] w-[280px] items-center justify-center md:h-[310px] md:w-[310px]"
+      className="relative flex h-[200px] w-[200px] items-center justify-center sm:h-[250px] sm:w-[250px] md:h-[280px] md:w-[280px] lg:h-[310px] lg:w-[310px]"
     >
       {/* Outer rotating dashed ring */}
       <motion.div
@@ -72,7 +72,7 @@ export default function ProfileOrbitAvatar() {
       <div className="absolute inset-9 rounded-full border border-accent/20 bg-background/30 shadow-[0_0_24px_rgba(123,97,255,0.08)] backdrop-blur-[2px]" />
 
       {/* Profile photo */}
-      <div className="relative h-[165px] w-[165px] overflow-hidden rounded-full border-4 border-white ring-4 ring-accent shadow-lift md:h-[185px] md:w-[185px] group">
+      <div className="group relative h-[110px] w-[110px] overflow-hidden rounded-full border-4 border-white ring-4 ring-accent shadow-lift sm:h-[140px] sm:w-[140px] md:h-[165px] md:w-[165px] lg:h-[185px] lg:w-[185px]">
         {user.avatarUrl ? (
           <img
             src={user.avatarUrl}

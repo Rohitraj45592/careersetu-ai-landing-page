@@ -6,7 +6,7 @@ export default function JobsSection() {
 
       <div className="mb-6 flex items-center justify-between">
 
-        <h2 className="text-2xl font-bold">
+        <h2 className="text-xl font-bold sm:text-2xl">
           Top Job Matches
         </h2>
 
@@ -16,7 +16,7 @@ export default function JobsSection() {
 
       </div>
 
-      <div className="grid grid-cols-4 gap-5">
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
 
         <JobCard
           company="Google"

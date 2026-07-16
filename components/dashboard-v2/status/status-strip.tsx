@@ -16,7 +16,7 @@ const items = [
 
 export default function StatusStrip() {
   return (
-    <div className="mt-6 grid grid-cols-5 gap-4">
+    <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
       {items.map((item) => {
         const Icon = item.icon;
 

@@ -20,14 +20,14 @@ export default function Progress() {
     .join(" ");
 
   return (
-    <section className="mt-10 grid grid-cols-2 gap-6">
+    <section className="mt-10 grid grid-cols-1 gap-6 lg:grid-cols-2">
 
       {/* Weekly Progress */}
 
-      <div className="rounded-[30px] border border-neutral-200 bg-white p-8">
+      <div className="rounded-[24px] border border-neutral-200 bg-white p-5 sm:p-8 lg:rounded-[30px]">
 
         <div className="mb-8 flex items-center justify-between">
-          <h2 className="text-2xl font-bold">
+          <h2 className="text-xl font-bold sm:text-2xl">
             Weekly Progress
           </h2>
 
@@ -75,7 +75,7 @@ export default function Progress() {
           ))}
         </svg>
 
-        <div className="mt-6 flex justify-between text-sm text-neutral-500">
+        <div className="mt-6 flex flex-wrap justify-between gap-x-3 gap-y-1 text-xs text-neutral-500 sm:text-sm">
           <span>May 6</span>
           <span>May 13</span>
           <span>May 20</span>
@@ -88,10 +88,10 @@ export default function Progress() {
 
       {/* Skill Progress */}
 
-      <div className="rounded-[30px] border border-neutral-200 bg-white p-8">
+      <div className="rounded-[24px] border border-neutral-200 bg-white p-5 sm:p-8 lg:rounded-[30px]">
 
         <div className="mb-8 flex items-center justify-between">
-          <h2 className="text-2xl font-bold">
+          <h2 className="text-xl font-bold sm:text-2xl">
             Skill Progress
           </h2>
 

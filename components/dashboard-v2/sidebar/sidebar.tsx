@@ -52,7 +52,7 @@ const items = [
   },
 ];
 
-export default function Sidebar() {
+export default function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   return (
     <div className="flex h-full flex-col rounded-[32px] border border-neutral-200 bg-white p-6 shadow-sm">
 
@@ -77,6 +77,7 @@ export default function Sidebar() {
           return (
             <button
               key={item.title}
+              onClick={onNavigate}
               className={`flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left transition-all duration-200 ${
                 item.active
                   ? "bg-black text-white shadow-lg"

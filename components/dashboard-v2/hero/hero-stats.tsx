@@ -23,7 +23,7 @@ export default function HeroStats() {
   ];
 
   return (
-    <div className="mt-8 grid grid-cols-3 gap-4">
+    <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
       {stats.map((item) => {
         const Icon = item.icon;
 

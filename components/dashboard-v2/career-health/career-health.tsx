@@ -41,10 +41,10 @@ const items = [
 
 export default function CareerHealth() {
   return (
-    <section className="mt-8 grid grid-cols-2 gap-6">
+    <section className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
 
       {/* Left Card */}
-      <div className="rounded-[28px] border border-neutral-200 bg-white p-6">
+      <div className="rounded-[28px] border border-neutral-200 bg-white p-5 sm:p-6">
 
         <div className="flex items-center justify-between">
 
@@ -113,7 +113,7 @@ export default function CareerHealth() {
 
       {/* Right Card */}
 
-      <div className="rounded-[28px] border border-neutral-200 bg-white p-6">
+      <div className="rounded-[28px] border border-neutral-200 bg-white p-5 sm:p-6">
 
         <h2 className="text-xl font-bold">
           AI Insight

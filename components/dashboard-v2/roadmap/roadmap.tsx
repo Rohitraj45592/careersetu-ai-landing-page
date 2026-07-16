@@ -34,12 +34,12 @@ export default function Roadmap() {
   ];
 
   return (
-    <section className="mt-10 rounded-[32px] border border-neutral-200 bg-white p-10">
+    <section className="mt-10 rounded-2xl border border-neutral-200 bg-white p-5 sm:p-6 lg:rounded-[32px] lg:p-10">
 
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-4xl font-bold">
+          <h2 className="text-2xl font-bold sm:text-3xl lg:text-4xl">
             Your Recommended Roadmap
           </h2>
 
@@ -48,18 +48,18 @@ export default function Roadmap() {
           </p>
         </div>
 
-        <button className="rounded-full border border-violet-400 px-6 py-3 font-medium text-violet-600 transition hover:bg-violet-50">
+        <button className="w-fit rounded-full border border-violet-400 px-6 py-3 font-medium text-violet-600 transition hover:bg-violet-50">
           View Full Roadmap →
         </button>
       </div>
 
       {/* Timeline */}
-      <div className="relative mt-16">
+      <div className="relative mt-10 lg:mt-16">
 
-        {/* One Connected Line */}
-        <div className="absolute left-0 right-0 top-[24px] h-[2px] bg-neutral-300" />
+        {/* One Connected Line: only makes sense in the single-row layout from lg up */}
+        <div className="absolute left-0 right-0 top-[24px] hidden h-[2px] bg-neutral-300 lg:block" />
 
-        <div className="relative grid grid-cols-5 gap-6">
+        <div className="relative grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-5 lg:gap-6">
 
           {steps.map((step) => (
             <div
