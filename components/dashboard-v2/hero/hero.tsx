@@ -4,7 +4,7 @@ import ProfileOrbitAvatar from "./profile-orbit-avatar";
 export default function Hero() {
   return (
     <section className="rounded-[32px] border border-neutral-200 bg-white p-8">
-      <div className="grid grid-cols-[1.2fr_1fr] gap-10 items-center">
+      <div className="grid grid-cols-[1.2fr_1fr] gap-10 items-stretch">
         {/* Left */}
         <div>
           <span className="text-sm font-medium text-neutral-500">
@@ -35,7 +35,7 @@ export default function Hero() {
           <HeroStats />
         </div>
         <div
-          className="relative flex min-h-[380px] items-center justify-center overflow-hidden rounded-[24px] bg-neutral-50 bg-cover bg-center"
+          className="relative flex h-full min-h-[460px] items-center justify-center overflow-hidden rounded-[24px] bg-neutral-50 bg-cover bg-center"
           style={{ backgroundImage: "url(/images/dashboard/mountain-backdrop.png)" }}
         >
           <ProfileOrbitAvatar />
