@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
   Sparkles,
@@ -16,11 +18,12 @@ const items = [
   {
     title: "Overview",
     icon: LayoutDashboard,
-    active: true,
+    href: "/dashboard-v2",
   },
   {
     title: "Career Twin",
     icon: Sparkles,
+    href: "/dashboard-v2/career-twin",
   },
   {
     title: "Resume Studio",
@@ -53,6 +56,8 @@ const items = [
 ];
 
 export default function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
+  const pathname = usePathname();
+
   return (
     <div className="flex h-full flex-col rounded-[32px] border border-neutral-200 bg-white p-6 shadow-sm">
 
@@ -73,16 +78,33 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
       <nav className="space-y-2">
         {items.map((item) => {
           const Icon = item.icon;
+          const active = item.href ? pathname === item.href : false;
+
+          const className = `flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left transition-all duration-200 ${
+            active
+              ? "bg-black text-white shadow-lg"
+              : "text-neutral-600 hover:bg-neutral-100"
+          }`;
+
+          if (item.href) {
+            return (
+              <Link
+                key={item.title}
+                href={item.href}
+                onClick={onNavigate}
+                className={className}
+              >
+                <Icon size={19} />
+                <span className="font-medium">{item.title}</span>
+              </Link>
+            );
+          }
 
           return (
             <button
               key={item.title}
               onClick={onNavigate}
-              className={`flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left transition-all duration-200 ${
-                item.active
-                  ? "bg-black text-white shadow-lg"
-                  : "text-neutral-600 hover:bg-neutral-100"
-              }`}
+              className={className}
             >
               <Icon size={19} />
               <span className="font-medium">{item.title}</span>
