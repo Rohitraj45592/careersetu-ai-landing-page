@@ -1,3 +1,7 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+import { motion } from "framer-motion";
 import {
   FileText,
   BadgeCheck,
@@ -5,16 +9,91 @@ import {
   Brain,
   Send,
   Target,
+  ArrowUp,
+  ArrowDown,
 } from "lucide-react";
 
 const stats = [
-  { icon: FileText, value: "82", label: "Resume Score" },
-  { icon: BadgeCheck, value: "91", label: "ATS Score" },
-  { icon: FolderKanban, value: "6", label: "Projects" },
-  { icon: Brain, value: "14", label: "Skills" },
-  { icon: Send, value: "23", label: "Applications" },
-  { icon: Target, value: "82%", label: "Placement Readiness" },
+  { icon: FileText, value: 82, suffix: "", label: "Resume Score", trend: 2, period: "this week" },
+  { icon: BadgeCheck, value: 91, suffix: "", label: "ATS Score", trend: 4, period: "this week" },
+  { icon: FolderKanban, value: 6, suffix: "", label: "Projects", trend: 1, period: "this month" },
+  { icon: Brain, value: 14, suffix: "", label: "Skills", trend: 2, period: "this month" },
+  { icon: Send, value: 23, suffix: "", label: "Applications", trend: 5, period: "this week" },
+  { icon: Target, value: 82, suffix: "%", label: "Placement Readiness", trend: 3, period: "this week" },
 ];
+
+function useCountUp(target: number, delay: number) {
+  const [value, setValue] = useState(0);
+  const started = useRef(false);
+
+  useEffect(() => {
+    if (started.current) return;
+    started.current = true;
+
+    const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (prefersReduced) {
+      setValue(target);
+      return;
+    }
+
+    const duration = 900;
+    let raf: number;
+    const start = performance.now() + delay;
+
+    function tick(now: number) {
+      const elapsed = now - start;
+      if (elapsed < 0) {
+        raf = requestAnimationFrame(tick);
+        return;
+      }
+      const t = Math.min(1, elapsed / duration);
+      const eased = 1 - Math.pow(1 - t, 3);
+      setValue(Math.round(target * eased));
+      if (t < 1) raf = requestAnimationFrame(tick);
+    }
+
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [target, delay]);
+
+  return value;
+}
+
+function StatCard({ item, index }: { item: (typeof stats)[number]; index: number }) {
+  const Icon = item.icon;
+  const count = useCountUp(item.value, index * 80);
+  const TrendIcon = item.trend >= 0 ? ArrowUp : ArrowDown;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-40px" }}
+      transition={{ duration: 0.4, delay: index * 0.05, ease: "easeOut" }}
+      whileHover={{ y: -4 }}
+      className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm transition-shadow duration-300 hover:shadow-lg"
+    >
+      <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-neutral-100">
+        <Icon size={18} />
+      </div>
+
+      <h3 className="text-2xl font-bold tabular-nums">
+        {count}
+        {item.suffix}
+      </h3>
+      <p className="mt-1 text-sm text-neutral-500">{item.label}</p>
+
+      <p className="mt-2 flex items-center gap-1 text-xs text-neutral-400">
+        <TrendIcon size={11} className={item.trend >= 0 ? "text-neutral-700" : "text-neutral-400"} />
+        <span className={item.trend >= 0 ? "text-neutral-700" : "text-neutral-400"}>
+          {item.trend >= 0 ? "+" : ""}
+          {item.trend}
+        </span>
+        {item.period}
+      </p>
+    </motion.div>
+  );
+}
 
 export default function Snapshot() {
   return (
@@ -22,23 +101,9 @@ export default function Snapshot() {
       <h2 className="text-xl font-bold sm:text-2xl">Career Snapshot</h2>
 
       <div className="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
-        {stats.map((item) => {
-          const Icon = item.icon;
-
-          return (
-            <div
-              key={item.label}
-              className="rounded-2xl border border-neutral-200 bg-white p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
-            >
-              <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-neutral-100">
-                <Icon size={18} />
-              </div>
-
-              <h3 className="text-2xl font-bold">{item.value}</h3>
-              <p className="mt-1 text-sm text-neutral-500">{item.label}</p>
-            </div>
-          );
-        })}
+        {stats.map((item, index) => (
+          <StatCard key={item.label} item={item} index={index} />
+        ))}
       </div>
     </section>
   );

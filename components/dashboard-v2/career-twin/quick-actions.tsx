@@ -1,3 +1,6 @@
+"use client";
+
+import { motion } from "framer-motion";
 import { FileSearch, Mic, Route, Search, TrendingUp } from "lucide-react";
 
 const actions = [
@@ -18,13 +21,16 @@ export default function QuickActions() {
           const Icon = action.icon;
 
           return (
-            <button
+            <motion.button
               key={action.label}
-              className="flex items-center gap-2 rounded-full border border-neutral-300 px-4 py-3 text-sm font-medium transition hover:border-black hover:bg-black hover:text-white"
+              whileHover={{ scale: 1.04, y: -2 }}
+              whileTap={{ scale: 0.95 }}
+              transition={{ type: "spring", stiffness: 420, damping: 22 }}
+              className="flex items-center gap-2.5 rounded-full border border-neutral-300 px-4 py-3 text-sm font-medium shadow-sm transition-colors duration-200 hover:border-black hover:bg-black hover:text-white"
             >
               <Icon size={16} />
               {action.label}
-            </button>
+            </motion.button>
           );
         })}
       </div>

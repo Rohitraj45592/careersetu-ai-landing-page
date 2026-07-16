@@ -21,19 +21,19 @@ export default function CareerTwinPage() {
         <ChatCard />
         <Snapshot />
 
-        <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <div className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-2">
           <TodayFocus />
           <QuickActions />
         </div>
 
         <AiSuggestions />
 
-        <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <div className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-2">
           <LearningProgress />
           <AiInsights />
         </div>
 
-        <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <div className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-2">
           <ActivityTimeline />
           <RecentConversations />
         </div>
