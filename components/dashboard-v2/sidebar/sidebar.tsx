@@ -53,6 +53,7 @@ const items = [
   {
     title: "Profile",
     icon: User,
+    href: "/dashboard-v2/profile",
   },
   {
     title: "Settings",
