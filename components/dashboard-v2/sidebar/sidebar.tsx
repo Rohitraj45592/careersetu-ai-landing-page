@@ -43,6 +43,7 @@ const items = [
   {
     title: "Mock Interview",
     icon: GraduationCap,
+    href: "/dashboard-v2/mock-interview",
   },
   {
     title: "Analytics",
