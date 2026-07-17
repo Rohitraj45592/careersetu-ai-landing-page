@@ -1,0 +1,1048 @@
+From 42797d719f7ffa6e3f0b05168594879d366bca86 Mon Sep 17 00:00:00 2001
+From: Rohitraj45592 <rohitraj45592@users.noreply.github.com>
+Date: Fri, 17 Jul 2026 08:38:38 +0000
+Subject: [PATCH] feat: add Analytics page as the central performance dashboard
+
+New route at /dashboard-v2/analytics, built with the existing
+DashboardLayout, Header and the same monochrome design language used
+across Overview, Career Twin, Resume Studio, Job Hub and Mock
+Interview - no layout, header, colors, radius, shadows or motion
+conventions changed.
+
+16 sections per spec: hero with a monochrome bar-chart illustration
+and floating growth badges, performance snapshot, weekly progress
+with 6 mini bar-chart cards, resume/interview/job analytics stat
+rows, a 10-skill learning analytics section, career insights,
+6-category skill distribution with animated circular rings, a
+monthly timeline paired with recent activity, productivity overview,
+AI recommendations, placement prediction, export report actions, and
+achievement badges.
+
+Reused the shared AnimatedNumber component and the shine-sweep
+keyframe already added for Career Twin/Mock Interview instead of
+duplicating that logic again.
+
+Sidebar was updated directly in this same commit (Analytics item now
+links to its route) per the task's explicit instruction not to
+generate a separate sidebar patch.
+
+UI only - no backend, API, auth, or database - realistic dummy
+analytics data throughout.
+---
+ app/dashboard-v2/analytics/page.tsx           | 49 ++++++++++
+ .../dashboard-v2/analytics/achievements.tsx   | 45 +++++++++
+ .../analytics/ai-recommendations.tsx          | 48 ++++++++++
+ .../analytics/career-insights.tsx             | 49 ++++++++++
+ .../dashboard-v2/analytics/export-reports.tsx | 37 ++++++++
+ components/dashboard-v2/analytics/hero.tsx    | 94 +++++++++++++++++++
+ .../analytics/interview-analytics.tsx         | 63 +++++++++++++
+ .../dashboard-v2/analytics/job-analytics.tsx  | 45 +++++++++
+ .../analytics/learning-analytics.tsx          | 49 ++++++++++
+ .../analytics/monthly-timeline.tsx            | 48 ++++++++++
+ .../analytics/placement-prediction.tsx        | 37 ++++++++
+ .../analytics/productivity-overview.tsx       | 44 +++++++++
+ .../analytics/recent-activity.tsx             | 48 ++++++++++
+ .../analytics/resume-analytics.tsx            | 44 +++++++++
+ .../analytics/skill-distribution.tsx          | 60 ++++++++++++
+ .../dashboard-v2/analytics/snapshot.tsx       | 45 +++++++++
+ .../analytics/weekly-progress.tsx             | 58 ++++++++++++
+ components/dashboard-v2/sidebar/sidebar.tsx   |  1 +
+ 18 files changed, 864 insertions(+)
+ create mode 100644 app/dashboard-v2/analytics/page.tsx
+ create mode 100644 components/dashboard-v2/analytics/achievements.tsx
+ create mode 100644 components/dashboard-v2/analytics/ai-recommendations.tsx
+ create mode 100644 components/dashboard-v2/analytics/career-insights.tsx
+ create mode 100644 components/dashboard-v2/analytics/export-reports.tsx
+ create mode 100644 components/dashboard-v2/analytics/hero.tsx
+ create mode 100644 components/dashboard-v2/analytics/interview-analytics.tsx
+ create mode 100644 components/dashboard-v2/analytics/job-analytics.tsx
+ create mode 100644 components/dashboard-v2/analytics/learning-analytics.tsx
+ create mode 100644 components/dashboard-v2/analytics/monthly-timeline.tsx
+ create mode 100644 components/dashboard-v2/analytics/placement-prediction.tsx
+ create mode 100644 components/dashboard-v2/analytics/productivity-overview.tsx
+ create mode 100644 components/dashboard-v2/analytics/recent-activity.tsx
+ create mode 100644 components/dashboard-v2/analytics/resume-analytics.tsx
+ create mode 100644 components/dashboard-v2/analytics/skill-distribution.tsx
+ create mode 100644 components/dashboard-v2/analytics/snapshot.tsx
+ create mode 100644 components/dashboard-v2/analytics/weekly-progress.tsx
+
+diff --git a/app/dashboard-v2/analytics/page.tsx b/app/dashboard-v2/analytics/page.tsx
+new file mode 100644
+index 0000000..97da2e0
+--- /dev/null
++++ b/app/dashboard-v2/analytics/page.tsx
+@@ -0,0 +1,49 @@
++import DashboardLayout from "@/components/dashboard-v2/layout/dashboard-layout";
++import Header from "@/components/dashboard-v2/header/header";
++import AnalyticsHero from "@/components/dashboard-v2/analytics/hero";
++import Snapshot from "@/components/dashboard-v2/analytics/snapshot";
++import WeeklyProgress from "@/components/dashboard-v2/analytics/weekly-progress";
++import ResumeAnalytics from "@/components/dashboard-v2/analytics/resume-analytics";
++import InterviewAnalytics from "@/components/dashboard-v2/analytics/interview-analytics";
++import JobAnalytics from "@/components/dashboard-v2/analytics/job-analytics";
++import LearningAnalytics from "@/components/dashboard-v2/analytics/learning-analytics";
++import CareerInsights from "@/components/dashboard-v2/analytics/career-insights";
++import SkillDistribution from "@/components/dashboard-v2/analytics/skill-distribution";
++import MonthlyTimeline from "@/components/dashboard-v2/analytics/monthly-timeline";
++import ProductivityOverview from "@/components/dashboard-v2/analytics/productivity-overview";
++import AiRecommendations from "@/components/dashboard-v2/analytics/ai-recommendations";
++import PlacementPrediction from "@/components/dashboard-v2/analytics/placement-prediction";
++import ExportReports from "@/components/dashboard-v2/analytics/export-reports";
++import RecentActivity from "@/components/dashboard-v2/analytics/recent-activity";
++import Achievements from "@/components/dashboard-v2/analytics/achievements";
++
++export default function AnalyticsPage() {
++  return (
++    <DashboardLayout>
++      <Header />
++
++      <div className="p-4 sm:p-6 lg:p-8">
++        <AnalyticsHero />
++        <Snapshot />
++        <WeeklyProgress />
++        <ResumeAnalytics />
++        <InterviewAnalytics />
++        <JobAnalytics />
++        <LearningAnalytics />
++        <CareerInsights />
++        <SkillDistribution />
++
++        <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
++          <MonthlyTimeline />
++          <RecentActivity />
++        </div>
++
++        <ProductivityOverview />
++        <AiRecommendations />
++        <PlacementPrediction />
++        <ExportReports />
++        <Achievements />
++      </div>
++    </DashboardLayout>
++  );
++}
+diff --git a/components/dashboard-v2/analytics/achievements.tsx b/components/dashboard-v2/analytics/achievements.tsx
+new file mode 100644
+index 0000000..705ea8c
+--- /dev/null
++++ b/components/dashboard-v2/analytics/achievements.tsx
+@@ -0,0 +1,45 @@
++"use client";
++
++import { motion } from "framer-motion";
++import { ListChecks, Mic, FileText, Target, Flame } from "lucide-react";
++
++const badges = [
++  { icon: ListChecks, title: "100 Tasks Completed", earned: true },
++  { icon: Mic, title: "10 Interviews", earned: true },
++  { icon: FileText, title: "Resume Expert", earned: true },
++  { icon: Target, title: "Placement Ready", earned: false },
++  { icon: Flame, title: "Consistency Champion", earned: true },
++];
++
++export default function Achievements() {
++  return (
++    <section className="mt-8">
++      <h2 className="text-xl font-bold sm:text-2xl">Achievements</h2>
++
++      <div className="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
++        {badges.map((badge, index) => {
++          const Icon = badge.icon;
++          return (
++            <motion.div
++              key={badge.title}
++              initial={{ opacity: 0, y: 14 }}
++              whileInView={{ opacity: 1, y: 0 }}
++              viewport={{ once: true }}
++              transition={{ duration: 0.4, delay: index * 0.05, ease: [0.22, 1, 0.36, 1] }}
++              whileHover={{ y: -4 }}
++              className={`flex flex-col items-center rounded-2xl border p-5 text-center shadow-sm transition-shadow duration-300 hover:shadow-lg ${
++                badge.earned ? "border-neutral-200 bg-white" : "border-neutral-200 bg-neutral-50 opacity-60"
++              }`}
++            >
++              <div className={`flex h-12 w-12 items-center justify-center rounded-full ${badge.earned ? "bg-black text-white" : "bg-neutral-200 text-neutral-400"}`}>
++                <Icon size={20} />
++              </div>
++              <p className="mt-3 text-sm font-medium">{badge.title}</p>
++              <span className="mt-1 text-[11px] text-neutral-400">{badge.earned ? "Earned" : "Locked"}</span>
++            </motion.div>
++          );
++        })}
++      </div>
++    </section>
++  );
++}
+diff --git a/components/dashboard-v2/analytics/ai-recommendations.tsx b/components/dashboard-v2/analytics/ai-recommendations.tsx
+new file mode 100644
+index 0000000..c10263d
+--- /dev/null
++++ b/components/dashboard-v2/analytics/ai-recommendations.tsx
+@@ -0,0 +1,48 @@
++"use client";
++
++import { motion } from "framer-motion";
++import { FileText, Container, Rocket, Mic, Link2, Send, ArrowRight } from "lucide-react";
++
++const recommendations = [
++  { icon: FileText, title: "Improve Resume", desc: "Tighten your summary and quantify recent project impact." },
++  { icon: Container, title: "Complete Docker", desc: "Finish the Docker module to close a high-demand gap." },
++  { icon: Rocket, title: "Deploy Projects", desc: "Deploy your latest project for recruiters to review live." },
++  { icon: Mic, title: "Practice Interviews", desc: "Two more mock interviews will stabilize your average score." },
++  { icon: Link2, title: "Improve LinkedIn", desc: "Your headline could better reflect your specialization." },
++  { icon: Send, title: "Apply More Jobs", desc: "Your response rate suggests applying to 5 more roles weekly." },
++];
++
++export default function AiRecommendations() {
++  return (
++    <section className="mt-8">
++      <h2 className="text-xl font-bold sm:text-2xl">AI Recommendations</h2>
++
++      <div className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
++        {recommendations.map((item, index) => {
++          const Icon = item.icon;
++          return (
++            <motion.div
++              key={item.title}
++              initial={{ opacity: 0, y: 14 }}
++              whileInView={{ opacity: 1, y: 0 }}
++              viewport={{ once: true, margin: "-10% 0px" }}
++              transition={{ duration: 0.4, delay: index * 0.05, ease: [0.22, 1, 0.36, 1] }}
++              whileHover={{ y: -4 }}
++              className="group rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm transition-shadow duration-300 hover:shadow-lg"
++            >
++              <div className="flex items-start justify-between">
++                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-neutral-100 transition-colors duration-200 group-hover:bg-black group-hover:text-white">
++                  <Icon size={18} />
++                </div>
++                <ArrowRight size={16} className="mt-2 -translate-x-1 text-neutral-300 opacity-0 transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-100 group-hover:text-black" />
++              </div>
++
++              <h3 className="mt-4 font-semibold">{item.title}</h3>
++              <p className="mt-2 text-sm leading-relaxed text-neutral-500">{item.desc}</p>
++            </motion.div>
++          );
++        })}
++      </div>
++    </section>
++  );
++}
+diff --git a/components/dashboard-v2/analytics/career-insights.tsx b/components/dashboard-v2/analytics/career-insights.tsx
+new file mode 100644
+index 0000000..656e4e6
+--- /dev/null
++++ b/components/dashboard-v2/analytics/career-insights.tsx
+@@ -0,0 +1,49 @@
++"use client";
++
++import { motion } from "framer-motion";
++import { Sparkles, TrendingUp, Mic, Cpu, Target, Brain } from "lucide-react";
++
++const insights = [
++  { icon: TrendingUp, text: "Resume score improved by 12% this month." },
++  { icon: Mic, text: "Interview score increased since last week." },
++  { icon: Cpu, text: "Backend skills are steadily improving." },
++  { icon: Target, text: "Placement readiness is above average." },
++  { icon: Brain, text: "Keep practicing DSA to close the remaining gap." },
++];
++
++export default function CareerInsights() {
++  return (
++    <section className="mt-8 rounded-[24px] border border-neutral-200 bg-white p-5 sm:p-6 lg:rounded-[30px]">
++      <div className="flex items-center gap-3">
++        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-black text-white">
++          <Sparkles size={18} />
++        </div>
++        <div>
++          <h2 className="text-xl font-bold sm:text-2xl">Career Insights</h2>
++          <p className="text-sm text-neutral-500">Based on your recent activity</p>
++        </div>
++      </div>
++
++      <ul className="mt-6 divide-y divide-neutral-100">
++        {insights.map((insight, index) => {
++          const Icon = insight.icon;
++          return (
++            <motion.li
++              key={insight.text}
++              initial={{ opacity: 0, x: -8 }}
++              whileInView={{ opacity: 1, x: 0 }}
++              viewport={{ once: true }}
++              transition={{ duration: 0.35, delay: index * 0.06 }}
++              className="flex items-start gap-3 py-3 first:pt-0 last:pb-0"
++            >
++              <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-neutral-100">
++                <Icon size={14} />
++              </span>
++              <span className="leading-relaxed text-neutral-700">{insight.text}</span>
++            </motion.li>
++          );
++        })}
++      </ul>
++    </section>
++  );
++}
+diff --git a/components/dashboard-v2/analytics/export-reports.tsx b/components/dashboard-v2/analytics/export-reports.tsx
+new file mode 100644
+index 0000000..171e700
+--- /dev/null
++++ b/components/dashboard-v2/analytics/export-reports.tsx
+@@ -0,0 +1,37 @@
++"use client";
++
++import { motion } from "framer-motion";
++import { FileDown, FileSpreadsheet, Share2, Sparkles } from "lucide-react";
++
++const actions = [
++  { icon: FileDown, label: "Download PDF" },
++  { icon: FileSpreadsheet, label: "Download CSV" },
++  { icon: Share2, label: "Share Report" },
++  { icon: Sparkles, label: "Generate AI Report" },
++];
++
++export default function ExportReports() {
++  return (
++    <section className="mt-8 rounded-[24px] border border-neutral-200 bg-white p-5 sm:p-6 lg:rounded-[30px]">
++      <h2 className="text-xl font-bold sm:text-2xl">Export Reports</h2>
++
++      <div className="mt-5 flex flex-wrap gap-3">
++        {actions.map((action) => {
++          const Icon = action.icon;
++          return (
++            <motion.button
++              key={action.label}
++              whileHover={{ y: -2, scale: 1.02 }}
++              whileTap={{ scale: 0.95 }}
++              transition={{ duration: 0.15, ease: "easeOut" }}
++              className="flex items-center gap-2.5 rounded-full border border-neutral-300 px-4 py-3 text-sm font-medium shadow-sm transition-colors duration-200 hover:border-black hover:bg-black hover:text-white hover:shadow-md"
++            >
++              <Icon size={16} />
++              {action.label}
++            </motion.button>
++          );
++        })}
++      </div>
++    </section>
++  );
++}
+diff --git a/components/dashboard-v2/analytics/hero.tsx b/components/dashboard-v2/analytics/hero.tsx
+new file mode 100644
+index 0000000..9975417
+--- /dev/null
++++ b/components/dashboard-v2/analytics/hero.tsx
+@@ -0,0 +1,94 @@
++"use client";
++
++import { motion } from "framer-motion";
++import { BarChart3, ArrowRight, Download, TrendingUp, Sparkles, FileBarChart } from "lucide-react";
++
++const floatingBadges = [
++  { icon: TrendingUp, label: "+24% Growth", position: "left-4 top-6" },
++  { icon: Sparkles, label: "AI Insights", position: "right-4 top-16" },
++  { icon: FileBarChart, label: "Weekly Report", position: "left-8 bottom-16" },
++];
++
++export default function AnalyticsHero() {
++  return (
++    <motion.section
++      initial={{ opacity: 0, y: 16 }}
++      animate={{ opacity: 1, y: 0 }}
++      transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
++      className="rounded-2xl border border-neutral-200 bg-white p-5 sm:p-6 lg:rounded-[32px] lg:p-8"
++    >
++      <div className="grid grid-cols-1 items-stretch gap-8 lg:grid-cols-[1.2fr_1fr] lg:gap-10">
++        <div>
++          <div className="flex items-center gap-2 text-sm font-medium text-neutral-500">
++            <BarChart3 size={16} />
++            Analytics
++          </div>
++
++          <h1 className="mt-3 text-3xl font-bold leading-tight sm:text-4xl lg:text-5xl">
++            Track Your Career Growth
++          </h1>
++
++          <p className="mt-6 max-w-xl text-base text-neutral-600 sm:text-lg">
++            Monitor your progress across learning, interviews, resumes and
++            placements with AI-powered insights.
++          </p>
++
++          <div className="mt-8 flex flex-wrap gap-3 sm:gap-4">
++            <motion.button
++              whileHover={{ y: -2, boxShadow: "0 10px 30px rgba(0,0,0,0.18)" }}
++              whileTap={{ y: 0, scale: 0.98 }}
++              transition={{ duration: 0.2, ease: "easeOut" }}
++              className="group flex items-center gap-2 rounded-2xl bg-black px-5 py-3 text-white sm:px-6"
++            >
++              View Report
++              <ArrowRight size={16} className="transition-transform duration-200 group-hover:translate-x-1" />
++            </motion.button>
++
++            <motion.button
++              whileHover={{ y: -2, borderColor: "rgb(0 0 0)" }}
++              whileTap={{ y: 0, scale: 0.98 }}
++              transition={{ duration: 0.2, ease: "easeOut" }}
++              className="flex items-center gap-2 rounded-2xl border border-neutral-300 px-5 py-3 sm:px-6"
++            >
++              <Download size={16} />
++              Export Analytics
++            </motion.button>
++          </div>
++        </div>
++
++        {/* Illustration */}
++        <div className="relative flex h-full min-h-[300px] items-center justify-center overflow-hidden rounded-2xl border border-neutral-200 bg-neutral-50 sm:min-h-[360px] lg:min-h-[420px] lg:rounded-[24px]">
++          <svg viewBox="0 0 320 260" className="h-[70%] w-[70%] text-neutral-300">
++            <rect x="40" y="40" width="240" height="170" rx="10" fill="none" stroke="currentColor" strokeWidth="3" />
++            <line x1="40" y1="90" x2="280" y2="90" stroke="currentColor" strokeWidth="1.5" opacity="0.4" />
++
++            {/* Bars */}
++            <rect x="65" y="150" width="20" height="45" rx="3" fill="#a3a3a3" />
++            <rect x="100" y="120" width="20" height="75" rx="3" fill="#737373" />
++            <rect x="135" y="100" width="20" height="95" rx="3" fill="#525252" />
++            <rect x="170" y="130" width="20" height="65" rx="3" fill="#737373" />
++            <rect x="205" y="80" width="20" height="115" rx="3" fill="#111111" />
++
++            {/* Trend line */}
++            <polyline points="65,150 100,120 135,100 170,130 205,80 240,60" fill="none" stroke="#111111" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
++          </svg>
++
++          {floatingBadges.map((badge, i) => {
++            const Icon = badge.icon;
++            return (
++              <motion.div
++                key={badge.label}
++                className={`absolute ${badge.position} flex items-center gap-1.5 rounded-full border border-neutral-200 bg-white px-3 py-1.5 text-xs font-medium shadow-sm`}
++                animate={{ y: [0, -8, 0] }}
++                transition={{ duration: 3.5 + i * 0.4, repeat: Infinity, ease: "easeInOut", delay: i * 0.3 }}
++              >
++                <Icon size={12} />
++                {badge.label}
++              </motion.div>
++            );
++          })}
++        </div>
++      </div>
++    </motion.section>
++  );
++}
+diff --git a/components/dashboard-v2/analytics/interview-analytics.tsx b/components/dashboard-v2/analytics/interview-analytics.tsx
+new file mode 100644
+index 0000000..0a51b53
+--- /dev/null
++++ b/components/dashboard-v2/analytics/interview-analytics.tsx
+@@ -0,0 +1,63 @@
++"use client";
++
++import { motion } from "framer-motion";
++import { Mic, Star, Cpu, MessageCircle, Smile, TrendingUp } from "lucide-react";
++import AnimatedNumber from "../shared/animated-number";
++
++const cards = [
++  { icon: Mic, value: 14, suffix: "", label: "Interviews Completed" },
++  { icon: Star, value: 78, suffix: "%", label: "Average Score" },
++  { icon: Cpu, value: 74, suffix: "%", label: "Technical" },
++  { icon: MessageCircle, value: 80, suffix: "%", label: "Communication" },
++  { icon: Smile, value: 82, suffix: "%", label: "Confidence" },
++];
++
++export default function InterviewAnalytics() {
++  return (
++    <section className="mt-8">
++      <h2 className="text-xl font-bold sm:text-2xl">Interview Analytics</h2>
++
++      <div className="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
++        {cards.map((item, index) => {
++          const Icon = item.icon;
++          return (
++            <motion.div
++              key={item.label}
++              initial={{ opacity: 0, y: 14 }}
++              whileInView={{ opacity: 1, y: 0 }}
++              viewport={{ once: true }}
++              transition={{ duration: 0.4, delay: index * 0.05, ease: [0.22, 1, 0.36, 1] }}
++              whileHover={{ y: -4 }}
++              className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm transition-shadow duration-300 hover:shadow-lg"
++            >
++              <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-neutral-100">
++                <Icon size={18} />
++              </div>
++              <AnimatedNumber value={item.value} suffix={item.suffix} />
++              <p className="mt-1 text-sm text-neutral-500">{item.label}</p>
++            </motion.div>
++          );
++        })}
++      </div>
++
++      <div className="mt-5 rounded-2xl border border-neutral-200 bg-neutral-50 p-5">
++        <div className="flex items-center gap-2 text-sm font-medium text-neutral-600">
++          <TrendingUp size={15} />
++          AI Feedback Trend
++        </div>
++        <div className="mt-4 flex h-16 items-end gap-1.5">
++          {[35, 42, 38, 55, 60, 58, 72, 78].map((h, i) => (
++            <motion.div
++              key={i}
++              initial={{ height: 0 }}
++              whileInView={{ height: `${h}%` }}
++              viewport={{ once: true }}
++              transition={{ duration: 0.5, delay: i * 0.05 }}
++              className="flex-1 rounded-t-sm bg-neutral-300"
++            />
++          ))}
++        </div>
++      </div>
++    </section>
++  );
++}
+diff --git a/components/dashboard-v2/analytics/job-analytics.tsx b/components/dashboard-v2/analytics/job-analytics.tsx
+new file mode 100644
+index 0000000..a5e4a28
+--- /dev/null
++++ b/components/dashboard-v2/analytics/job-analytics.tsx
+@@ -0,0 +1,45 @@
++"use client";
++
++import { motion } from "framer-motion";
++import { Send, Bookmark, PhoneCall, Trophy, CheckCircle2, Reply } from "lucide-react";
++import AnimatedNumber from "../shared/animated-number";
++
++const cards = [
++  { icon: Send, value: 23, suffix: "", label: "Jobs Applied" },
++  { icon: Bookmark, value: 7, suffix: "", label: "Saved Jobs" },
++  { icon: PhoneCall, value: 4, suffix: "", label: "Interview Calls" },
++  { icon: Trophy, value: 1, suffix: "", label: "Offers" },
++  { icon: CheckCircle2, value: 100, suffix: "%", label: "Acceptance Rate" },
++  { icon: Reply, value: 58, suffix: "%", label: "Response Rate" },
++];
++
++export default function JobAnalytics() {
++  return (
++    <section className="mt-8">
++      <h2 className="text-xl font-bold sm:text-2xl">Job Analytics</h2>
++
++      <div className="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
++        {cards.map((item, index) => {
++          const Icon = item.icon;
++          return (
++            <motion.div
++              key={item.label}
++              initial={{ opacity: 0, y: 14 }}
++              whileInView={{ opacity: 1, y: 0 }}
++              viewport={{ once: true }}
++              transition={{ duration: 0.4, delay: index * 0.05, ease: [0.22, 1, 0.36, 1] }}
++              whileHover={{ y: -4 }}
++              className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm transition-shadow duration-300 hover:shadow-lg"
++            >
++              <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-neutral-100">
++                <Icon size={18} />
++              </div>
++              <AnimatedNumber value={item.value} suffix={item.suffix} />
++              <p className="mt-1 text-sm text-neutral-500">{item.label}</p>
++            </motion.div>
++          );
++        })}
++      </div>
++    </section>
++  );
++}
+diff --git a/components/dashboard-v2/analytics/learning-analytics.tsx b/components/dashboard-v2/analytics/learning-analytics.tsx
+new file mode 100644
+index 0000000..33d77d3
+--- /dev/null
++++ b/components/dashboard-v2/analytics/learning-analytics.tsx
+@@ -0,0 +1,49 @@
++"use client";
++
++import { motion, useInView } from "framer-motion";
++import { useRef } from "react";
++
++const skills = [
++  { name: "Python", value: 88 },
++  { name: "Java", value: 60 },
++  { name: "SQL", value: 68 },
++  { name: "React", value: 80 },
++  { name: "FastAPI", value: 45 },
++  { name: "Docker", value: 38 },
++  { name: "AWS", value: 30 },
++  { name: "GenAI", value: 55 },
++  { name: "System Design", value: 42 },
++  { name: "DSA", value: 65 },
++];
++
++export default function LearningAnalytics() {
++  const ref = useRef<HTMLDivElement>(null);
++  const inView = useInView(ref, { once: true, margin: "-10% 0px" });
++
++  return (
++    <section className="mt-8 rounded-[24px] border border-neutral-200 bg-white p-5 sm:p-6 lg:rounded-[30px]">
++      <h2 className="text-xl font-bold sm:text-2xl">Learning Analytics</h2>
++
++      <div ref={ref} className="mt-6 grid grid-cols-1 gap-x-8 gap-y-5 sm:grid-cols-2">
++        {skills.map((skill, index) => (
++          <div key={skill.name}>
++            <div className="mb-1.5 flex justify-between text-sm">
++              <span className="font-medium">{skill.name}</span>
++              <span className="tabular-nums text-neutral-500">{skill.value}%</span>
++            </div>
++            <div className="relative h-2 overflow-hidden rounded-full bg-neutral-200">
++              <motion.div
++                className="relative h-2 overflow-hidden rounded-full bg-black"
++                initial={{ width: "0%" }}
++                animate={{ width: inView ? `${skill.value}%` : "0%" }}
++                transition={{ duration: 0.9, delay: index * 0.05, ease: [0.22, 1, 0.36, 1] }}
++              >
++                <span className="absolute inset-0 -skew-x-12 animate-shine-sweep bg-gradient-to-r from-transparent via-white/25 to-transparent" />
++              </motion.div>
++            </div>
++          </div>
++        ))}
++      </div>
++    </section>
++  );
++}
+diff --git a/components/dashboard-v2/analytics/monthly-timeline.tsx b/components/dashboard-v2/analytics/monthly-timeline.tsx
+new file mode 100644
+index 0000000..9844211
+--- /dev/null
++++ b/components/dashboard-v2/analytics/monthly-timeline.tsx
+@@ -0,0 +1,48 @@
++"use client";
++
++import { motion } from "framer-motion";
++import { FileText, FolderKanban, Mic, GraduationCap, Send } from "lucide-react";
++
++const events = [
++  { icon: FileText, title: "Resume Updated", time: "2 days ago" },
++  { icon: FolderKanban, title: "Project Completed", time: "5 days ago" },
++  { icon: Mic, title: "Interview Finished", time: "1 week ago" },
++  { icon: GraduationCap, title: "Course Completed", time: "2 weeks ago" },
++  { icon: Send, title: "Application Submitted", time: "3 weeks ago" },
++];
++
++export default function MonthlyTimeline() {
++  return (
++    <section className="rounded-[24px] border border-neutral-200 bg-white p-5 sm:p-6 lg:rounded-[30px]">
++      <h2 className="text-xl font-bold sm:text-2xl">Monthly Timeline</h2>
++
++      <div className="relative mt-6">
++        <div className="absolute left-5 top-2 bottom-2 w-px bg-neutral-200" />
++        <div className="space-y-2">
++          {events.map((event, index) => {
++            const Icon = event.icon;
++            return (
++              <motion.div
++                key={event.title}
++                initial={{ opacity: 0, x: -8 }}
++                whileInView={{ opacity: 1, x: 0 }}
++                viewport={{ once: true }}
++                transition={{ duration: 0.35, delay: index * 0.06 }}
++                whileHover={{ x: 2 }}
++                className="relative flex items-center gap-4 rounded-xl px-2 py-2.5 transition-colors duration-200 hover:bg-neutral-50"
++              >
++                <div className="z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-neutral-200 bg-white">
++                  <Icon size={16} />
++                </div>
++                <div className="flex min-w-0 flex-1 items-center justify-between gap-3">
++                  <span className="truncate font-medium">{event.title}</span>
++                  <span className="shrink-0 whitespace-nowrap text-xs text-neutral-400">{event.time}</span>
++                </div>
++              </motion.div>
++            );
++          })}
++        </div>
++      </div>
++    </section>
++  );
++}
+diff --git a/components/dashboard-v2/analytics/placement-prediction.tsx b/components/dashboard-v2/analytics/placement-prediction.tsx
+new file mode 100644
+index 0000000..bb3ac0f
+--- /dev/null
++++ b/components/dashboard-v2/analytics/placement-prediction.tsx
+@@ -0,0 +1,37 @@
++"use client";
++
++import AnimatedNumber from "../shared/animated-number";
++import { Sparkles } from "lucide-react";
++
++const metrics = [
++  { label: "Current Readiness", value: 82, suffix: "%" },
++  { label: "Dream Company Readiness", value: 64, suffix: "%" },
++  { label: "Expected Interview Chance", value: 76, suffix: "%" },
++  { label: "Expected Placement Chance", value: 68, suffix: "%" },
++  { label: "AI Confidence Score", value: 88, suffix: "%" },
++];
++
++export default function PlacementPrediction() {
++  return (
++    <section className="mt-8 rounded-2xl border border-neutral-200 bg-white p-5 sm:p-6 lg:rounded-[32px] lg:p-8">
++      <div className="flex items-center gap-3">
++        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-black text-white">
++          <Sparkles size={18} />
++        </div>
++        <div>
++          <h2 className="text-xl font-bold sm:text-2xl">Placement Prediction</h2>
++          <p className="text-sm text-neutral-500">AI-estimated based on your current trajectory</p>
++        </div>
++      </div>
++
++      <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
++        {metrics.map((item) => (
++          <div key={item.label} className="rounded-2xl border border-neutral-200 p-5 text-center">
++            <AnimatedNumber value={item.value} suffix={item.suffix} className="text-3xl font-bold tabular-nums" />
++            <p className="mt-2 text-sm text-neutral-500">{item.label}</p>
++          </div>
++        ))}
++      </div>
++    </section>
++  );
++}
+diff --git a/components/dashboard-v2/analytics/productivity-overview.tsx b/components/dashboard-v2/analytics/productivity-overview.tsx
+new file mode 100644
+index 0000000..361118a
+--- /dev/null
++++ b/components/dashboard-v2/analytics/productivity-overview.tsx
+@@ -0,0 +1,44 @@
++"use client";
++
++import { motion } from "framer-motion";
++import { Flame, CalendarCheck, Clock, ListChecks, Focus } from "lucide-react";
++import AnimatedNumber from "../shared/animated-number";
++
++const cards = [
++  { icon: Flame, value: 9, suffix: "", label: "Daily Streak" },
++  { icon: CalendarCheck, value: 86, suffix: "%", label: "Weekly Consistency" },
++  { icon: Clock, value: 18, suffix: "h", label: "Learning Hours" },
++  { icon: ListChecks, value: 27, suffix: "", label: "Tasks Completed" },
++  { icon: Focus, value: 12, suffix: "h", label: "Focus Time" },
++];
++
++export default function ProductivityOverview() {
++  return (
++    <section className="mt-8">
++      <h2 className="text-xl font-bold sm:text-2xl">Productivity Overview</h2>
++
++      <div className="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
++        {cards.map((item, index) => {
++          const Icon = item.icon;
++          return (
++            <motion.div
++              key={item.label}
++              initial={{ opacity: 0, y: 14 }}
++              whileInView={{ opacity: 1, y: 0 }}
++              viewport={{ once: true }}
++              transition={{ duration: 0.4, delay: index * 0.05, ease: [0.22, 1, 0.36, 1] }}
++              whileHover={{ y: -4 }}
++              className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm transition-shadow duration-300 hover:shadow-lg"
++            >
++              <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-neutral-100">
++                <Icon size={18} />
++              </div>
++              <AnimatedNumber value={item.value} suffix={item.suffix} />
++              <p className="mt-1 text-sm text-neutral-500">{item.label}</p>
++            </motion.div>
++          );
++        })}
++      </div>
++    </section>
++  );
++}
+diff --git a/components/dashboard-v2/analytics/recent-activity.tsx b/components/dashboard-v2/analytics/recent-activity.tsx
+new file mode 100644
+index 0000000..70d7e10
+--- /dev/null
++++ b/components/dashboard-v2/analytics/recent-activity.tsx
+@@ -0,0 +1,48 @@
++"use client";
++
++import { motion } from "framer-motion";
++import { FileText, Mic, Send, Trophy, Sparkles } from "lucide-react";
++
++const events = [
++  { icon: FileText, title: "Resume Score Improved to 82", time: "2 hours ago" },
++  { icon: Mic, title: "Mock Interview Completed", time: "1 day ago" },
++  { icon: Send, title: "Applied to 3 New Jobs", time: "1 day ago" },
++  { icon: Sparkles, title: "New AI Insights Generated", time: "2 days ago" },
++  { icon: Trophy, title: "Achievement Unlocked: Consistency Champion", time: "3 days ago" },
++];
++
++export default function RecentActivity() {
++  return (
++    <section className="rounded-[24px] border border-neutral-200 bg-white p-5 sm:p-6 lg:rounded-[30px]">
++      <h2 className="text-xl font-bold sm:text-2xl">Recent Activity</h2>
++
++      <div className="relative mt-6">
++        <div className="absolute left-5 top-2 bottom-2 w-px bg-neutral-200" />
++        <div className="space-y-2">
++          {events.map((event, index) => {
++            const Icon = event.icon;
++            return (
++              <motion.div
++                key={event.title}
++                initial={{ opacity: 0, x: -8 }}
++                whileInView={{ opacity: 1, x: 0 }}
++                viewport={{ once: true }}
++                transition={{ duration: 0.35, delay: index * 0.06 }}
++                whileHover={{ x: 2 }}
++                className="relative flex items-center gap-4 rounded-xl px-2 py-2.5 transition-colors duration-200 hover:bg-neutral-50"
++              >
++                <div className="z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-neutral-200 bg-white">
++                  <Icon size={16} />
++                </div>
++                <div className="flex min-w-0 flex-1 items-center justify-between gap-3">
++                  <span className="truncate font-medium">{event.title}</span>
++                  <span className="shrink-0 whitespace-nowrap text-xs text-neutral-400">{event.time}</span>
++                </div>
++              </motion.div>
++            );
++          })}
++        </div>
++      </div>
++    </section>
++  );
++}
+diff --git a/components/dashboard-v2/analytics/resume-analytics.tsx b/components/dashboard-v2/analytics/resume-analytics.tsx
+new file mode 100644
+index 0000000..ca6041f
+--- /dev/null
++++ b/components/dashboard-v2/analytics/resume-analytics.tsx
+@@ -0,0 +1,44 @@
++"use client";
++
++import { motion } from "framer-motion";
++import { TrendingUp, BadgeCheck, Hash, RefreshCcw, CheckCircle2 } from "lucide-react";
++import AnimatedNumber from "../shared/animated-number";
++
++const cards = [
++  { icon: TrendingUp, value: 82, suffix: "", label: "Resume Score Trend" },
++  { icon: BadgeCheck, value: 12, suffix: "%", label: "ATS Improvement" },
++  { icon: Hash, value: 34, suffix: "", label: "Keyword Growth" },
++  { icon: RefreshCcw, value: 6, suffix: "", label: "Resume Updates" },
++  { icon: CheckCircle2, value: 18, suffix: "", label: "Suggestions Applied" },
++];
++
++export default function ResumeAnalytics() {
++  return (
++    <section className="mt-8">
++      <h2 className="text-xl font-bold sm:text-2xl">Resume Analytics</h2>
++
++      <div className="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
++        {cards.map((item, index) => {
++          const Icon = item.icon;
++          return (
++            <motion.div
++              key={item.label}
++              initial={{ opacity: 0, y: 14 }}
++              whileInView={{ opacity: 1, y: 0 }}
++              viewport={{ once: true }}
++              transition={{ duration: 0.4, delay: index * 0.05, ease: [0.22, 1, 0.36, 1] }}
++              whileHover={{ y: -4 }}
++              className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm transition-shadow duration-300 hover:shadow-lg"
++            >
++              <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-neutral-100">
++                <Icon size={18} />
++              </div>
++              <AnimatedNumber value={item.value} suffix={item.suffix} />
++              <p className="mt-1 text-sm text-neutral-500">{item.label}</p>
++            </motion.div>
++          );
++        })}
++      </div>
++    </section>
++  );
++}
+diff --git a/components/dashboard-v2/analytics/skill-distribution.tsx b/components/dashboard-v2/analytics/skill-distribution.tsx
+new file mode 100644
+index 0000000..0469d14
+--- /dev/null
++++ b/components/dashboard-v2/analytics/skill-distribution.tsx
+@@ -0,0 +1,60 @@
++"use client";
++
++import { motion, useInView } from "framer-motion";
++import { useRef } from "react";
++import { Layout, Server, Brain, Database, Cloud, Users } from "lucide-react";
++
++const categories = [
++  { icon: Layout, name: "Frontend", value: 78 },
++  { icon: Server, name: "Backend", value: 70 },
++  { icon: Brain, name: "AI", value: 62 },
++  { icon: Database, name: "Database", value: 68 },
++  { icon: Cloud, name: "Cloud", value: 40 },
++  { icon: Users, name: "Soft Skills", value: 80 },
++];
++
++export default function SkillDistribution() {
++  const ref = useRef<HTMLDivElement>(null);
++  const inView = useInView(ref, { once: true, margin: "-10% 0px" });
++  const circumference = 2 * Math.PI * 30;
++
++  return (
++    <section ref={ref} className="mt-8">
++      <h2 className="text-xl font-bold sm:text-2xl">Skill Distribution</h2>
++
++      <div className="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
++        {categories.map((cat, index) => {
++          const Icon = cat.icon;
++          return (
++            <motion.div
++              key={cat.name}
++              initial={{ opacity: 0, y: 14 }}
++              whileInView={{ opacity: 1, y: 0 }}
++              viewport={{ once: true }}
++              transition={{ duration: 0.4, delay: index * 0.05, ease: [0.22, 1, 0.36, 1] }}
++              whileHover={{ y: -4 }}
++              className="flex flex-col items-center rounded-2xl border border-neutral-200 bg-white p-5 text-center shadow-sm transition-shadow duration-300 hover:shadow-lg"
++            >
++              <div className="relative flex h-16 w-16 items-center justify-center">
++                <svg viewBox="0 0 70 70" className="h-16 w-16 -rotate-90">
++                  <circle cx="35" cy="35" r="30" fill="none" stroke="#e5e5e5" strokeWidth="6" />
++                  <motion.circle
++                    cx="35" cy="35" r="30" fill="none" stroke="#111111" strokeWidth="6" strokeLinecap="round"
++                    strokeDasharray={circumference}
++                    initial={{ strokeDashoffset: circumference }}
++                    animate={{ strokeDashoffset: inView ? circumference * (1 - cat.value / 100) : circumference }}
++                    transition={{ duration: 1, delay: index * 0.06, ease: [0.22, 1, 0.36, 1] }}
++                  />
++                </svg>
++                <Icon size={16} className="absolute" />
++              </div>
++
++              <p className="mt-3 text-sm font-semibold">{cat.name}</p>
++              <p className="text-xs text-neutral-500">{cat.value}%</p>
++            </motion.div>
++          );
++        })}
++      </div>
++    </section>
++  );
++}
+diff --git a/components/dashboard-v2/analytics/snapshot.tsx b/components/dashboard-v2/analytics/snapshot.tsx
+new file mode 100644
+index 0000000..337c01d
+--- /dev/null
++++ b/components/dashboard-v2/analytics/snapshot.tsx
+@@ -0,0 +1,45 @@
++"use client";
++
++import { motion } from "framer-motion";
++import { Gauge, FileText, Mic, Send, FolderKanban, Target } from "lucide-react";
++import AnimatedNumber from "../shared/animated-number";
++
++const stats = [
++  { icon: Gauge, value: 78, suffix: "%", label: "Overall Progress" },
++  { icon: FileText, value: 82, suffix: "", label: "Resume Score" },
++  { icon: Mic, value: 78, suffix: "%", label: "Interview Score" },
++  { icon: Send, value: 23, suffix: "", label: "Applications" },
++  { icon: FolderKanban, value: 6, suffix: "", label: "Projects" },
++  { icon: Target, value: 82, suffix: "%", label: "Placement Readiness" },
++];
++
++export default function Snapshot() {
++  return (
++    <section className="mt-8">
++      <h2 className="text-xl font-bold sm:text-2xl">Performance Snapshot</h2>
++
++      <div className="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
++        {stats.map((item, index) => {
++          const Icon = item.icon;
++          return (
++            <motion.div
++              key={item.label}
++              initial={{ opacity: 0, y: 14 }}
++              whileInView={{ opacity: 1, y: 0 }}
++              viewport={{ once: true, margin: "-10% 0px" }}
++              transition={{ duration: 0.4, delay: index * 0.05, ease: [0.22, 1, 0.36, 1] }}
++              whileHover={{ y: -4 }}
++              className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm transition-shadow duration-300 hover:shadow-lg"
++            >
++              <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-neutral-100">
++                <Icon size={18} />
++              </div>
++              <AnimatedNumber value={item.value} suffix={item.suffix} />
++              <p className="mt-1 text-sm text-neutral-500">{item.label}</p>
++            </motion.div>
++          );
++        })}
++      </div>
++    </section>
++  );
++}
+diff --git a/components/dashboard-v2/analytics/weekly-progress.tsx b/components/dashboard-v2/analytics/weekly-progress.tsx
+new file mode 100644
+index 0000000..2de9e4a
+--- /dev/null
++++ b/components/dashboard-v2/analytics/weekly-progress.tsx
+@@ -0,0 +1,58 @@
++"use client";
++
++import { motion } from "framer-motion";
++import { Clock, FolderKanban, Send, Mic, ClipboardCheck, ListChecks } from "lucide-react";
++
++const metrics = [
++  { icon: Clock, label: "Study Hours", value: "18h", bars: [40, 55, 65, 50, 80, 60, 70] },
++  { icon: FolderKanban, label: "Projects", value: "2", bars: [20, 20, 40, 40, 60, 60, 80] },
++  { icon: Send, label: "Applications", value: "9", bars: [30, 45, 20, 60, 40, 70, 55] },
++  { icon: Mic, label: "Interviews", value: "3", bars: [0, 30, 0, 50, 0, 40, 20] },
++  { icon: ClipboardCheck, label: "Mock Tests", value: "5", bars: [20, 40, 30, 50, 45, 60, 50] },
++  { icon: ListChecks, label: "Tasks Completed", value: "27", bars: [50, 60, 55, 70, 65, 80, 90] },
++];
++
++export default function WeeklyProgress() {
++  return (
++    <section className="mt-8 rounded-2xl border border-neutral-200 bg-white p-5 sm:p-6 lg:rounded-[32px] lg:p-8">
++      <h2 className="text-xl font-bold sm:text-2xl">Weekly Progress</h2>
++
++      <div className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
++        {metrics.map((metric, index) => {
++          const Icon = metric.icon;
++          return (
++            <motion.div
++              key={metric.label}
++              initial={{ opacity: 0, y: 12 }}
++              whileInView={{ opacity: 1, y: 0 }}
++              viewport={{ once: true }}
++              transition={{ duration: 0.4, delay: index * 0.05, ease: [0.22, 1, 0.36, 1] }}
++              className="rounded-2xl border border-neutral-200 p-4"
++            >
++              <div className="flex items-center justify-between">
++                <div className="flex items-center gap-2 text-sm font-medium text-neutral-600">
++                  <Icon size={15} />
++                  {metric.label}
++                </div>
++                <span className="text-lg font-bold">{metric.value}</span>
++              </div>
++
++              <div className="mt-4 flex h-16 items-end gap-1.5">
++                {metric.bars.map((h, i) => (
++                  <motion.div
++                    key={i}
++                    initial={{ height: 0 }}
++                    whileInView={{ height: `${h}%` }}
++                    viewport={{ once: true }}
++                    transition={{ duration: 0.5, delay: i * 0.05, ease: [0.22, 1, 0.36, 1] }}
++                    className="flex-1 rounded-t-sm bg-neutral-300"
++                  />
++                ))}
++              </div>
++            </motion.div>
++          );
++        })}
++      </div>
++    </section>
++  );
++}
+diff --git a/components/dashboard-v2/sidebar/sidebar.tsx b/components/dashboard-v2/sidebar/sidebar.tsx
+index 991c82d..bec683f 100644
+--- a/components/dashboard-v2/sidebar/sidebar.tsx
++++ b/components/dashboard-v2/sidebar/sidebar.tsx
+@@ -47,6 +47,7 @@ const items = [
+   {
+     title: "Analytics",
+     icon: BarChart3,
++    href: "/dashboard-v2/analytics",
+   },
+   {
+     title: "Profile",
+-- 
+2.43.0
+

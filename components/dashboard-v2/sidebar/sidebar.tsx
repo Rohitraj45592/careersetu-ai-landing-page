@@ -48,6 +48,7 @@ const items = [
   {
     title: "Analytics",
     icon: BarChart3,
+    href: "/dashboard-v2/analytics",
   },
   {
     title: "Profile",
