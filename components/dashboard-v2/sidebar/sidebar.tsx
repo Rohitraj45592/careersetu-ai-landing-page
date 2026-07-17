@@ -58,6 +58,7 @@ const items = [
   {
     title: "Settings",
     icon: Settings,
+    href: "/dashboard-v2/settings",
   },
 ];
 
