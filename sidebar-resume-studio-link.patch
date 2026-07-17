@@ -1,0 +1,24 @@
+From 8957bb4ef47d514460a5a8db85276c20a2fba82d Mon Sep 17 00:00:00 2001
+From: Rohitraj45592 <rohitraj45592@users.noreply.github.com>
+Date: Thu, 16 Jul 2026 19:40:06 +0000
+Subject: [PATCH] fix: wire Resume Studio sidebar link to its route
+
+---
+ components/dashboard-v2/sidebar/sidebar.tsx | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/components/dashboard-v2/sidebar/sidebar.tsx b/components/dashboard-v2/sidebar/sidebar.tsx
+index 20c1456..5c8f12b 100644
+--- a/components/dashboard-v2/sidebar/sidebar.tsx
++++ b/components/dashboard-v2/sidebar/sidebar.tsx
+@@ -28,6 +28,7 @@ const items = [
+   {
+     title: "Resume Studio",
+     icon: FileText,
++    href: "/dashboard-v2/resume-studio",
+   },
+   {
+     title: "Job Hub",
+-- 
+2.43.0
+

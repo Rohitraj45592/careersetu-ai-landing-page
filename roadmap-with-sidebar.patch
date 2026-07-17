@@ -1,0 +1,1293 @@
+diff --git a/app/dashboard-v2/roadmap/page.tsx b/app/dashboard-v2/roadmap/page.tsx
+new file mode 100644
+index 0000000..f9d2d1e
+--- /dev/null
++++ b/app/dashboard-v2/roadmap/page.tsx
+@@ -0,0 +1,53 @@
++import DashboardLayout from "@/components/dashboard-v2/layout/dashboard-layout";
++import Header from "@/components/dashboard-v2/header/header";
++import RoadmapHero from "@/components/dashboard-v2/roadmap/hero";
++import Snapshot from "@/components/dashboard-v2/roadmap/snapshot";
++import CareerGoal from "@/components/dashboard-v2/roadmap/career-goal";
++import RoadmapTimeline from "@/components/dashboard-v2/roadmap/roadmap-timeline";
++import WeeklyPlan from "@/components/dashboard-v2/roadmap/weekly-plan";
++import SkillProgress from "@/components/dashboard-v2/roadmap/skill-progress";
++import RecommendedProjects from "@/components/dashboard-v2/roadmap/recommended-projects";
++import Certifications from "@/components/dashboard-v2/roadmap/certifications";
++import AiRecommendations from "@/components/dashboard-v2/roadmap/ai-recommendations";
++import UpcomingMilestones from "@/components/dashboard-v2/roadmap/upcoming-milestones";
++import DailyTasks from "@/components/dashboard-v2/roadmap/daily-tasks";
++import LearningAnalytics from "@/components/dashboard-v2/roadmap/learning-analytics";
++import CareerInsights from "@/components/dashboard-v2/roadmap/career-insights";
++import RecentActivity from "@/components/dashboard-v2/roadmap/recent-activity";
++import MotivationCard from "@/components/dashboard-v2/roadmap/motivation-card";
++import ExportActions from "@/components/dashboard-v2/roadmap/export-actions";
++
++export default function RoadmapPage() {
++  return (
++    <DashboardLayout>
++      <Header />
++
++      <div className="p-4 sm:p-6 lg:p-8">
++        <RoadmapHero />
++        <Snapshot />
++        <CareerGoal />
++        <RoadmapTimeline />
++        <WeeklyPlan />
++        <SkillProgress />
++        <RecommendedProjects />
++        <Certifications />
++        <AiRecommendations />
++
++        <div className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-2">
++          <UpcomingMilestones />
++          <DailyTasks />
++        </div>
++
++        <LearningAnalytics />
++
++        <div className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-2">
++          <CareerInsights />
++          <RecentActivity />
++        </div>
++
++        <MotivationCard />
++        <ExportActions />
++      </div>
++    </DashboardLayout>
++  );
++}
+diff --git a/components/dashboard-v2/roadmap/ai-recommendations.tsx b/components/dashboard-v2/roadmap/ai-recommendations.tsx
+new file mode 100644
+index 0000000..2f50baa
+--- /dev/null
++++ b/components/dashboard-v2/roadmap/ai-recommendations.tsx
+@@ -0,0 +1,59 @@
++"use client";
++
++import { motion } from "framer-motion";
++import {
++  Brain,
++  Container,
++  FolderKanban,
++  FileText,
++  Database,
++  Mic,
++  Link2,
++} from "lucide-react";
++
++const recommendations = [
++  { icon: Brain, title: "Improve DSA", desc: "You're behind pace on graphs and dynamic programming." },
++  { icon: Container, title: "Learn Docker", desc: "Comes up in almost every backend interview now." },
++  { icon: FolderKanban, title: "Complete Backend Project", desc: "Finish and deploy your FastAPI project this week." },
++  { icon: FileText, title: "Update Resume", desc: "Add your latest project before applying further." },
++  { icon: Database, title: "Practice SQL", desc: "Joins and window functions need more reps." },
++  { icon: Mic, title: "Mock Interview", desc: "You haven't done one in 2 weeks — schedule one." },
++  { icon: Link2, title: "Optimize LinkedIn", desc: "Your headline doesn't reflect your AI focus yet." },
++];
++
++export default function AiRecommendations() {
++  return (
++    <section className="mt-8">
++      <h2 className="text-xl font-bold sm:text-2xl">AI Recommendations</h2>
++
++      <div className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
++        {recommendations.map((item, index) => {
++          const Icon = item.icon;
++
++          return (
++            <motion.div
++              key={item.title}
++              initial={{ opacity: 0, y: 10 }}
++              whileInView={{ opacity: 1, y: 0 }}
++              viewport={{ once: true, margin: "-40px" }}
++              transition={{ duration: 0.4, delay: index * 0.05, ease: "easeOut" }}
++              whileHover={{ y: -4 }}
++              className="group flex flex-col rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm transition-shadow duration-300 hover:shadow-lg"
++            >
++              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-neutral-100 text-black transition-colors duration-300 group-hover:bg-black group-hover:text-white">
++                <Icon size={18} />
++              </div>
++
++              <h3 className="mt-4 font-semibold leading-snug">{item.title}</h3>
++              <p className="mt-2 flex-1 text-sm leading-relaxed text-neutral-500">{item.desc}</p>
++
++              <button className="mt-4 self-start rounded-full border border-neutral-300 px-4 py-2 text-sm font-medium transition-colors hover:border-black hover:bg-black hover:text-white">
++                Improve
++              </button>
++            </motion.div>
++          );
++        })}
++      </div>
++    </section>
++  );
++}
+diff --git a/components/dashboard-v2/roadmap/career-goal.tsx b/components/dashboard-v2/roadmap/career-goal.tsx
+new file mode 100644
+index 0000000..0abfc79
+--- /dev/null
++++ b/components/dashboard-v2/roadmap/career-goal.tsx
+@@ -0,0 +1,61 @@
++"use client";
++
++import { motion } from "framer-motion";
++import { Briefcase, Building2, IndianRupee, CalendarClock, Clock3, Pencil } from "lucide-react";
++
++const goals = [
++  { icon: Briefcase, label: "Target Role", value: "AI Engineer" },
++  { icon: Building2, label: "Dream Company", value: "Google" },
++  { icon: IndianRupee, label: "Expected Package", value: "18 LPA" },
++  { icon: CalendarClock, label: "Learning Duration", value: "6 months" },
++  { icon: Clock3, label: "Weekly Hours", value: "20 hrs/week" },
++];
++
++export default function CareerGoal() {
++  return (
++    <motion.section
++      initial={{ opacity: 0, y: 10 }}
++      whileInView={{ opacity: 1, y: 0 }}
++      viewport={{ once: true, margin: "-40px" }}
++      transition={{ duration: 0.4, ease: "easeOut" }}
++      className="mt-8 rounded-[24px] border border-neutral-200 bg-white p-5 sm:p-6 lg:rounded-[30px]"
++    >
++      <div className="flex flex-wrap items-center justify-between gap-3">
++        <h2 className="text-xl font-bold sm:text-2xl">Career Goal</h2>
++
++        <motion.button
++          whileHover={{ scale: 1.03 }}
++          whileTap={{ scale: 0.97 }}
++          className="flex items-center gap-1.5 rounded-full border border-neutral-300 px-4 py-2 text-sm font-medium transition-colors hover:border-black"
++        >
++          <Pencil size={14} />
++          Edit Goal
++        </motion.button>
++      </div>
++
++      <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
++        {goals.map((goal, index) => {
++          const Icon = goal.icon;
++          return (
++            <motion.div
++              key={goal.label}
++              initial={{ opacity: 0, y: 8 }}
++              whileInView={{ opacity: 1, y: 0 }}
++              viewport={{ once: true }}
++              transition={{ duration: 0.35, delay: index * 0.05, ease: "easeOut" }}
++              className="rounded-2xl border border-neutral-200 p-4"
++            >
++              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-neutral-100">
++                <Icon size={16} />
++              </div>
++              <p className="mt-3 text-xs font-medium uppercase tracking-wide text-neutral-400">
++                {goal.label}
++              </p>
++              <p className="mt-1 font-semibold">{goal.value}</p>
++            </motion.div>
++          );
++        })}
++      </div>
++    </motion.section>
++  );
++}
+diff --git a/components/dashboard-v2/roadmap/career-insights.tsx b/components/dashboard-v2/roadmap/career-insights.tsx
+new file mode 100644
+index 0000000..dfa7425
+--- /dev/null
++++ b/components/dashboard-v2/roadmap/career-insights.tsx
+@@ -0,0 +1,43 @@
++"use client";
++
++import { motion } from "framer-motion";
++import { Sparkles } from "lucide-react";
++
++const insights = [
++  "Backend hiring is increasing this quarter.",
++  "Complete Docker before applying to internships.",
++  "Your resume score improved by 6 points this month.",
++  "Projects are carrying more weight than certificates right now.",
++  "Practice interviews next week — you're due for one.",
++];
++
++export default function CareerInsights() {
++  return (
++    <section className="mt-8 rounded-[24px] border border-neutral-200 bg-white p-5 sm:p-6 lg:rounded-[30px]">
++      <div className="flex items-center gap-3">
++        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-black text-white">
++          <Sparkles size={18} />
++        </div>
++        <h2 className="text-xl font-bold sm:text-2xl">Career Insights</h2>
++      </div>
++
++      <ul className="mt-6 space-y-1">
++        {insights.map((insight, index) => (
++          <motion.li
++            key={insight}
++            initial={{ opacity: 0, x: -6 }}
++            whileInView={{ opacity: 1, x: 0 }}
++            viewport={{ once: true }}
++            transition={{ duration: 0.35, delay: index * 0.06, ease: "easeOut" }}
++            className="flex items-center gap-3 rounded-xl px-2 py-2.5 transition-colors hover:bg-neutral-50"
++          >
++            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-neutral-100 text-[11px] font-medium tabular-nums text-neutral-500">
++              {String(index + 1).padStart(2, "0")}
++            </span>
++            <span className="text-[15px] leading-relaxed text-neutral-700">{insight}</span>
++          </motion.li>
++        ))}
++      </ul>
++    </section>
++  );
++}
+diff --git a/components/dashboard-v2/roadmap/certifications.tsx b/components/dashboard-v2/roadmap/certifications.tsx
+new file mode 100644
+index 0000000..9ba23b9
+--- /dev/null
++++ b/components/dashboard-v2/roadmap/certifications.tsx
+@@ -0,0 +1,58 @@
++"use client";
++
++import { motion } from "framer-motion";
++import { GraduationCap } from "lucide-react";
++
++const certifications = [
++  { course: "Machine Learning Specialization", platform: "Coursera", duration: "3 months", progress: 68 },
++  { course: "AWS Certified Developer", platform: "AWS Skill Builder", duration: "6 weeks", progress: 32 },
++  { course: "Meta Backend Developer", platform: "Coursera", duration: "4 months", progress: 12 },
++];
++
++export default function Certifications() {
++  return (
++    <section className="mt-8 rounded-[24px] border border-neutral-200 bg-white p-5 sm:p-6 lg:rounded-[30px]">
++      <h2 className="text-xl font-bold sm:text-2xl">Certifications</h2>
++
++      <div className="mt-5 grid grid-cols-1 gap-4 lg:grid-cols-3">
++        {certifications.map((cert, index) => (
++          <motion.div
++            key={cert.course}
++            initial={{ opacity: 0, y: 10 }}
++            whileInView={{ opacity: 1, y: 0 }}
++            viewport={{ once: true, margin: "-40px" }}
++            transition={{ duration: 0.4, delay: index * 0.06, ease: "easeOut" }}
++            whileHover={{ y: -4 }}
++            className="rounded-2xl border border-neutral-200 p-5 transition-shadow duration-300 hover:shadow-lg"
++          >
++            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-neutral-100">
++              <GraduationCap size={16} />
++            </div>
++
++            <h3 className="mt-3 font-semibold leading-snug">{cert.course}</h3>
++            <p className="mt-1 text-sm text-neutral-500">
++              {cert.platform} · {cert.duration}
++            </p>
++
++            <div className="mt-4 flex items-center gap-2">
++              <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-neutral-200">
++                <motion.div
++                  className="h-full rounded-full bg-black"
++                  initial={{ width: 0 }}
++                  whileInView={{ width: `${cert.progress}%` }}
++                  viewport={{ once: true }}
++                  transition={{ duration: 0.7, delay: index * 0.06, ease: "easeOut" }}
++                />
++              </div>
++              <span className="text-xs tabular-nums text-neutral-500">{cert.progress}%</span>
++            </div>
++
++            <button className="mt-4 w-full rounded-full border border-neutral-300 px-4 py-2 text-sm font-medium transition-colors hover:border-black hover:bg-black hover:text-white">
++              Continue Learning
++            </button>
++          </motion.div>
++        ))}
++      </div>
++    </section>
++  );
++}
+diff --git a/components/dashboard-v2/roadmap/daily-tasks.tsx b/components/dashboard-v2/roadmap/daily-tasks.tsx
+new file mode 100644
+index 0000000..cc20482
+--- /dev/null
++++ b/components/dashboard-v2/roadmap/daily-tasks.tsx
+@@ -0,0 +1,90 @@
++"use client";
++
++import { useState } from "react";
++import { motion } from "framer-motion";
++import { Check } from "lucide-react";
++
++const initialTasks = [
++  { id: "dsa", label: "Solve 2 DSA problems", done: true },
++  { id: "video", label: "Watch FastAPI module 4", done: false },
++  { id: "project", label: "Push today's project commit", done: false },
++  { id: "revise", label: "Revise yesterday's notes", done: false },
++];
++
++export default function DailyTasks() {
++  const [tasks, setTasks] = useState(initialTasks);
++
++  function toggle(id: string) {
++    setTasks((prev) =>
++      prev.map((task) => (task.id === id ? { ...task, done: !task.done } : task))
++    );
++  }
++
++  const completed = tasks.filter((t) => t.done).length;
++  const progress = (completed / tasks.length) * 100;
++
++  return (
++    <section className="mt-8 rounded-[24px] border border-neutral-200 bg-white p-5 sm:p-6 lg:rounded-[30px]">
++      <div className="flex items-center justify-between">
++        <h2 className="text-xl font-bold sm:text-2xl">Daily Tasks</h2>
++        <span className="text-sm text-neutral-500 tabular-nums">
++          {Math.round(progress)}% done
++        </span>
++      </div>
++
++      <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-neutral-100">
++        <motion.div
++          className="h-full rounded-full bg-black"
++          initial={false}
++          animate={{ width: `${progress}%` }}
++          transition={{ type: "spring", stiffness: 200, damping: 26 }}
++        />
++      </div>
++
++      <div className="mt-5 space-y-3">
++        {tasks.map((task) => (
++          <button
++            key={task.id}
++            onClick={() => toggle(task.id)}
++            className="flex w-full items-center gap-3 rounded-2xl border border-neutral-200 p-4 text-left transition-colors hover:bg-neutral-50"
++          >
++            <motion.span
++              animate={
++                task.done
++                  ? { backgroundColor: "#000", borderColor: "#000" }
++                  : { backgroundColor: "#fff", borderColor: "#d4d4d4" }
++              }
++              transition={{ duration: 0.2 }}
++              className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md border-2"
++            >
++              <motion.span
++                initial={false}
++                animate={task.done ? { scale: 1, opacity: 1 } : { scale: 0.3, opacity: 0 }}
++                transition={{ type: "spring", stiffness: 500, damping: 22 }}
++                className="text-white"
++              >
++                <Check size={14} />
++              </motion.span>
++            </motion.span>
++
++            <span className="relative font-medium">
++              <motion.span
++                animate={{ color: task.done ? "#a3a3a3" : "#262626" }}
++                transition={{ duration: 0.25 }}
++              >
++                {task.label}
++              </motion.span>
++              <motion.span
++                initial={false}
++                animate={{ scaleX: task.done ? 1 : 0 }}
++                transition={{ duration: 0.3, ease: "easeOut" }}
++                style={{ transformOrigin: "left" }}
++                className="absolute left-0 top-1/2 h-px w-full bg-neutral-400"
++              />
++            </span>
++          </button>
++        ))}
++      </div>
++    </section>
++  );
++}
+diff --git a/components/dashboard-v2/roadmap/export-actions.tsx b/components/dashboard-v2/roadmap/export-actions.tsx
+new file mode 100644
+index 0000000..2d9192f
+--- /dev/null
++++ b/components/dashboard-v2/roadmap/export-actions.tsx
+@@ -0,0 +1,77 @@
++"use client";
++
++import { useState } from "react";
++import { motion } from "framer-motion";
++import Link from "next/link";
++import { Download, Share2, Check, FileText, Briefcase, Mic } from "lucide-react";
++
++export default function ExportActions() {
++  const [copied, setCopied] = useState(false);
++
++  async function share() {
++    try {
++      await navigator.clipboard.writeText("https://careersetu.ai/roadmap/rohit-raj");
++    } catch {
++      // clipboard permissions unavailable — still show feedback for the demo
++    }
++    setCopied(true);
++    window.setTimeout(() => setCopied(false), 1800);
++  }
++
++  return (
++    <section className="mt-8 rounded-[24px] border border-neutral-200 bg-white p-5 sm:p-6 lg:rounded-[30px]">
++      <h2 className="text-xl font-bold sm:text-2xl">Export</h2>
++
++      <div className="mt-5 flex flex-wrap gap-3">
++        <motion.button
++          whileHover={{ scale: 1.03, y: -2 }}
++          whileTap={{ scale: 0.97 }}
++          className="flex items-center gap-2 rounded-2xl bg-black px-5 py-3 text-sm font-medium text-white shadow-sm transition-shadow hover:shadow-md"
++        >
++          <Download size={16} />
++          Download Roadmap PDF
++        </motion.button>
++
++        <motion.button
++          onClick={share}
++          whileHover={{ scale: 1.03, y: -2 }}
++          whileTap={{ scale: 0.97 }}
++          className="flex items-center gap-2 rounded-2xl border border-neutral-300 px-5 py-3 text-sm font-medium transition-colors hover:border-black"
++        >
++          {copied ? <Check size={16} /> : <Share2 size={16} />}
++          {copied ? "Link Copied" : "Share Roadmap"}
++        </motion.button>
++      </div>
++
++      <div className="mt-6 border-t border-neutral-100 pt-5">
++        <p className="text-sm font-medium text-neutral-500">Continue your journey</p>
++
++        <div className="mt-3 flex flex-wrap gap-3">
++          <Link
++            href="/dashboard-v2/resume-studio"
++            className="flex items-center gap-2 rounded-full border border-neutral-300 px-4 py-2 text-sm font-medium transition-colors hover:border-black hover:bg-black hover:text-white"
++          >
++            <FileText size={15} />
++            Resume Studio
++          </Link>
++
++          <Link
++            href="/dashboard-v2/job-hub"
++            className="flex items-center gap-2 rounded-full border border-neutral-300 px-4 py-2 text-sm font-medium transition-colors hover:border-black hover:bg-black hover:text-white"
++          >
++            <Briefcase size={15} />
++            Job Hub
++          </Link>
++
++          <Link
++            href="/dashboard-v2/mock-interview"
++            className="flex items-center gap-2 rounded-full border border-neutral-300 px-4 py-2 text-sm font-medium transition-colors hover:border-black hover:bg-black hover:text-white"
++          >
++            <Mic size={15} />
++            Mock Interview
++          </Link>
++        </div>
++      </div>
++    </section>
++  );
++}
+diff --git a/components/dashboard-v2/roadmap/hero.tsx b/components/dashboard-v2/roadmap/hero.tsx
+new file mode 100644
+index 0000000..6b74354
+--- /dev/null
++++ b/components/dashboard-v2/roadmap/hero.tsx
+@@ -0,0 +1,125 @@
++"use client";
++
++import { motion } from "framer-motion";
++import { Route, Sparkles, Target, Milestone, Laptop } from "lucide-react";
++
++const pills = [
++  { label: "AI Generated" },
++  { label: "Placement Ready" },
++  { label: "90 Days" },
++  { label: "Daily Goals" },
++];
++
++const nodes = [
++  { icon: Laptop, top: "8%", left: "18%" },
++  { icon: Target, top: "38%", left: "62%" },
++  { icon: Milestone, top: "68%", left: "22%" },
++];
++
++function RoadmapIllustration() {
++  return (
++    <div className="relative flex h-full min-h-[280px] items-center justify-center py-6">
++      <svg viewBox="0 0 220 220" className="h-56 w-56 sm:h-64 sm:w-64" fill="none">
++        <motion.path
++          d="M30 190 C 60 150, 40 120, 90 100 S 150 60, 130 30"
++          stroke="#d4d4d4"
++          strokeWidth={3}
++          strokeDasharray="8 8"
++          initial={{ pathLength: 0 }}
++          whileInView={{ pathLength: 1 }}
++          viewport={{ once: true }}
++          transition={{ duration: 1.4, ease: "easeOut" }}
++        />
++        <circle cx="30" cy="190" r="7" fill="#111" />
++        <circle cx="90" cy="100" r="6" fill="#a3a3a3" />
++        <circle cx="130" cy="30" r="7" fill="#111" />
++      </svg>
++
++      {nodes.map((node, index) => {
++        const Icon = node.icon;
++        return (
++          <motion.div
++            key={index}
++            style={{ top: node.top, left: node.left }}
++            animate={{ y: [0, -8, 0] }}
++            transition={{ duration: 4 + index * 0.5, repeat: Infinity, ease: "easeInOut", delay: index * 0.4 }}
++            className="absolute flex h-11 w-11 items-center justify-center rounded-2xl border border-neutral-200 bg-white shadow-md"
++          >
++            <Icon size={18} />
++          </motion.div>
++        );
++      })}
++
++      {pills.map((pill, index) => {
++        const positions = [
++          "left-0 top-2 sm:left-1",
++          "right-0 top-20 sm:right-1",
++          "left-1 bottom-16",
++          "right-2 bottom-2",
++        ];
++        return (
++          <motion.div
++            key={pill.label}
++            animate={{ y: [0, -8, 0] }}
++            transition={{ duration: 4 + index * 0.6, repeat: Infinity, ease: "easeInOut", delay: index * 0.4 }}
++            className={`absolute ${positions[index]} flex items-center gap-1.5 rounded-full border border-neutral-200 bg-white px-3 py-1.5 text-xs font-medium shadow-md`}
++          >
++            <Sparkles size={12} />
++            {pill.label}
++          </motion.div>
++        );
++      })}
++    </div>
++  );
++}
++
++export default function RoadmapHero() {
++  return (
++    <motion.section
++      initial={{ opacity: 0, y: 12 }}
++      animate={{ opacity: 1, y: 0 }}
++      transition={{ duration: 0.5, ease: "easeOut" }}
++      className="rounded-2xl border border-neutral-200 bg-white p-5 sm:p-6 lg:rounded-[32px] lg:p-8"
++    >
++      <div className="grid grid-cols-1 items-center gap-8 lg:grid-cols-2">
++        <div>
++          <div className="flex items-center gap-2 text-sm font-medium text-neutral-500">
++            <Route size={16} />
++            Roadmap
++          </div>
++
++          <h1 className="mt-3 text-3xl font-bold leading-tight sm:text-4xl lg:text-5xl">
++            Your Personalized AI Career Roadmap
++          </h1>
++
++          <p className="mt-6 max-w-xl text-base text-neutral-600 sm:text-lg">
++            Build a structured learning journey tailored to your career
++            goals, current skills and placement targets.
++          </p>
++
++          <div className="mt-8 flex flex-wrap gap-3 sm:gap-4">
++            <motion.button
++              whileHover={{ scale: 1.03 }}
++              whileTap={{ scale: 0.97 }}
++              transition={{ type: "spring", stiffness: 400, damping: 22 }}
++              className="rounded-2xl bg-black px-5 py-3 text-white shadow-sm transition-shadow hover:shadow-md sm:px-6"
++            >
++              Generate Roadmap
++            </motion.button>
++
++            <motion.button
++              whileHover={{ scale: 1.03 }}
++              whileTap={{ scale: 0.97 }}
++              transition={{ type: "spring", stiffness: 400, damping: 22 }}
++              className="rounded-2xl border border-neutral-300 px-5 py-3 sm:px-6"
++            >
++              Update Goal
++            </motion.button>
++          </div>
++        </div>
++
++        <RoadmapIllustration />
++      </div>
++    </motion.section>
++  );
++}
+diff --git a/components/dashboard-v2/roadmap/hooks.ts b/components/dashboard-v2/roadmap/hooks.ts
+new file mode 100644
+index 0000000..beccb95
+--- /dev/null
++++ b/components/dashboard-v2/roadmap/hooks.ts
+@@ -0,0 +1,40 @@
++"use client";
++
++import { useEffect, useRef, useState } from "react";
++
++/** Animates a number from 0 up to `target` with an eased count-up, once. */
++export function useCountUp(target: number, delay = 0, duration = 900) {
++  const [value, setValue] = useState(0);
++  const started = useRef(false);
++
++  useEffect(() => {
++    if (started.current) return;
++    started.current = true;
++
++    const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
++    if (prefersReduced) {
++      setValue(target);
++      return;
++    }
++
++    let raf: number;
++    const start = performance.now() + delay;
++
++    function tick(now: number) {
++      const elapsed = now - start;
++      if (elapsed < 0) {
++        raf = requestAnimationFrame(tick);
++        return;
++      }
++      const t = Math.min(1, elapsed / duration);
++      const eased = 1 - Math.pow(1 - t, 3);
++      setValue(Math.round(target * eased));
++      if (t < 1) raf = requestAnimationFrame(tick);
++    }
++
++    raf = requestAnimationFrame(tick);
++    return () => cancelAnimationFrame(raf);
++  }, [target, delay, duration]);
++
++  return value;
++}
+diff --git a/components/dashboard-v2/roadmap/learning-analytics.tsx b/components/dashboard-v2/roadmap/learning-analytics.tsx
+new file mode 100644
+index 0000000..7dca7b5
+--- /dev/null
++++ b/components/dashboard-v2/roadmap/learning-analytics.tsx
+@@ -0,0 +1,53 @@
++"use client";
++
++import { motion } from "framer-motion";
++import { Clock, CheckCircle2, Flame, Brain, FolderCheck } from "lucide-react";
++import { useCountUp } from "./hooks";
++
++const stats = [
++  { icon: Clock, value: 142, suffix: " hrs", label: "Hours Studied" },
++  { icon: CheckCircle2, value: 96, suffix: "", label: "Tasks Completed" },
++  { icon: Flame, value: 12, suffix: " days", label: "Consistency" },
++  { icon: Brain, value: 12, suffix: "", label: "Skills Improved" },
++  { icon: FolderCheck, value: 5, suffix: "", label: "Projects Finished" },
++];
++
++function StatCard({ item, index }: { item: (typeof stats)[number]; index: number }) {
++  const Icon = item.icon;
++  const count = useCountUp(item.value, index * 80);
++
++  return (
++    <motion.div
++      initial={{ opacity: 0, y: 10 }}
++      whileInView={{ opacity: 1, y: 0 }}
++      viewport={{ once: true, margin: "-40px" }}
++      transition={{ duration: 0.4, delay: index * 0.05, ease: "easeOut" }}
++      whileHover={{ y: -4 }}
++      className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm transition-shadow duration-300 hover:shadow-lg"
++    >
++      <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-neutral-100">
++        <Icon size={18} />
++      </div>
++
++      <h3 className="text-2xl font-bold tabular-nums">
++        {count}
++        {item.suffix}
++      </h3>
++      <p className="mt-1 text-sm text-neutral-500">{item.label}</p>
++    </motion.div>
++  );
++}
++
++export default function LearningAnalytics() {
++  return (
++    <section className="mt-8">
++      <h2 className="text-xl font-bold sm:text-2xl">Learning Analytics</h2>
++
++      <div className="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
++        {stats.map((item, index) => (
++          <StatCard key={item.label} item={item} index={index} />
++        ))}
++      </div>
++    </section>
++  );
++}
+diff --git a/components/dashboard-v2/roadmap/motivation-card.tsx b/components/dashboard-v2/roadmap/motivation-card.tsx
+new file mode 100644
+index 0000000..55dbc0b
+--- /dev/null
++++ b/components/dashboard-v2/roadmap/motivation-card.tsx
+@@ -0,0 +1,56 @@
++"use client";
++
++import { motion } from "framer-motion";
++import { Flame, Target, Quote, Sparkles } from "lucide-react";
++
++export default function MotivationCard() {
++  return (
++    <motion.section
++      initial={{ opacity: 0, y: 10 }}
++      whileInView={{ opacity: 1, y: 0 }}
++      viewport={{ once: true, margin: "-40px" }}
++      transition={{ duration: 0.4, ease: "easeOut" }}
++      className="mt-8 rounded-[24px] border border-neutral-200 bg-white p-5 sm:p-6 lg:rounded-[30px]"
++    >
++      <h2 className="text-xl font-bold sm:text-2xl">Keep Going</h2>
++
++      <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
++        <div className="rounded-2xl border border-neutral-200 p-5">
++          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-neutral-100">
++            <Flame size={16} />
++          </div>
++          <p className="mt-3 text-2xl font-bold">12 days</p>
++          <p className="mt-1 text-sm text-neutral-500">Current Streak</p>
++        </div>
++
++        <div className="rounded-2xl border border-neutral-200 p-5">
++          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-neutral-100">
++            <Target size={16} />
++          </div>
++          <p className="mt-3 text-2xl font-bold">5/7 days</p>
++          <p className="mt-1 text-sm text-neutral-500">Weekly Goal</p>
++        </div>
++
++        <div className="rounded-2xl border border-neutral-200 p-5 sm:col-span-2">
++          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-neutral-100">
++            <Quote size={16} />
++          </div>
++          <p className="mt-3 text-sm leading-relaxed text-neutral-700">
++            "Consistency compounds. A small step today is still a step
++            toward placement day."
++          </p>
++        </div>
++      </div>
++
++      <div className="mt-4 flex items-start gap-3 rounded-2xl border border-neutral-800 bg-neutral-50 p-4">
++        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-black text-white">
++          <Sparkles size={14} />
++        </div>
++        <p className="text-sm leading-relaxed text-neutral-700">
++          You're 62% through DSA and ahead of your 90-day pace. Keep this
++          rhythm and you'll hit placement-ready a week early.
++        </p>
++      </div>
++    </motion.section>
++  );
++}
+diff --git a/components/dashboard-v2/roadmap/recent-activity.tsx b/components/dashboard-v2/roadmap/recent-activity.tsx
+new file mode 100644
+index 0000000..d80ab38
+--- /dev/null
++++ b/components/dashboard-v2/roadmap/recent-activity.tsx
+@@ -0,0 +1,59 @@
++"use client";
++
++import { motion } from "framer-motion";
++import { Code2, GraduationCap, FolderPlus, FileText, Mic } from "lucide-react";
++
++const events = [
++  { icon: Code2, title: "Completed React Module", time: "3 hours ago" },
++  { icon: GraduationCap, title: "Finished SQL Course", time: "1 day ago" },
++  { icon: FolderPlus, title: "Added New Project", time: "2 days ago" },
++  { icon: FileText, title: "Updated Resume", time: "3 days ago" },
++  { icon: Mic, title: "Completed Mock Interview", time: "5 days ago" },
++];
++
++export default function RecentActivity() {
++  return (
++    <section className="mt-8 rounded-[24px] border border-neutral-200 bg-white p-5 sm:p-6 lg:rounded-[30px]">
++      <h2 className="text-xl font-bold sm:text-2xl">Recent Activity</h2>
++
++      <div className="relative mt-6">
++        <motion.div
++          initial={{ scaleY: 0 }}
++          whileInView={{ scaleY: 1 }}
++          viewport={{ once: true }}
++          transition={{ duration: 0.6, ease: "easeOut" }}
++          style={{ transformOrigin: "top" }}
++          className="absolute left-5 top-1 bottom-1 w-px bg-neutral-200"
++        />
++
++        <div className="space-y-1">
++          {events.map((event, index) => {
++            const Icon = event.icon;
++
++            return (
++              <motion.div
++                key={index}
++                initial={{ opacity: 0, x: -8 }}
++                whileInView={{ opacity: 1, x: 0 }}
++                viewport={{ once: true }}
++                transition={{ duration: 0.35, delay: index * 0.08, ease: "easeOut" }}
++                className="group relative flex items-center gap-4 rounded-xl px-2 py-2.5 transition-colors hover:bg-neutral-50"
++              >
++                <div className="z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-neutral-200 bg-white transition-transform duration-300 group-hover:scale-110 group-hover:border-black">
++                  <Icon size={16} />
++                </div>
++
++                <div className="flex min-w-0 flex-1 items-center justify-between gap-3">
++                  <span className="truncate font-medium">{event.title}</span>
++                  <span className="shrink-0 text-xs tabular-nums text-neutral-400">
++                    {event.time}
++                  </span>
++                </div>
++              </motion.div>
++            );
++          })}
++        </div>
++      </div>
++    </section>
++  );
++}
+diff --git a/components/dashboard-v2/roadmap/recommended-projects.tsx b/components/dashboard-v2/roadmap/recommended-projects.tsx
+new file mode 100644
+index 0000000..0490ea1
+--- /dev/null
++++ b/components/dashboard-v2/roadmap/recommended-projects.tsx
+@@ -0,0 +1,74 @@
++"use client";
++
++import { motion } from "framer-motion";
++import { ArrowRight } from "lucide-react";
++
++const projects = [
++  {
++    name: "AI Resume Screener",
++    difficulty: "Intermediate",
++    stack: "Python, FastAPI, LangChain",
++    time: "1 week",
++  },
++  {
++    name: "Realtime Chat App",
++    difficulty: "Intermediate",
++    stack: "React, Node.js, WebSockets",
++    time: "5 days",
++  },
++  {
++    name: "E-commerce Backend",
++    difficulty: "Advanced",
++    stack: "FastAPI, PostgreSQL, Docker",
++    time: "2 weeks",
++  },
++  {
++    name: "GenAI Interview Coach",
++    difficulty: "Advanced",
++    stack: "Python, OpenAI API, React",
++    time: "10 days",
++  },
++];
++
++const difficultyStyle: Record<string, string> = {
++  Beginner: "border-neutral-200 text-neutral-500",
++  Intermediate: "border-neutral-300 text-neutral-700",
++  Advanced: "border-black bg-black text-white",
++};
++
++export default function RecommendedProjects() {
++  return (
++    <section className="mt-8">
++      <h2 className="text-xl font-bold sm:text-2xl">Recommended Projects</h2>
++
++      <div className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
++        {projects.map((project, index) => (
++          <motion.div
++            key={project.name}
++            initial={{ opacity: 0, y: 10 }}
++            whileInView={{ opacity: 1, y: 0 }}
++            viewport={{ once: true, margin: "-40px" }}
++            transition={{ duration: 0.4, delay: index * 0.05, ease: "easeOut" }}
++            whileHover={{ y: -4 }}
++            className="flex flex-col rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm transition-shadow duration-300 hover:shadow-lg"
++          >
++            <span
++              className={`inline-block w-fit rounded-full border px-3 py-1 text-xs font-medium ${difficultyStyle[project.difficulty]}`}
++            >
++              {project.difficulty}
++            </span>
++
++            <h3 className="mt-4 font-semibold leading-snug">{project.name}</h3>
++            <p className="mt-2 flex-1 text-sm text-neutral-500">{project.stack}</p>
++            <p className="mt-3 text-xs text-neutral-400">Est. {project.time}</p>
++
++            <button className="group mt-4 flex items-center gap-1.5 self-start rounded-full border border-neutral-300 px-4 py-2 text-sm font-medium transition-colors hover:border-black hover:bg-black hover:text-white">
++              Start Project
++              <ArrowRight size={14} className="transition-transform duration-200 group-hover:translate-x-0.5" />
++            </button>
++          </motion.div>
++        ))}
++      </div>
++    </section>
++  );
++}
+diff --git a/components/dashboard-v2/roadmap/roadmap-timeline.tsx b/components/dashboard-v2/roadmap/roadmap-timeline.tsx
+new file mode 100644
+index 0000000..1687a8a
+--- /dev/null
++++ b/components/dashboard-v2/roadmap/roadmap-timeline.tsx
+@@ -0,0 +1,100 @@
++"use client";
++
++import { motion } from "framer-motion";
++import { Check, Circle, Loader2 } from "lucide-react";
++
++type Status = "done" | "active" | "upcoming";
++
++const milestones: { title: string; status: Status; completion: number; duration: string }[] = [
++  { title: "Foundation", status: "done", completion: 100, duration: "3 weeks" },
++  { title: "Programming", status: "done", completion: 100, duration: "4 weeks" },
++  { title: "DSA", status: "active", completion: 62, duration: "6 weeks" },
++  { title: "Development", status: "active", completion: 45, duration: "5 weeks" },
++  { title: "Backend", status: "upcoming", completion: 0, duration: "4 weeks" },
++  { title: "Projects", status: "upcoming", completion: 0, duration: "5 weeks" },
++  { title: "Resume", status: "upcoming", completion: 0, duration: "1 week" },
++  { title: "Interview", status: "upcoming", completion: 0, duration: "3 weeks" },
++  { title: "Placement", status: "upcoming", completion: 0, duration: "Ongoing" },
++];
++
++const statusStyles: Record<Status, string> = {
++  done: "border-black bg-black text-white",
++  active: "border-black bg-white text-black",
++  upcoming: "border-neutral-200 bg-white text-neutral-300",
++};
++
++const statusLabel: Record<Status, string> = {
++  done: "Completed",
++  active: "In Progress",
++  upcoming: "Upcoming",
++};
++
++export default function RoadmapTimeline() {
++  return (
++    <section className="mt-8 rounded-[24px] border border-neutral-200 bg-white p-5 sm:p-6 lg:rounded-[30px]">
++      <h2 className="text-xl font-bold sm:text-2xl">Roadmap Timeline</h2>
++
++      <div className="relative mt-6">
++        <motion.div
++          initial={{ scaleY: 0 }}
++          whileInView={{ scaleY: 1 }}
++          viewport={{ once: true }}
++          transition={{ duration: 0.8, ease: "easeOut" }}
++          style={{ transformOrigin: "top" }}
++          className="absolute left-5 top-1 bottom-1 w-px bg-neutral-200"
++        />
++
++        <div className="space-y-2">
++          {milestones.map((milestone, index) => (
++            <motion.div
++              key={milestone.title}
++              initial={{ opacity: 0, x: -8 }}
++              whileInView={{ opacity: 1, x: 0 }}
++              viewport={{ once: true }}
++              transition={{ duration: 0.35, delay: index * 0.06, ease: "easeOut" }}
++              className="group relative flex gap-4 rounded-xl px-2 py-3 transition-colors hover:bg-neutral-50"
++            >
++              <div
++                className={`z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 ${statusStyles[milestone.status]}`}
++              >
++                {milestone.status === "done" && <Check size={16} />}
++                {milestone.status === "active" && <Loader2 size={16} className="animate-spin" />}
++                {milestone.status === "upcoming" && <Circle size={10} fill="currentColor" />}
++              </div>
++
++              <div className="min-w-0 flex-1 pt-1">
++                <div className="flex flex-wrap items-center justify-between gap-2">
++                  <span className="font-semibold">{milestone.title}</span>
++                  <div className="flex items-center gap-2 text-xs text-neutral-400">
++                    <span
++                      className={`rounded-full px-2.5 py-1 font-medium ${
++                        milestone.status === "done"
++                          ? "bg-neutral-100 text-neutral-700"
++                          : milestone.status === "active"
++                          ? "bg-black text-white"
++                          : "bg-neutral-100 text-neutral-400"
++                      }`}
++                    >
++                      {statusLabel[milestone.status]}
++                    </span>
++                    <span className="tabular-nums">{milestone.duration}</span>
++                  </div>
++                </div>
++
++                <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-neutral-100">
++                  <motion.div
++                    className="h-full rounded-full bg-black"
++                    initial={{ width: 0 }}
++                    whileInView={{ width: `${milestone.completion}%` }}
++                    viewport={{ once: true }}
++                    transition={{ duration: 0.7, delay: index * 0.06, ease: "easeOut" }}
++                  />
++                </div>
++              </div>
++            </motion.div>
++          ))}
++        </div>
++      </div>
++    </section>
++  );
++}
+diff --git a/components/dashboard-v2/roadmap/skill-progress.tsx b/components/dashboard-v2/roadmap/skill-progress.tsx
+new file mode 100644
+index 0000000..5df29e8
+--- /dev/null
++++ b/components/dashboard-v2/roadmap/skill-progress.tsx
+@@ -0,0 +1,61 @@
++"use client";
++
++import { motion } from "framer-motion";
++
++const skills = [
++  { name: "Python", value: 88 },
++  { name: "Java", value: 62 },
++  { name: "SQL", value: 71 },
++  { name: "React", value: 80 },
++  { name: "FastAPI", value: 55 },
++  { name: "Docker", value: 40 },
++  { name: "AWS", value: 35 },
++  { name: "GenAI", value: 58 },
++  { name: "System Design", value: 30 },
++  { name: "DSA", value: 66 },
++];
++
++export default function SkillProgress() {
++  return (
++    <section className="mt-8 rounded-[24px] border border-neutral-200 bg-white p-5 sm:p-6 lg:rounded-[30px]">
++      <h2 className="text-xl font-bold sm:text-2xl">Skill Progress</h2>
++
++      <div className="mt-6 grid grid-cols-1 gap-x-8 gap-y-6 sm:grid-cols-2">
++        {skills.map((skill, index) => (
++          <div key={skill.name}>
++            <div className="mb-2 flex items-baseline justify-between">
++              <span className="font-medium">{skill.name}</span>
++              <span className="w-10 text-right text-sm tabular-nums text-neutral-500">
++                {skill.value}%
++              </span>
++            </div>
++
++            <div className="relative h-2 overflow-hidden rounded-full bg-neutral-200">
++              <motion.div
++                className="relative h-2 overflow-hidden rounded-full bg-black"
++                initial={{ width: 0 }}
++                whileInView={{ width: `${skill.value}%` }}
++                viewport={{ once: true }}
++                transition={{ duration: 0.8, delay: index * 0.06, ease: "easeOut" }}
++              >
++                <span
++                  className="absolute inset-y-0 left-0 w-1/3 -skew-x-12 bg-gradient-to-r from-transparent via-white/25 to-transparent"
++                  style={{
++                    animation: `roadmapShine 2.6s ease-in-out ${1 + index * 0.12}s infinite`,
++                  }}
++                />
++              </motion.div>
++            </div>
++          </div>
++        ))}
++      </div>
++
++      <style>{`
++        @keyframes roadmapShine {
++          0% { transform: translateX(-120%) skewX(-12deg); }
++          60%, 100% { transform: translateX(320%) skewX(-12deg); }
++        }
++      `}</style>
++    </section>
++  );
++}
+diff --git a/components/dashboard-v2/roadmap/snapshot.tsx b/components/dashboard-v2/roadmap/snapshot.tsx
+new file mode 100644
+index 0000000..8bcc1cd
+--- /dev/null
++++ b/components/dashboard-v2/roadmap/snapshot.tsx
+@@ -0,0 +1,54 @@
++"use client";
++
++import { motion } from "framer-motion";
++import { Gauge, CheckSquare, Layers, Brain, FolderKanban, Target } from "lucide-react";
++import { useCountUp } from "./hooks";
++
++const stats = [
++  { icon: Gauge, value: 64, suffix: "%", label: "Overall Progress" },
++  { icon: CheckSquare, value: 38, suffix: "", label: "Completed Tasks" },
++  { icon: Layers, value: 3, suffix: "", label: "Current Phase" },
++  { icon: Brain, value: 12, suffix: "", label: "Skills Learned" },
++  { icon: FolderKanban, value: 5, suffix: "", label: "Projects Built" },
++  { icon: Target, value: 71, suffix: "%", label: "Placement Readiness" },
++];
++
++function StatCard({ item, index }: { item: (typeof stats)[number]; index: number }) {
++  const Icon = item.icon;
++  const count = useCountUp(item.value, index * 80);
++
++  return (
++    <motion.div
++      initial={{ opacity: 0, y: 10 }}
++      whileInView={{ opacity: 1, y: 0 }}
++      viewport={{ once: true, margin: "-40px" }}
++      transition={{ duration: 0.4, delay: index * 0.05, ease: "easeOut" }}
++      whileHover={{ y: -4 }}
++      className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm transition-shadow duration-300 hover:shadow-lg"
++    >
++      <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-neutral-100">
++        <Icon size={18} />
++      </div>
++
++      <h3 className="text-2xl font-bold tabular-nums">
++        {count}
++        {item.suffix}
++      </h3>
++      <p className="mt-1 text-sm text-neutral-500">{item.label}</p>
++    </motion.div>
++  );
++}
++
++export default function Snapshot() {
++  return (
++    <section className="mt-8">
++      <h2 className="text-xl font-bold sm:text-2xl">Roadmap Snapshot</h2>
++
++      <div className="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
++        {stats.map((item, index) => (
++          <StatCard key={item.label} item={item} index={index} />
++        ))}
++      </div>
++    </section>
++  );
++}
+diff --git a/components/dashboard-v2/roadmap/upcoming-milestones.tsx b/components/dashboard-v2/roadmap/upcoming-milestones.tsx
+new file mode 100644
+index 0000000..1d299b3
+--- /dev/null
++++ b/components/dashboard-v2/roadmap/upcoming-milestones.tsx
+@@ -0,0 +1,60 @@
++"use client";
++
++import { motion } from "framer-motion";
++import { Code2, Rocket, FileSearch, Send, Mic, Trophy } from "lucide-react";
++
++const milestones = [
++  { icon: Code2, title: "Finish DSA", eta: "2 weeks" },
++  { icon: Rocket, title: "Deploy Project", eta: "3 weeks" },
++  { icon: FileSearch, title: "Resume Review", eta: "3 weeks" },
++  { icon: Send, title: "Apply Internship", eta: "4 weeks" },
++  { icon: Mic, title: "Mock Interview", eta: "5 weeks" },
++  { icon: Trophy, title: "Placement Drive", eta: "8 weeks" },
++];
++
++export default function UpcomingMilestones() {
++  return (
++    <section className="mt-8 rounded-[24px] border border-neutral-200 bg-white p-5 sm:p-6 lg:rounded-[30px]">
++      <h2 className="text-xl font-bold sm:text-2xl">Upcoming Milestones</h2>
++
++      <div className="relative mt-6">
++        <motion.div
++          initial={{ scaleY: 0 }}
++          whileInView={{ scaleY: 1 }}
++          viewport={{ once: true }}
++          transition={{ duration: 0.6, ease: "easeOut" }}
++          style={{ transformOrigin: "top" }}
++          className="absolute left-5 top-1 bottom-1 w-px bg-neutral-200"
++        />
++
++        <div className="space-y-1">
++          {milestones.map((milestone, index) => {
++            const Icon = milestone.icon;
++
++            return (
++              <motion.div
++                key={milestone.title}
++                initial={{ opacity: 0, x: -8 }}
++                whileInView={{ opacity: 1, x: 0 }}
++                viewport={{ once: true }}
++                transition={{ duration: 0.35, delay: index * 0.08, ease: "easeOut" }}
++                className="group relative flex items-center gap-4 rounded-xl px-2 py-2.5 transition-colors hover:bg-neutral-50"
++              >
++                <div className="z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-neutral-200 bg-white transition-transform duration-300 group-hover:scale-110 group-hover:border-black">
++                  <Icon size={16} />
++                </div>
++
++                <div className="flex min-w-0 flex-1 items-center justify-between gap-3">
++                  <span className="truncate font-medium">{milestone.title}</span>
++                  <span className="shrink-0 text-xs tabular-nums text-neutral-400">
++                    In {milestone.eta}
++                  </span>
++                </div>
++              </motion.div>
++            );
++          })}
++        </div>
++      </div>
++    </section>
++  );
++}
+diff --git a/components/dashboard-v2/roadmap/weekly-plan.tsx b/components/dashboard-v2/roadmap/weekly-plan.tsx
+new file mode 100644
+index 0000000..670e53b
+--- /dev/null
++++ b/components/dashboard-v2/roadmap/weekly-plan.tsx
+@@ -0,0 +1,50 @@
++"use client";
++
++import { motion } from "framer-motion";
++
++const plan = [
++  { day: "Monday", topic: "DSA — Arrays & Strings", duration: "2 hrs", priority: "High" },
++  { day: "Tuesday", topic: "Backend — FastAPI routes", duration: "1.5 hrs", priority: "High" },
++  { day: "Wednesday", topic: "React — State management", duration: "2 hrs", priority: "Medium" },
++  { day: "Thursday", topic: "DSA — Trees & Graphs", duration: "2 hrs", priority: "High" },
++  { day: "Friday", topic: "Project — Deploy backend", duration: "2.5 hrs", priority: "Medium" },
++  { day: "Saturday", topic: "Mock Interview practice", duration: "1 hr", priority: "High" },
++  { day: "Sunday", topic: "Revision + light reading", duration: "1 hr", priority: "Low" },
++];
++
++const priorityStyle: Record<string, string> = {
++  High: "border-black bg-black text-white",
++  Medium: "border-neutral-300 text-neutral-600",
++  Low: "border-neutral-200 text-neutral-400",
++};
++
++export default function WeeklyPlan() {
++  return (
++    <section className="mt-8 rounded-[24px] border border-neutral-200 bg-white p-5 sm:p-6 lg:rounded-[30px]">
++      <h2 className="text-xl font-bold sm:text-2xl">Weekly Learning Plan</h2>
++
++      <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7">
++        {plan.map((item, index) => (
++          <motion.div
++            key={item.day}
++            initial={{ opacity: 0, y: 10 }}
++            whileInView={{ opacity: 1, y: 0 }}
++            viewport={{ once: true, margin: "-40px" }}
++            transition={{ duration: 0.35, delay: index * 0.05, ease: "easeOut" }}
++            whileHover={{ y: -4 }}
++            className="rounded-2xl border border-neutral-200 p-4 shadow-sm transition-shadow duration-300 hover:shadow-lg"
++          >
++            <p className="text-xs font-medium uppercase tracking-wide text-neutral-400">{item.day}</p>
++            <p className="mt-2 text-sm font-semibold leading-snug">{item.topic}</p>
++            <p className="mt-3 text-xs text-neutral-500">{item.duration}</p>
++            <span
++              className={`mt-3 inline-block rounded-full border px-2.5 py-1 text-[11px] font-medium ${priorityStyle[item.priority]}`}
++            >
++              {item.priority}
++            </span>
++          </motion.div>
++        ))}
++      </div>
++    </section>
++  );
++}
+diff --git a/components/dashboard-v2/sidebar/sidebar.tsx b/components/dashboard-v2/sidebar/sidebar.tsx
+index 20c1456..18c3d3c 100644
+--- a/components/dashboard-v2/sidebar/sidebar.tsx
++++ b/components/dashboard-v2/sidebar/sidebar.tsx
+@@ -36,6 +36,7 @@ const items = [
+   {
+     title: "Roadmap",
+     icon: Route,
++    href: "/dashboard-v2/roadmap",
+   },
+   {
+     title: "Mock Interview",

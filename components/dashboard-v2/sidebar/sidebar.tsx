@@ -38,6 +38,7 @@ const items = [
   {
     title: "Roadmap",
     icon: Route,
+    href: "/dashboard-v2/roadmap",
   },
   {
     title: "Mock Interview",
