@@ -2,19 +2,13 @@
 
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
+import { NAV_LINKS } from '@/lib/constants'
 import { ArrowRight, Menu, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { BrandLogo } from '@/components/brand-logo'
 import { cn } from '@/lib/utils'
 
-const links = [
-  { label: 'Features', href: '#features' },
-  { label: 'How It Works', href: '#how-it-works' },
-  { label: 'Use Cases', href: '#use-cases' },
-  { label: 'Roadmap', href: '#roadmap' },
-  { label: 'Testimonials', href: '#testimonials' },
-  { label: 'Pricing', href: '#pricing' },
-]
+
 
 export function SiteNav() {
   const [scrolled, setScrolled] = useState(false)
@@ -47,7 +41,7 @@ export function SiteNav() {
         </a>
 
         <ul className="hidden items-center gap-1 lg:flex">
-          {links.map((link) => (
+          { NAV_LINKS.map((link) => (
             <li key={link.href}>
               <a
                 href={link.href}
@@ -98,7 +92,7 @@ export function SiteNav() {
           className="mx-auto mt-2 max-w-6xl rounded-3xl border border-white/60 bg-white/90 p-3 shadow-lift backdrop-blur-xl md:hidden"
         >
           <ul className="flex flex-col">
-            {links.map((link) => (
+            {NAV_LINKS.map((link) => (
               <li key={link.href}>
                 <a
                   href={link.href}

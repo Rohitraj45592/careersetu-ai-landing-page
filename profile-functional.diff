@@ -1,0 +1,3576 @@
+diff --git a/app/dashboard-v2/profile/page.tsx b/app/dashboard-v2/profile/page.tsx
+index d7166f4..00b413b 100644
+--- a/app/dashboard-v2/profile/page.tsx
++++ b/app/dashboard-v2/profile/page.tsx
+@@ -1,5 +1,6 @@
+ import DashboardLayout from "@/components/dashboard-v2/layout/dashboard-layout";
+ import Header from "@/components/dashboard-v2/header/header";
++import { ProfileProvider } from "@/hooks/useProfile";
+ import ProfileHero from "@/components/dashboard-v2/profile/hero";
+ import ProfileOverview from "@/components/dashboard-v2/profile/profile-overview";
+ import CareerSnapshot from "@/components/dashboard-v2/profile/snapshot";
+@@ -22,24 +23,26 @@ export default function ProfilePage() {
+     <DashboardLayout>
+       <Header />
+ 
+-      <div className="p-4 sm:p-6 lg:p-8">
+-        <ProfileHero />
+-        <ProfileOverview />
+-        <CareerSnapshot />
+-        <AboutMe />
+-        <Education />
+-        <Skills />
+-        <Projects />
+-        <Experience />
+-        <Certifications />
+-        <Achievements />
+-        <SocialProfiles />
+-        <CareerGoals />
+-        <AiInsights />
+-        <RecentActivity />
+-        <AccountStatistics />
+-        <QuickActions />
+-      </div>
++      <ProfileProvider>
++        <div className="p-4 sm:p-6 lg:p-8">
++          <ProfileHero />
++          <ProfileOverview />
++          <CareerSnapshot />
++          <AboutMe />
++          <Education />
++          <Skills />
++          <Projects />
++          <Experience />
++          <Certifications />
++          <Achievements />
++          <SocialProfiles />
++          <CareerGoals />
++          <AiInsights />
++          <RecentActivity />
++          <AccountStatistics />
++          <QuickActions />
++        </div>
++      </ProfileProvider>
+     </DashboardLayout>
+   );
+ }
+diff --git a/backend/alembic/versions/0002_profile_sections.py b/backend/alembic/versions/0002_profile_sections.py
+new file mode 100644
+index 0000000..bde6f82
+--- /dev/null
++++ b/backend/alembic/versions/0002_profile_sections.py
+@@ -0,0 +1,166 @@
++"""profile sections - education, skills, projects, experience,
++certifications, achievements, social links, account stats
++
++Revision ID: 0002
++Revises: 0001
++Create Date: 2026-07-19
++
++"""
++from collections.abc import Sequence
++
++import sqlalchemy as sa
++from alembic import op
++from sqlalchemy.dialects import postgresql
++
++revision: str = "0002"
++down_revision: str | None = "0001"
++branch_labels: Sequence[str] | str | None = None
++depends_on: Sequence[str] | str | None = None
++
++
++def _timestamps():
++    return [
++        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
++        sa.Column(
++            "updated_at",
++            sa.DateTime(timezone=True),
++            server_default=sa.func.now(),
++            onupdate=sa.func.now(),
++            nullable=False,
++        ),
++    ]
++
++
++def upgrade() -> None:
++    # --- extend profiles ------------------------------------------------
++    op.add_column("profiles", sa.Column("phone", sa.String(30)))
++    op.add_column("profiles", sa.Column("career_interests", postgresql.ARRAY(sa.String())))
++
++    # --- education --------------------------------------------------------
++    op.create_table(
++        "profile_education",
++        sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True),
++        sa.Column("user_id", postgresql.UUID(as_uuid=True), nullable=False),
++        sa.Column("order_index", sa.Integer(), server_default="0", nullable=False),
++        sa.Column("college", sa.String(255), nullable=False),
++        sa.Column("degree", sa.String(255), nullable=False),
++        sa.Column("duration", sa.String(100)),
++        sa.Column("cgpa", sa.String(50)),
++        sa.Column("coursework", sa.Text()),
++        sa.Column("achievement", sa.String(255)),
++        *_timestamps(),
++    )
++    op.create_index("ix_profile_education_user_id", "profile_education", ["user_id"])
++
++    # --- skills -------------------------------------------------------------
++    op.create_table(
++        "profile_skills",
++        sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True),
++        sa.Column("user_id", postgresql.UUID(as_uuid=True), nullable=False),
++        sa.Column("order_index", sa.Integer(), server_default="0", nullable=False),
++        sa.Column("category", sa.String(100), nullable=False),
++        sa.Column("name", sa.String(100), nullable=False),
++        sa.Column("level", sa.Integer(), nullable=False),
++        sa.Column("proficiency_label", sa.String(30), nullable=False),
++        *_timestamps(),
++    )
++    op.create_index("ix_profile_skills_user_id", "profile_skills", ["user_id"])
++
++    # --- projects -------------------------------------------------------------
++    op.create_table(
++        "profile_projects",
++        sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True),
++        sa.Column("user_id", postgresql.UUID(as_uuid=True), nullable=False),
++        sa.Column("order_index", sa.Integer(), server_default="0", nullable=False),
++        sa.Column("name", sa.String(255), nullable=False),
++        sa.Column("description", sa.Text()),
++        sa.Column("tech_stack", postgresql.ARRAY(sa.String())),
++        sa.Column("github_url", sa.String(500)),
++        sa.Column("live_url", sa.String(500)),
++        sa.Column("status", sa.String(30), server_default="Completed", nullable=False),
++        sa.Column("duration", sa.String(100)),
++        *_timestamps(),
++    )
++    op.create_index("ix_profile_projects_user_id", "profile_projects", ["user_id"])
++
++    # --- experience -------------------------------------------------------------
++    op.create_table(
++        "profile_experience",
++        sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True),
++        sa.Column("user_id", postgresql.UUID(as_uuid=True), nullable=False),
++        sa.Column("order_index", sa.Integer(), server_default="0", nullable=False),
++        sa.Column("role", sa.String(255), nullable=False),
++        sa.Column("organization", sa.String(255), nullable=False),
++        sa.Column("duration", sa.String(100)),
++        sa.Column("description", sa.Text()),
++        sa.Column("type", sa.String(50), server_default="Internship", nullable=False),
++        *_timestamps(),
++    )
++    op.create_index("ix_profile_experience_user_id", "profile_experience", ["user_id"])
++
++    # --- certifications -------------------------------------------------------------
++    op.create_table(
++        "profile_certifications",
++        sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True),
++        sa.Column("user_id", postgresql.UUID(as_uuid=True), nullable=False),
++        sa.Column("order_index", sa.Integer(), server_default="0", nullable=False),
++        sa.Column("name", sa.String(255), nullable=False),
++        sa.Column("platform", sa.String(255)),
++        sa.Column("issued_date", sa.String(50)),
++        sa.Column("credential_id", sa.String(100)),
++        sa.Column("certificate_url", sa.String(500)),
++        *_timestamps(),
++    )
++    op.create_index("ix_profile_certifications_user_id", "profile_certifications", ["user_id"])
++
++    # --- achievements -------------------------------------------------------------
++    op.create_table(
++        "profile_achievements",
++        sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True),
++        sa.Column("user_id", postgresql.UUID(as_uuid=True), nullable=False),
++        sa.Column("order_index", sa.Integer(), server_default="0", nullable=False),
++        sa.Column("label", sa.String(255), nullable=False),
++        sa.Column("value", sa.Integer(), nullable=False),
++        sa.Column("icon_key", sa.String(50), nullable=False),
++        *_timestamps(),
++    )
++    op.create_index("ix_profile_achievements_user_id", "profile_achievements", ["user_id"])
++
++    # --- social links -------------------------------------------------------------
++    op.create_table(
++        "profile_social_links",
++        sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True),
++        sa.Column("user_id", postgresql.UUID(as_uuid=True), nullable=False),
++        sa.Column("platform", sa.String(50), nullable=False),
++        sa.Column("username", sa.String(255)),
++        sa.Column("url", sa.String(500)),
++        sa.Column("is_connected", sa.Boolean(), server_default=sa.false(), nullable=False),
++        *_timestamps(),
++    )
++    op.create_index("ix_profile_social_links_user_id", "profile_social_links", ["user_id"])
++
++    # --- account stats -------------------------------------------------------------
++    op.create_table(
++        "profile_account_stats",
++        sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True),
++        sa.Column("user_id", postgresql.UUID(as_uuid=True), nullable=False, unique=True),
++        sa.Column("profile_views", sa.Integer(), server_default="0", nullable=False),
++        sa.Column("resume_downloads", sa.Integer(), server_default="0", nullable=False),
++        sa.Column("portfolio_visits", sa.Integer(), server_default="0", nullable=False),
++        sa.Column("interview_invitations", sa.Integer(), server_default="0", nullable=False),
++        *_timestamps(),
++    )
++    op.create_index("ix_profile_account_stats_user_id", "profile_account_stats", ["user_id"])
++
++
++def downgrade() -> None:
++    op.drop_table("profile_account_stats")
++    op.drop_table("profile_social_links")
++    op.drop_table("profile_achievements")
++    op.drop_table("profile_certifications")
++    op.drop_table("profile_experience")
++    op.drop_table("profile_projects")
++    op.drop_table("profile_skills")
++    op.drop_table("profile_education")
++    op.drop_column("profiles", "career_interests")
++    op.drop_column("profiles", "phone")
+diff --git a/backend/app/api/v1/routers/profile.py b/backend/app/api/v1/routers/profile.py
+index f5c2c9e..c5e9081 100644
+--- a/backend/app/api/v1/routers/profile.py
++++ b/backend/app/api/v1/routers/profile.py
+@@ -1,42 +1,304 @@
+-from fastapi import APIRouter, Depends
++import uuid
++
++from fastapi import APIRouter, Depends, HTTPException, status
+ from sqlalchemy import select
+ from sqlalchemy.orm import Session
+ 
+ from app.api.v1.deps import CurrentUser, get_current_user, get_db
++from app.models.account_stat import AccountStat
++from app.models.achievement import Achievement
++from app.models.certification import Certification
++from app.models.education import Education
++from app.models.experience import Experience
+ from app.models.profile import Profile
++from app.models.project import Project
++from app.models.skill import Skill
++from app.models.social_link import SocialLink
+ from app.schemas.profile import ProfileRead, ProfileUpdate
++from app.schemas.profile_sections import (
++    AccountStatIncrement,
++    AccountStatisticsRead,
++    AchievementCreate,
++    AchievementRead,
++    ActivityEventRead,
++    CareerSnapshotRead,
++    CertificationCreate,
++    CertificationRead,
++    EducationCreate,
++    EducationRead,
++    ExperienceCreate,
++    ExperienceRead,
++    ProfileInsightsRead,
++    ProjectCreate,
++    ProjectRead,
++    SkillCreate,
++    SkillRead,
++    SocialLinkRead,
++    SocialLinkUpsert,
++)
++from app.services import profile_service
+ 
+ router = APIRouter(prefix="/profile", tags=["profile"])
+ 
+ 
+-@router.get("/me", response_model=ProfileRead)
+-def get_my_profile(
+-    user: CurrentUser = Depends(get_current_user),
+-    db: Session = Depends(get_db),
+-):
+-    profile = db.scalar(select(Profile).where(Profile.user_id == user.id))
++# ---------------------------------------------------------------------------
++# Core profile
++# ---------------------------------------------------------------------------
++def _get_or_create_profile(db: Session, user_id: uuid.UUID) -> Profile:
++    profile = db.scalar(select(Profile).where(Profile.user_id == user_id))
+     if profile is None:
+-        profile = Profile(user_id=user.id)
++        profile = Profile(user_id=user_id)
+         db.add(profile)
+         db.commit()
+         db.refresh(profile)
+     return profile
+ 
+ 
++@router.get("/me", response_model=ProfileRead)
++def get_my_profile(user: CurrentUser = Depends(get_current_user), db: Session = Depends(get_db)):
++    profile = _get_or_create_profile(db, uuid.UUID(user.id))
++    return ProfileRead.model_validate(profile).model_copy(update={"email": user.email})
++
++
+ @router.put("/me", response_model=ProfileRead)
+ def update_my_profile(
+     payload: ProfileUpdate,
+     user: CurrentUser = Depends(get_current_user),
+     db: Session = Depends(get_db),
+ ):
+-    profile = db.scalar(select(Profile).where(Profile.user_id == user.id))
+-    if profile is None:
+-        profile = Profile(user_id=user.id)
+-        db.add(profile)
+-
++    profile = _get_or_create_profile(db, uuid.UUID(user.id))
+     for field, value in payload.model_dump(exclude_unset=True).items():
+         setattr(profile, field, value)
+-
+     db.commit()
+     db.refresh(profile)
+-    return profile
++    return ProfileRead.model_validate(profile).model_copy(update={"email": user.email})
++
++
++# ---------------------------------------------------------------------------
++# Generic replace-all helper for the simple list sections
++# ---------------------------------------------------------------------------
++def _replace_all(db: Session, model, user_id: uuid.UUID, items: list, build_kwargs):
++    db.query(model).filter(model.user_id == user_id).delete()
++    rows = [model(user_id=user_id, **build_kwargs(item, index)) for index, item in enumerate(items)]
++    db.add_all(rows)
++    db.commit()
++    return db.scalars(
++        select(model).where(model.user_id == user_id).order_by(model.order_index)
++    ).all()
++
++
++# ---------------------------------------------------------------------------
++# Education
++# ---------------------------------------------------------------------------
++@router.get("/education", response_model=list[EducationRead])
++def list_education(user: CurrentUser = Depends(get_current_user), db: Session = Depends(get_db)):
++    return db.scalars(
++        select(Education).where(Education.user_id == uuid.UUID(user.id)).order_by(Education.order_index)
++    ).all()
++
++
++@router.put("/education", response_model=list[EducationRead])
++def replace_education(
++    payload: list[EducationCreate],
++    user: CurrentUser = Depends(get_current_user),
++    db: Session = Depends(get_db),
++):
++    return _replace_all(
++        db, Education, uuid.UUID(user.id), payload,
++        lambda item, index: {**item.model_dump(exclude={"order_index"}), "order_index": index},
++    )
++
++
++# ---------------------------------------------------------------------------
++# Skills
++# ---------------------------------------------------------------------------
++@router.get("/skills", response_model=list[SkillRead])
++def list_skills(user: CurrentUser = Depends(get_current_user), db: Session = Depends(get_db)):
++    return db.scalars(
++        select(Skill).where(Skill.user_id == uuid.UUID(user.id)).order_by(Skill.order_index)
++    ).all()
++
++
++@router.put("/skills", response_model=list[SkillRead])
++def replace_skills(
++    payload: list[SkillCreate],
++    user: CurrentUser = Depends(get_current_user),
++    db: Session = Depends(get_db),
++):
++    return _replace_all(
++        db, Skill, uuid.UUID(user.id), payload,
++        lambda item, index: {**item.model_dump(exclude={"order_index"}), "order_index": index},
++    )
++
++
++# ---------------------------------------------------------------------------
++# Projects
++# ---------------------------------------------------------------------------
++@router.get("/projects", response_model=list[ProjectRead])
++def list_projects(user: CurrentUser = Depends(get_current_user), db: Session = Depends(get_db)):
++    return db.scalars(
++        select(Project).where(Project.user_id == uuid.UUID(user.id)).order_by(Project.order_index)
++    ).all()
++
++
++@router.put("/projects", response_model=list[ProjectRead])
++def replace_projects(
++    payload: list[ProjectCreate],
++    user: CurrentUser = Depends(get_current_user),
++    db: Session = Depends(get_db),
++):
++    return _replace_all(
++        db, Project, uuid.UUID(user.id), payload,
++        lambda item, index: {**item.model_dump(exclude={"order_index"}), "order_index": index},
++    )
++
++
++# ---------------------------------------------------------------------------
++# Experience
++# ---------------------------------------------------------------------------
++@router.get("/experience", response_model=list[ExperienceRead])
++def list_experience(user: CurrentUser = Depends(get_current_user), db: Session = Depends(get_db)):
++    return db.scalars(
++        select(Experience).where(Experience.user_id == uuid.UUID(user.id)).order_by(Experience.order_index)
++    ).all()
++
++
++@router.put("/experience", response_model=list[ExperienceRead])
++def replace_experience(
++    payload: list[ExperienceCreate],
++    user: CurrentUser = Depends(get_current_user),
++    db: Session = Depends(get_db),
++):
++    return _replace_all(
++        db, Experience, uuid.UUID(user.id), payload,
++        lambda item, index: {**item.model_dump(exclude={"order_index"}), "order_index": index},
++    )
++
++
++# ---------------------------------------------------------------------------
++# Certifications
++# ---------------------------------------------------------------------------
++@router.get("/certifications", response_model=list[CertificationRead])
++def list_certifications(user: CurrentUser = Depends(get_current_user), db: Session = Depends(get_db)):
++    return db.scalars(
++        select(Certification)
++        .where(Certification.user_id == uuid.UUID(user.id))
++        .order_by(Certification.order_index)
++    ).all()
++
++
++@router.put("/certifications", response_model=list[CertificationRead])
++def replace_certifications(
++    payload: list[CertificationCreate],
++    user: CurrentUser = Depends(get_current_user),
++    db: Session = Depends(get_db),
++):
++    return _replace_all(
++        db, Certification, uuid.UUID(user.id), payload,
++        lambda item, index: {**item.model_dump(exclude={"order_index"}), "order_index": index},
++    )
++
++
++# ---------------------------------------------------------------------------
++# Achievements
++# ---------------------------------------------------------------------------
++@router.get("/achievements", response_model=list[AchievementRead])
++def list_achievements(user: CurrentUser = Depends(get_current_user), db: Session = Depends(get_db)):
++    return db.scalars(
++        select(Achievement).where(Achievement.user_id == uuid.UUID(user.id)).order_by(Achievement.order_index)
++    ).all()
++
++
++@router.put("/achievements", response_model=list[AchievementRead])
++def replace_achievements(
++    payload: list[AchievementCreate],
++    user: CurrentUser = Depends(get_current_user),
++    db: Session = Depends(get_db),
++):
++    return _replace_all(
++        db, Achievement, uuid.UUID(user.id), payload,
++        lambda item, index: {**item.model_dump(exclude={"order_index"}), "order_index": index},
++    )
++
++
++# ---------------------------------------------------------------------------
++# Social links (LeetCode / Codeforces / HackerRank)
++# ---------------------------------------------------------------------------
++@router.get("/social-links", response_model=list[SocialLinkRead])
++def list_social_links(user: CurrentUser = Depends(get_current_user), db: Session = Depends(get_db)):
++    return db.scalars(select(SocialLink).where(SocialLink.user_id == uuid.UUID(user.id))).all()
++
++
++@router.put("/social-links", response_model=list[SocialLinkRead])
++def replace_social_links(
++    payload: list[SocialLinkUpsert],
++    user: CurrentUser = Depends(get_current_user),
++    db: Session = Depends(get_db),
++):
++    db.query(SocialLink).filter(SocialLink.user_id == uuid.UUID(user.id)).delete()
++    rows = [SocialLink(user_id=uuid.UUID(user.id), **item.model_dump()) for item in payload]
++    db.add_all(rows)
++    db.commit()
++    return db.scalars(select(SocialLink).where(SocialLink.user_id == uuid.UUID(user.id))).all()
++
++
++# ---------------------------------------------------------------------------
++# Computed sections: Career Snapshot / AI Insights / Recent Activity / Stats
++# ---------------------------------------------------------------------------
++@router.get("/snapshot", response_model=CareerSnapshotRead)
++def get_career_snapshot(user: CurrentUser = Depends(get_current_user), db: Session = Depends(get_db)):
++    profile = _get_or_create_profile(db, uuid.UUID(user.id))
++    return profile_service.get_career_snapshot(db, uuid.UUID(user.id), profile)
++
++
++@router.get("/insights", response_model=ProfileInsightsRead)
++def get_profile_insights(user: CurrentUser = Depends(get_current_user), db: Session = Depends(get_db)):
++    profile = _get_or_create_profile(db, uuid.UUID(user.id))
++    return {"insights": profile_service.generate_profile_insights(db, uuid.UUID(user.id), profile)}
++
++
++@router.get("/activity", response_model=list[ActivityEventRead])
++def get_recent_activity(user: CurrentUser = Depends(get_current_user), db: Session = Depends(get_db)):
++    return profile_service.get_recent_activity(db, uuid.UUID(user.id))
++
++
++@router.get("/stats", response_model=AccountStatisticsRead)
++def get_account_statistics(user: CurrentUser = Depends(get_current_user), db: Session = Depends(get_db)):
++    stat = db.scalar(select(AccountStat).where(AccountStat.user_id == uuid.UUID(user.id)))
++    if stat is None:
++        stat = AccountStat(user_id=uuid.UUID(user.id))
++        db.add(stat)
++        db.commit()
++        db.refresh(stat)
++
++    job_matches, applications = profile_service.get_job_hub_counts(db, uuid.UUID(user.id))
++
++    return AccountStatisticsRead(
++        profile_views=stat.profile_views,
++        resume_downloads=stat.resume_downloads,
++        portfolio_visits=stat.portfolio_visits,
++        interview_invitations=stat.interview_invitations,
++        job_matches=job_matches,
++        applications=applications,
++    )
++
++
++@router.post("/stats/increment", response_model=AccountStatisticsRead)
++def increment_stat(
++    payload: AccountStatIncrement,
++    user: CurrentUser = Depends(get_current_user),
++    db: Session = Depends(get_db),
++):
++    valid_metrics = {"profile_views", "resume_downloads", "portfolio_visits", "interview_invitations"}
++    if payload.metric not in valid_metrics:
++        raise HTTPException(status.HTTP_400_BAD_REQUEST, f"metric must be one of {sorted(valid_metrics)}")
++
++    stat = db.scalar(select(AccountStat).where(AccountStat.user_id == uuid.UUID(user.id)))
++    if stat is None:
++        stat = AccountStat(user_id=uuid.UUID(user.id))
++        db.add(stat)
++
++    setattr(stat, payload.metric, getattr(stat, payload.metric, 0) + 1)
++    db.commit()
++
++    return get_account_statistics(user=user, db=db)
+diff --git a/backend/app/models/__init__.py b/backend/app/models/__init__.py
+index e2bd674..37b77e4 100644
+--- a/backend/app/models/__init__.py
++++ b/backend/app/models/__init__.py
+@@ -1,24 +1,40 @@
++from app.models.account_stat import AccountStat
++from app.models.achievement import Achievement
+ from app.models.analytics import AnalyticsSnapshot
+ from app.models.career_twin import CareerTwinConversation, CareerTwinMessage
++from app.models.certification import Certification
++from app.models.education import Education
++from app.models.experience import Experience
+ from app.models.interview import InterviewQuestion, InterviewSession
+ from app.models.job import JobListing, JobMatch
+ from app.models.notification import Notification
+ from app.models.profile import Profile
++from app.models.project import Project
+ from app.models.resume import Resume, ResumeAnalysis
+ from app.models.roadmap import Roadmap, RoadmapMilestone
++from app.models.skill import Skill
++from app.models.social_link import SocialLink
+ 
+ __all__ = [
++    "AccountStat",
++    "Achievement",
+     "AnalyticsSnapshot",
+     "CareerTwinConversation",
+     "CareerTwinMessage",
++    "Certification",
++    "Education",
++    "Experience",
+     "InterviewQuestion",
+     "InterviewSession",
+     "JobListing",
+     "JobMatch",
+     "Notification",
+     "Profile",
++    "Project",
+     "Resume",
+     "ResumeAnalysis",
+     "Roadmap",
+     "RoadmapMilestone",
++    "Skill",
++    "SocialLink",
+ ]
+diff --git a/backend/app/models/account_stat.py b/backend/app/models/account_stat.py
+new file mode 100644
+index 0000000..8abcb31
+--- /dev/null
++++ b/backend/app/models/account_stat.py
+@@ -0,0 +1,25 @@
++import uuid
++
++from sqlalchemy import Integer
++from sqlalchemy.dialects.postgresql import UUID
++from sqlalchemy.orm import Mapped, mapped_column
++
++from app.core.database import Base
++from app.models.base import TimestampedModel
++
++
++class AccountStat(TimestampedModel, Base):
++    """
++    One row per user. job_matches / applications counts are NOT stored
++    here - they're computed live from the existing job_matches table
++    (see app/services/profile_stats_service.py) to avoid duplicating
++    data Job Hub already owns.
++    """
++
++    __tablename__ = "profile_account_stats"
++
++    user_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), unique=True, index=True)
++    profile_views: Mapped[int] = mapped_column(Integer, default=0)
++    resume_downloads: Mapped[int] = mapped_column(Integer, default=0)
++    portfolio_visits: Mapped[int] = mapped_column(Integer, default=0)
++    interview_invitations: Mapped[int] = mapped_column(Integer, default=0)
+diff --git a/backend/app/models/achievement.py b/backend/app/models/achievement.py
+new file mode 100644
+index 0000000..9e2e7a5
+--- /dev/null
++++ b/backend/app/models/achievement.py
+@@ -0,0 +1,19 @@
++import uuid
++
++from sqlalchemy import Integer, String
++from sqlalchemy.dialects.postgresql import UUID
++from sqlalchemy.orm import Mapped, mapped_column
++
++from app.core.database import Base
++from app.models.base import TimestampedModel
++
++
++class Achievement(TimestampedModel, Base):
++    __tablename__ = "profile_achievements"
++
++    user_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), index=True)
++    order_index: Mapped[int] = mapped_column(Integer, default=0)
++
++    label: Mapped[str] = mapped_column(String(255))  # "Hackathons Won"
++    value: Mapped[int] = mapped_column(Integer)
++    icon_key: Mapped[str] = mapped_column(String(50))  # maps to a lucide icon on the frontend
+diff --git a/backend/app/models/certification.py b/backend/app/models/certification.py
+new file mode 100644
+index 0000000..2b348f8
+--- /dev/null
++++ b/backend/app/models/certification.py
+@@ -0,0 +1,21 @@
++import uuid
++
++from sqlalchemy import Integer, String
++from sqlalchemy.dialects.postgresql import UUID
++from sqlalchemy.orm import Mapped, mapped_column
++
++from app.core.database import Base
++from app.models.base import TimestampedModel
++
++
++class Certification(TimestampedModel, Base):
++    __tablename__ = "profile_certifications"
++
++    user_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), index=True)
++    order_index: Mapped[int] = mapped_column(Integer, default=0)
++
++    name: Mapped[str] = mapped_column(String(255))
++    platform: Mapped[str] = mapped_column(String(255))
++    issued_date: Mapped[str] = mapped_column(String(50))
++    credential_id: Mapped[str | None] = mapped_column(String(100))
++    certificate_url: Mapped[str | None] = mapped_column(String(500))
+diff --git a/backend/app/models/education.py b/backend/app/models/education.py
+new file mode 100644
+index 0000000..68a99a5
+--- /dev/null
++++ b/backend/app/models/education.py
+@@ -0,0 +1,22 @@
++import uuid
++
++from sqlalchemy import Integer, String, Text
++from sqlalchemy.dialects.postgresql import UUID
++from sqlalchemy.orm import Mapped, mapped_column
++
++from app.core.database import Base
++from app.models.base import TimestampedModel
++
++
++class Education(TimestampedModel, Base):
++    __tablename__ = "profile_education"
++
++    user_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), index=True)
++    order_index: Mapped[int] = mapped_column(Integer, default=0)
++
++    college: Mapped[str] = mapped_column(String(255))
++    degree: Mapped[str] = mapped_column(String(255))
++    duration: Mapped[str] = mapped_column(String(100))
++    cgpa: Mapped[str | None] = mapped_column(String(50))
++    coursework: Mapped[str | None] = mapped_column(Text)
++    achievement: Mapped[str | None] = mapped_column(String(255))
+diff --git a/backend/app/models/experience.py b/backend/app/models/experience.py
+new file mode 100644
+index 0000000..4b7bcba
+--- /dev/null
++++ b/backend/app/models/experience.py
+@@ -0,0 +1,21 @@
++import uuid
++
++from sqlalchemy import Integer, String, Text
++from sqlalchemy.dialects.postgresql import UUID
++from sqlalchemy.orm import Mapped, mapped_column
++
++from app.core.database import Base
++from app.models.base import TimestampedModel
++
++
++class Experience(TimestampedModel, Base):
++    __tablename__ = "profile_experience"
++
++    user_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), index=True)
++    order_index: Mapped[int] = mapped_column(Integer, default=0)
++
++    role: Mapped[str] = mapped_column(String(255))
++    organization: Mapped[str] = mapped_column(String(255))
++    duration: Mapped[str] = mapped_column(String(100))
++    description: Mapped[str | None] = mapped_column(Text)
++    type: Mapped[str] = mapped_column(String(50), default="Internship")  # Internship|Freelance|Leadership|Volunteer
+diff --git a/backend/app/models/profile.py b/backend/app/models/profile.py
+index 7f195ce..c2d60da 100644
+--- a/backend/app/models/profile.py
++++ b/backend/app/models/profile.py
+@@ -21,6 +21,7 @@ class Profile(TimestampedModel, Base):
+     degree: Mapped[str | None] = mapped_column(String(255))
+     graduation_year: Mapped[int | None]
+     location: Mapped[str | None] = mapped_column(String(255))
++    phone: Mapped[str | None] = mapped_column(String(50))
+     bio: Mapped[str | None] = mapped_column(Text)
+ 
+     target_role: Mapped[str | None] = mapped_column(String(255))
+@@ -28,6 +29,7 @@ class Profile(TimestampedModel, Base):
+     expected_salary: Mapped[str | None] = mapped_column(String(100))
+     preferred_location: Mapped[str | None] = mapped_column(String(255))
+     preferred_work_mode: Mapped[str | None] = mapped_column(String(50))
++    career_interests: Mapped[list[str] | None] = mapped_column(ARRAY(String))
+ 
+     linkedin_url: Mapped[str | None] = mapped_column(String(500))
+     github_url: Mapped[str | None] = mapped_column(String(500))
+diff --git a/backend/app/models/project.py b/backend/app/models/project.py
+new file mode 100644
+index 0000000..c5c2ac2
+--- /dev/null
++++ b/backend/app/models/project.py
+@@ -0,0 +1,23 @@
++import uuid
++
++from sqlalchemy import Integer, String, Text
++from sqlalchemy.dialects.postgresql import ARRAY, UUID
++from sqlalchemy.orm import Mapped, mapped_column
++
++from app.core.database import Base
++from app.models.base import TimestampedModel
++
++
++class Project(TimestampedModel, Base):
++    __tablename__ = "profile_projects"
++
++    user_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), index=True)
++    order_index: Mapped[int] = mapped_column(Integer, default=0)
++
++    name: Mapped[str] = mapped_column(String(255))
++    description: Mapped[str | None] = mapped_column(Text)
++    tech_stack: Mapped[list[str] | None] = mapped_column(ARRAY(String))
++    github_url: Mapped[str | None] = mapped_column(String(500))
++    live_url: Mapped[str | None] = mapped_column(String(500))
++    status: Mapped[str] = mapped_column(String(30), default="Completed")  # In Progress|Completed
++    duration: Mapped[str | None] = mapped_column(String(100))
+diff --git a/backend/app/models/skill.py b/backend/app/models/skill.py
+new file mode 100644
+index 0000000..55aafcb
+--- /dev/null
++++ b/backend/app/models/skill.py
+@@ -0,0 +1,20 @@
++import uuid
++
++from sqlalchemy import Integer, String
++from sqlalchemy.dialects.postgresql import UUID
++from sqlalchemy.orm import Mapped, mapped_column
++
++from app.core.database import Base
++from app.models.base import TimestampedModel
++
++
++class Skill(TimestampedModel, Base):
++    __tablename__ = "profile_skills"
++
++    user_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), index=True)
++    order_index: Mapped[int] = mapped_column(Integer, default=0)
++
++    category: Mapped[str] = mapped_column(String(100))  # "Programming Languages", "Frameworks", ...
++    name: Mapped[str] = mapped_column(String(100))
++    level: Mapped[int] = mapped_column(Integer)  # 0-100
++    proficiency_label: Mapped[str] = mapped_column(String(30))  # Beginner|Intermediate|Advanced
+diff --git a/backend/app/models/social_link.py b/backend/app/models/social_link.py
+new file mode 100644
+index 0000000..771661a
+--- /dev/null
++++ b/backend/app/models/social_link.py
+@@ -0,0 +1,18 @@
++import uuid
++
++from sqlalchemy import Boolean, String
++from sqlalchemy.dialects.postgresql import UUID
++from sqlalchemy.orm import Mapped, mapped_column
++
++from app.core.database import Base
++from app.models.base import TimestampedModel
++
++
++class SocialLink(TimestampedModel, Base):
++    __tablename__ = "profile_social_links"
++
++    user_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), index=True)
++    platform: Mapped[str] = mapped_column(String(50))  # leetcode|codeforces|hackerrank
++    username: Mapped[str | None] = mapped_column(String(255))
++    url: Mapped[str | None] = mapped_column(String(500))
++    is_connected: Mapped[bool] = mapped_column(Boolean, default=False)
+diff --git a/backend/app/schemas/profile.py b/backend/app/schemas/profile.py
+index 8473a26..b0b104e 100644
+--- a/backend/app/schemas/profile.py
++++ b/backend/app/schemas/profile.py
+@@ -12,11 +12,13 @@ class ProfileBase(BaseModel):
+     graduation_year: int | None = None
+     location: str | None = None
+     bio: str | None = None
++    phone: str | None = None
+     target_role: str | None = None
+     dream_companies: list[str] | None = None
+     expected_salary: str | None = None
+     preferred_location: str | None = None
+     preferred_work_mode: str | None = None
++    career_interests: list[str] | None = None
+     linkedin_url: str | None = None
+     github_url: str | None = None
+     portfolio_url: str | None = None
+@@ -31,5 +33,6 @@ class ProfileRead(ProfileBase):
+ 
+     id: uuid.UUID
+     user_id: uuid.UUID
++    email: str | None = None  # from the Supabase JWT, not the profiles table - never editable here
+     created_at: datetime
+     updated_at: datetime
+diff --git a/backend/app/schemas/profile_sections.py b/backend/app/schemas/profile_sections.py
+new file mode 100644
+index 0000000..9d9e280
+--- /dev/null
++++ b/backend/app/schemas/profile_sections.py
+@@ -0,0 +1,174 @@
++"""Schemas for every Profile sub-section besides the core Profile row itself."""
++
++import uuid
++from datetime import datetime
++
++from pydantic import BaseModel, ConfigDict
++
++
++# --- Education ----------------------------------------------------------
++class EducationBase(BaseModel):
++    college: str
++    degree: str
++    duration: str | None = None
++    cgpa: str | None = None
++    coursework: str | None = None
++    achievement: str | None = None
++    order_index: int = 0
++
++
++class EducationCreate(EducationBase):
++    pass
++
++
++class EducationRead(EducationBase):
++    model_config = ConfigDict(from_attributes=True)
++    id: uuid.UUID
++
++
++# --- Skills ---------------------------------------------------------------
++class SkillBase(BaseModel):
++    category: str
++    name: str
++    level: int
++    proficiency_label: str
++    order_index: int = 0
++
++
++class SkillCreate(SkillBase):
++    pass
++
++
++class SkillRead(SkillBase):
++    model_config = ConfigDict(from_attributes=True)
++    id: uuid.UUID
++
++
++# --- Projects ---------------------------------------------------------------
++class ProjectBase(BaseModel):
++    name: str
++    description: str | None = None
++    tech_stack: list[str] | None = None
++    github_url: str | None = None
++    live_url: str | None = None
++    status: str = "Completed"
++    duration: str | None = None
++    order_index: int = 0
++
++
++class ProjectCreate(ProjectBase):
++    pass
++
++
++class ProjectRead(ProjectBase):
++    model_config = ConfigDict(from_attributes=True)
++    id: uuid.UUID
++
++
++# --- Experience ---------------------------------------------------------------
++class ExperienceBase(BaseModel):
++    role: str
++    organization: str
++    duration: str | None = None
++    description: str | None = None
++    type: str = "Internship"
++    order_index: int = 0
++
++
++class ExperienceCreate(ExperienceBase):
++    pass
++
++
++class ExperienceRead(ExperienceBase):
++    model_config = ConfigDict(from_attributes=True)
++    id: uuid.UUID
++
++
++# --- Certifications ---------------------------------------------------------
++class CertificationBase(BaseModel):
++    name: str
++    platform: str | None = None
++    issued_date: str | None = None
++    credential_id: str | None = None
++    certificate_url: str | None = None
++    order_index: int = 0
++
++
++class CertificationCreate(CertificationBase):
++    pass
++
++
++class CertificationRead(CertificationBase):
++    model_config = ConfigDict(from_attributes=True)
++    id: uuid.UUID
++
++
++# --- Achievements ---------------------------------------------------------
++class AchievementBase(BaseModel):
++    type: str
++    label: str
++    value: int
++    icon_key: str
++    order_index: int = 0
++
++
++class AchievementCreate(AchievementBase):
++    pass
++
++
++class AchievementRead(AchievementBase):
++    model_config = ConfigDict(from_attributes=True)
++    id: uuid.UUID
++
++
++# --- Social links (leetcode/codeforces/hackerrank) -------------------------
++class SocialLinkBase(BaseModel):
++    platform: str
++    username: str | None = None
++    url: str | None = None
++    is_connected: bool = False
++
++
++class SocialLinkUpsert(SocialLinkBase):
++    pass
++
++
++class SocialLinkRead(SocialLinkBase):
++    model_config = ConfigDict(from_attributes=True)
++    id: uuid.UUID
++
++
++# --- Career Snapshot (computed, read-only) ----------------------------------
++class CareerSnapshotRead(BaseModel):
++    profile_completion: int
++    resume_score: int | None
++    projects_count: int
++    certificates_count: int
++    skills_count: int
++    placement_readiness: int | None
++
++
++# --- AI Profile Insights (computed, read-only) -------------------------------
++class ProfileInsightsRead(BaseModel):
++    insights: list[str]
++
++
++# --- Recent Activity (computed from other modules' tables, read-only) -------
++class ActivityEventRead(BaseModel):
++    title: str
++    event_type: str
++    occurred_at: datetime
++
++
++# --- Account Statistics -----------------------------------------------------
++class AccountStatisticsRead(BaseModel):
++    profile_views: int
++    resume_downloads: int
++    portfolio_visits: int
++    interview_invitations: int
++    job_matches: int
++    applications: int
++
++
++class AccountStatIncrement(BaseModel):
++    metric: str  # profile_views|resume_downloads|portfolio_visits|interview_invitations
+diff --git a/backend/app/services/profile_service.py b/backend/app/services/profile_service.py
+new file mode 100644
+index 0000000..4647676
+--- /dev/null
++++ b/backend/app/services/profile_service.py
+@@ -0,0 +1,161 @@
++"""
++Everything here is read-only aggregation for the Profile page's
++computed sections (Career Snapshot, AI Insights, Recent Activity,
++Account Statistics). It queries other modules' tables (resumes,
++job_matches, interview_sessions, analytics_snapshots) directly via
++SQLAlchemy SELECTs - it never imports or calls their routers, and
++never writes to their tables. Those modules are untouched.
++"""
++
++import uuid
++
++from sqlalchemy import select
++from sqlalchemy.orm import Session
++
++from app.models.analytics import AnalyticsSnapshot
++from app.models.certification import Certification
++from app.models.interview import InterviewSession
++from app.models.job import JobMatch
++from app.models.profile import Profile
++from app.models.project import Project
++from app.models.resume import Resume, ResumeAnalysis
++from app.models.skill import Skill
++
++_PROFILE_COMPLETION_FIELDS = [
++    "full_name",
++    "headline",
++    "college",
++    "degree",
++    "graduation_year",
++    "location",
++    "bio",
++    "phone",
++    "target_role",
++    "linkedin_url",
++    "github_url",
++    "portfolio_url",
++]
++
++
++def compute_profile_completion(profile: Profile) -> int:
++    filled = sum(1 for field_name in _PROFILE_COMPLETION_FIELDS if getattr(profile, field_name))
++    return round((filled / len(_PROFILE_COMPLETION_FIELDS)) * 100)
++
++
++def get_career_snapshot(db: Session, user_id: uuid.UUID, profile: Profile) -> dict:
++    latest_analysis = db.scalar(
++        select(ResumeAnalysis)
++        .where(ResumeAnalysis.user_id == user_id)
++        .order_by(ResumeAnalysis.created_at.desc())
++    )
++    latest_snapshot = db.scalar(
++        select(AnalyticsSnapshot)
++        .where(AnalyticsSnapshot.user_id == user_id)
++        .order_by(AnalyticsSnapshot.snapshot_date.desc())
++    )
++    projects_count = len(db.scalars(select(Project).where(Project.user_id == user_id)).all())
++    certificates_count = len(db.scalars(select(Certification).where(Certification.user_id == user_id)).all())
++    skills_count = len(db.scalars(select(Skill).where(Skill.user_id == user_id)).all())
++
++    return {
++        "profile_completion": compute_profile_completion(profile),
++        "resume_score": latest_analysis.overall_score if latest_analysis else None,
++        "projects_count": projects_count,
++        "certificates_count": certificates_count,
++        "skills_count": skills_count,
++        "placement_readiness": latest_snapshot.placement_readiness if latest_snapshot else None,
++    }
++
++
++def generate_profile_insights(db: Session, user_id: uuid.UUID, profile: Profile) -> list[str]:
++    """
++    Deterministic, grounded in real data (not a live LLM call) - same
++    pattern as the other services/*.py placeholders. Swap the body for
++    a real model call later; keep returning list[str].
++    """
++    insights: list[str] = []
++
++    if not profile.linkedin_url:
++        insights.append("Complete your LinkedIn profile to improve recruiter visibility.")
++
++    project_count = len(db.scalars(select(Project).where(Project.user_id == user_id)).all())
++    if project_count < 4:
++        insights.append("Add one more backend project to balance your portfolio.")
++
++    if not profile.portfolio_url:
++        insights.append("Add a portfolio link — recruiters check it more than you'd expect.")
++
++    latest_resume = db.scalar(
++        select(Resume).where(Resume.user_id == user_id).order_by(Resume.created_at.desc())
++    )
++    if latest_resume is None:
++        insights.append("Upload your resume to unlock ATS scoring and tailored suggestions.")
++
++    if not any("aws" in (s.name or "").lower() or "cloud" in (s.name or "").lower() for s in
++               db.scalars(select(Skill).where(Skill.user_id == user_id)).all()):
++        insights.append("Earn a cloud certification to strengthen your profile.")
++
++    if not insights:
++        insights.append("Your profile looks strong — keep it updated as you finish new projects.")
++
++    return insights
++
++
++def get_recent_activity(db: Session, user_id: uuid.UUID, limit: int = 10) -> list[dict]:
++    events: list[dict] = []
++
++    for resume in db.scalars(
++        select(Resume).where(Resume.user_id == user_id).order_by(Resume.created_at.desc()).limit(5)
++    ):
++        events.append({"title": "Resume Updated", "event_type": "resume", "occurred_at": resume.created_at})
++
++    for project in db.scalars(
++        select(Project).where(Project.user_id == user_id).order_by(Project.created_at.desc()).limit(5)
++    ):
++        events.append(
++            {"title": f"Project Added — {project.name}", "event_type": "project", "occurred_at": project.created_at}
++        )
++
++    for cert in db.scalars(
++        select(Certification)
++        .where(Certification.user_id == user_id)
++        .order_by(Certification.created_at.desc())
++        .limit(5)
++    ):
++        events.append(
++            {
++                "title": f"Certificate Uploaded — {cert.name}",
++                "event_type": "certification",
++                "occurred_at": cert.created_at,
++            }
++        )
++
++    for session in db.scalars(
++        select(InterviewSession)
++        .where(InterviewSession.user_id == user_id, InterviewSession.status == "completed")
++        .order_by(InterviewSession.completed_at.desc())
++        .limit(5)
++    ):
++        events.append(
++            {
++                "title": f"Interview Completed — {session.interview_type.replace('_', ' ').title()}",
++                "event_type": "interview",
++                "occurred_at": session.completed_at,
++            }
++        )
++
++    for profile in db.scalars(
++        select(Profile).where(Profile.user_id == user_id).order_by(Profile.updated_at.desc()).limit(1)
++    ):
++        if profile.updated_at != profile.created_at:
++            events.append({"title": "Profile Updated", "event_type": "profile", "occurred_at": profile.updated_at})
++
++    events.sort(key=lambda e: e["occurred_at"], reverse=True)
++    return events[:limit]
++
++
++def get_job_hub_counts(db: Session, user_id: uuid.UUID) -> tuple[int, int]:
++    """(job_matches_count, applications_count) - read-only against Job Hub's own table."""
++    matches = db.scalars(select(JobMatch).where(JobMatch.user_id == user_id)).all()
++    applications = [m for m in matches if m.status != "suggested"]
++    return len(matches), len(applications)
+diff --git a/components/dashboard-v2/profile/about.tsx b/components/dashboard-v2/profile/about.tsx
+index 2dc569c..0580ce2 100644
+--- a/components/dashboard-v2/profile/about.tsx
++++ b/components/dashboard-v2/profile/about.tsx
+@@ -3,7 +3,11 @@
+ import { motion } from "framer-motion";
+ import { Pencil } from "lucide-react";
+ 
++import { useProfile } from "@/hooks/useProfile";
++
+ export default function AboutMe() {
++  const { profile, loading, setIsEditing } = useProfile();
++
+   return (
+     <motion.section
+       initial={{ opacity: 0, y: 12 }}
+@@ -15,21 +19,29 @@ export default function AboutMe() {
+       <div className="flex items-center justify-between">
+         <h2 className="text-xl font-bold sm:text-2xl">About Me</h2>
+ 
+-        <button className="flex items-center gap-1.5 text-sm font-medium text-neutral-500 transition-colors hover:text-black">
++        <button
++          onClick={() => {
++            setIsEditing(true);
++            document.getElementById("profile-overview")?.scrollIntoView({ behavior: "smooth" });
++          }}
++          className="flex items-center gap-1.5 text-sm font-medium text-neutral-500 transition-colors hover:text-black"
++        >
+           <Pencil size={14} />
+           Edit
+         </button>
+       </div>
+ 
+-      <p className="mt-4 max-w-3xl text-[15px] leading-relaxed text-neutral-600">
+-        I&apos;m a final-year Computer Science student passionate about building
+-        AI-powered products end-to-end — from model integration to polished
+-        frontend experiences. Over the last two years I&apos;ve worked on six
+-        production-grade projects, interned as a backend developer, and led a
+-        team of four in a national-level hackathon. I&apos;m currently sharpening
+-        my system design fundamentals while preparing for SDE and AI Engineer
+-        placements at top product companies.
+-      </p>
++      {loading ? (
++        <div className="mt-4 space-y-2">
++          <div className="h-4 w-full animate-pulse rounded bg-neutral-100" />
++          <div className="h-4 w-full animate-pulse rounded bg-neutral-100" />
++          <div className="h-4 w-2/3 animate-pulse rounded bg-neutral-100" />
++        </div>
++      ) : (
++        <p className="mt-4 max-w-3xl text-[15px] leading-relaxed text-neutral-600">
++          {profile?.bio || "Add a short bio so recruiters know who you are — click Edit to get started."}
++        </p>
++      )}
+     </motion.section>
+   );
+ }
+diff --git a/components/dashboard-v2/profile/account-statistics.tsx b/components/dashboard-v2/profile/account-statistics.tsx
+index b435061..c9b04ee 100644
+--- a/components/dashboard-v2/profile/account-statistics.tsx
++++ b/components/dashboard-v2/profile/account-statistics.tsx
+@@ -4,43 +4,51 @@ import { motion } from "framer-motion";
+ import { Eye, Download, Globe2, Mail, Target, Send } from "lucide-react";
+ import AnimatedNumber from "../shared/animated-number";
+ 
+-const stats = [
+-  { icon: Eye, value: 342, suffix: "", label: "Profile Views" },
+-  { icon: Download, value: 58, suffix: "", label: "Resume Downloads" },
+-  { icon: Globe2, value: 129, suffix: "", label: "Portfolio Visits" },
+-  { icon: Mail, value: 9, suffix: "", label: "Interview Invitations" },
+-  { icon: Target, value: 24, suffix: "", label: "Job Matches" },
+-  { icon: Send, value: 23, suffix: "", label: "Applications" },
+-];
++import { useProfile } from "@/hooks/useProfile";
+ 
+ export default function AccountStatistics() {
++  const { stats, loading } = useProfile();
++
++  const items = [
++    { icon: Eye, value: stats?.profile_views ?? 0, label: "Profile Views" },
++    { icon: Download, value: stats?.resume_downloads ?? 0, label: "Resume Downloads" },
++    { icon: Globe2, value: stats?.portfolio_visits ?? 0, label: "Portfolio Visits" },
++    { icon: Mail, value: stats?.interview_invitations ?? 0, label: "Interview Invitations" },
++    { icon: Target, value: stats?.job_matches ?? 0, label: "Job Matches" },
++    { icon: Send, value: stats?.applications ?? 0, label: "Applications" },
++  ];
++
+   return (
+     <section className="mt-8">
+       <h2 className="text-xl font-bold sm:text-2xl">Account Statistics</h2>
+ 
+       <div className="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
+-        {stats.map((item, index) => {
+-          const Icon = item.icon;
+-          return (
+-            <motion.div
+-              key={item.label}
+-              initial={{ opacity: 0, y: 14 }}
+-              whileInView={{ opacity: 1, y: 0 }}
+-              viewport={{ once: true, margin: "-10% 0px" }}
+-              transition={{ duration: 0.4, delay: index * 0.05, ease: [0.22, 1, 0.36, 1] }}
+-              whileHover={{ y: -4 }}
+-              className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm transition-shadow duration-300 hover:shadow-lg"
+-            >
+-              <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-neutral-100">
+-                <Icon size={18} />
+-              </div>
+-
+-              <AnimatedNumber value={item.value} suffix={item.suffix} />
+-
+-              <p className="mt-1 text-sm text-neutral-500">{item.label}</p>
+-            </motion.div>
+-          );
+-        })}
++        {loading
++          ? Array.from({ length: 6 }).map((_, i) => (
++              <div key={i} className="h-28 animate-pulse rounded-2xl border border-neutral-200 bg-neutral-50" />
++            ))
++          : items.map((item, index) => {
++              const Icon = item.icon;
++              return (
++                <motion.div
++                  key={item.label}
++                  initial={{ opacity: 0, y: 14 }}
++                  whileInView={{ opacity: 1, y: 0 }}
++                  viewport={{ once: true, margin: "-10% 0px" }}
++                  transition={{ duration: 0.4, delay: index * 0.05, ease: [0.22, 1, 0.36, 1] }}
++                  whileHover={{ y: -4 }}
++                  className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm transition-shadow duration-300 hover:shadow-lg"
++                >
++                  <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-neutral-100">
++                    <Icon size={18} />
++                  </div>
++
++                  <AnimatedNumber value={item.value} />
++
++                  <p className="mt-1 text-sm text-neutral-500">{item.label}</p>
++                </motion.div>
++              );
++            })}
+       </div>
+     </section>
+   );
+diff --git a/components/dashboard-v2/profile/achievements.tsx b/components/dashboard-v2/profile/achievements.tsx
+index 4b6a6f1..97d356b 100644
+--- a/components/dashboard-v2/profile/achievements.tsx
++++ b/components/dashboard-v2/profile/achievements.tsx
+@@ -1,45 +1,62 @@
+ "use client";
+ 
+ import { motion } from "framer-motion";
+-import { Trophy, Medal, Award, GitPullRequest } from "lucide-react";
++import { Trophy, Medal, Award, GitPullRequest, Star, type LucideIcon } from "lucide-react";
+ import AnimatedNumber from "../shared/animated-number";
+ 
+-const achievements = [
+-  { icon: Trophy, value: 3, label: "Hackathons Won" },
+-  { icon: Medal, value: 12, label: "Coding Contests" },
+-  { icon: Award, value: 5, label: "Awards & Recognitions" },
+-  { icon: GitPullRequest, value: 21, label: "Open Source Contributions" },
+-];
++import { useProfile } from "@/hooks/useProfile";
++
++const iconByKey: Record<string, LucideIcon> = {
++  trophy: Trophy,
++  hackathon: Trophy,
++  medal: Medal,
++  contest: Medal,
++  award: Award,
++  git_pull_request: GitPullRequest,
++  open_source: GitPullRequest,
++};
+ 
+ export default function Achievements() {
++  const { achievements, loading } = useProfile();
++
+   return (
+     <section className="mt-8 rounded-[24px] border border-neutral-200 bg-white p-5 sm:p-6 lg:rounded-[30px]">
+       <h2 className="text-xl font-bold sm:text-2xl">Achievements</h2>
+ 
+-      <div className="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-4">
+-        {achievements.map((item, index) => {
+-          const Icon = item.icon;
+-          return (
+-            <motion.div
+-              key={item.label}
+-              initial={{ opacity: 0, y: 12 }}
+-              whileInView={{ opacity: 1, y: 0 }}
+-              viewport={{ once: true, margin: "-10% 0px" }}
+-              transition={{ duration: 0.4, delay: index * 0.06, ease: "easeOut" }}
+-              whileHover={{ y: -4 }}
+-              className="rounded-2xl border border-neutral-200 p-5 text-center transition-shadow duration-300 hover:shadow-lg"
+-            >
+-              <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-xl bg-black text-white">
+-                <Icon size={18} />
+-              </div>
+-              <div className="mt-3 flex justify-center">
+-                <AnimatedNumber value={item.value} />
+-              </div>
+-              <p className="mt-1 text-sm text-neutral-500">{item.label}</p>
+-            </motion.div>
+-          );
+-        })}
+-      </div>
++      {loading ? (
++        <div className="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-4">
++          {Array.from({ length: 4 }).map((_, i) => (
++            <div key={i} className="h-32 animate-pulse rounded-2xl border border-neutral-200 bg-neutral-50" />
++          ))}
++        </div>
++      ) : achievements.length === 0 ? (
++        <p className="mt-5 text-sm text-neutral-400">No achievements added yet.</p>
++      ) : (
++        <div className="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-4">
++          {achievements.map((item, index) => {
++            const Icon = iconByKey[item.icon_key] ?? Star;
++            return (
++              <motion.div
++                key={item.id}
++                initial={{ opacity: 0, y: 12 }}
++                whileInView={{ opacity: 1, y: 0 }}
++                viewport={{ once: true, margin: "-10% 0px" }}
++                transition={{ duration: 0.4, delay: index * 0.06, ease: "easeOut" }}
++                whileHover={{ y: -4 }}
++                className="rounded-2xl border border-neutral-200 p-5 text-center transition-shadow duration-300 hover:shadow-lg"
++              >
++                <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-xl bg-black text-white">
++                  <Icon size={18} />
++                </div>
++                <div className="mt-3 flex justify-center">
++                  <AnimatedNumber value={item.value} />
++                </div>
++                <p className="mt-1 text-sm text-neutral-500">{item.label}</p>
++              </motion.div>
++            );
++          })}
++        </div>
++      )}
+     </section>
+   );
+ }
+diff --git a/components/dashboard-v2/profile/ai-insights.tsx b/components/dashboard-v2/profile/ai-insights.tsx
+index 5dcd39c..5e32a8c 100644
+--- a/components/dashboard-v2/profile/ai-insights.tsx
++++ b/components/dashboard-v2/profile/ai-insights.tsx
+@@ -3,15 +3,12 @@
+ import { motion } from "framer-motion";
+ import { Sparkles } from "lucide-react";
+ 
+-const insights = [
+-  "Complete your LinkedIn profile to improve recruiter visibility.",
+-  "Add one more backend project to balance your portfolio.",
+-  "Improve your portfolio description — it reads as generic right now.",
+-  "Upload your latest resume, the current one is 3 weeks old.",
+-  "Earn a cloud certification to strengthen your AWS skill claim.",
+-];
++import { useProfile } from "@/hooks/useProfile";
+ 
+ export default function AiInsights() {
++  const { insights, loading } = useProfile();
++  const items = insights?.insights ?? [];
++
+   return (
+     <section className="mt-8 rounded-[24px] border border-neutral-200 bg-white p-5 sm:p-6 lg:rounded-[30px]">
+       <div className="flex items-center gap-3">
+@@ -21,23 +18,31 @@ export default function AiInsights() {
+         <h2 className="text-xl font-bold sm:text-2xl">AI Profile Insights</h2>
+       </div>
+ 
+-      <ul className="mt-6 space-y-1">
+-        {insights.map((insight, index) => (
+-          <motion.li
+-            key={insight}
+-            initial={{ opacity: 0, x: -6 }}
+-            whileInView={{ opacity: 1, x: 0 }}
+-            viewport={{ once: true }}
+-            transition={{ duration: 0.35, delay: index * 0.06, ease: "easeOut" }}
+-            className="flex items-center gap-3 rounded-xl px-2 py-2.5 transition-colors hover:bg-neutral-50"
+-          >
+-            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-neutral-100 text-[11px] font-medium tabular-nums text-neutral-500">
+-              {String(index + 1).padStart(2, "0")}
+-            </span>
+-            <span className="text-[15px] leading-relaxed text-neutral-700">{insight}</span>
+-          </motion.li>
+-        ))}
+-      </ul>
++      {loading ? (
++        <div className="mt-6 space-y-2">
++          {Array.from({ length: 4 }).map((_, i) => (
++            <div key={i} className="h-10 animate-pulse rounded-xl bg-neutral-50" />
++          ))}
++        </div>
++      ) : (
++        <ul className="mt-6 space-y-1">
++          {items.map((insight, index) => (
++            <motion.li
++              key={insight}
++              initial={{ opacity: 0, x: -6 }}
++              whileInView={{ opacity: 1, x: 0 }}
++              viewport={{ once: true }}
++              transition={{ duration: 0.35, delay: index * 0.06, ease: "easeOut" }}
++              className="flex items-center gap-3 rounded-xl px-2 py-2.5 transition-colors hover:bg-neutral-50"
++            >
++              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-neutral-100 text-[11px] font-medium tabular-nums text-neutral-500">
++                {String(index + 1).padStart(2, "0")}
++              </span>
++              <span className="text-[15px] leading-relaxed text-neutral-700">{insight}</span>
++            </motion.li>
++          ))}
++        </ul>
++      )}
+     </section>
+   );
+ }
+diff --git a/components/dashboard-v2/profile/career-goals.tsx b/components/dashboard-v2/profile/career-goals.tsx
+index d7c5438..8de0007 100644
+--- a/components/dashboard-v2/profile/career-goals.tsx
++++ b/components/dashboard-v2/profile/career-goals.tsx
+@@ -1,18 +1,94 @@
+ "use client";
+ 
++import { useEffect, useState } from "react";
+ import { motion } from "framer-motion";
+ import { Target, Building2, IndianRupee, MapPin, Laptop, Sparkles, Pencil } from "lucide-react";
+ 
+-const goals = [
+-  { icon: Target, label: "Target Role", value: "AI Engineer / SDE-1" },
+-  { icon: Building2, label: "Dream Company", value: "Google, Razorpay, Zerodha" },
+-  { icon: IndianRupee, label: "Expected Salary", value: "₹18 – 24 LPA" },
+-  { icon: MapPin, label: "Preferred Location", value: "Bengaluru, Remote" },
+-  { icon: Laptop, label: "Preferred Work Mode", value: "Hybrid" },
+-  { icon: Sparkles, label: "Career Interests", value: "AI/ML, Full-Stack, Product Engineering" },
+-];
++import { useProfile } from "@/hooks/useProfile";
++
++interface GoalsDraft {
++  target_role: string;
++  dream_companies: string;
++  expected_salary: string;
++  preferred_location: string;
++  preferred_work_mode: string;
++  career_interests: string;
++}
+ 
+ export default function CareerGoals() {
++  const { profile, loading, saving, error, saveProfile } = useProfile();
++  const [editing, setEditing] = useState(false);
++  const [draft, setDraft] = useState<GoalsDraft>({
++    target_role: "",
++    dream_companies: "",
++    expected_salary: "",
++    preferred_location: "",
++    preferred_work_mode: "",
++    career_interests: "",
++  });
++
++  useEffect(() => {
++    if (profile && editing) {
++      setDraft({
++        target_role: profile.target_role ?? "",
++        dream_companies: (profile.dream_companies ?? []).join(", "),
++        expected_salary: profile.expected_salary ?? "",
++        preferred_location: profile.preferred_location ?? "",
++        preferred_work_mode: profile.preferred_work_mode ?? "",
++        career_interests: (profile.career_interests ?? []).join(", "),
++      });
++    }
++  }, [profile, editing]);
++
++  async function handleSave() {
++    try {
++      await saveProfile({
++        target_role: draft.target_role || null,
++        dream_companies: draft.dream_companies
++          ? draft.dream_companies.split(",").map((s) => s.trim()).filter(Boolean)
++          : [],
++        expected_salary: draft.expected_salary || null,
++        preferred_location: draft.preferred_location || null,
++        preferred_work_mode: draft.preferred_work_mode || null,
++        career_interests: draft.career_interests
++          ? draft.career_interests.split(",").map((s) => s.trim()).filter(Boolean)
++          : [],
++      });
++      setEditing(false);
++    } catch {
++      // error surfaced below via context `error`
++    }
++  }
++
++  const goals = [
++    { icon: Target, label: "Target Role", value: profile?.target_role, key: "target_role" as const },
++    {
++      icon: Building2,
++      label: "Dream Company",
++      value: profile?.dream_companies?.join(", "),
++      key: "dream_companies" as const,
++    },
++    { icon: IndianRupee, label: "Expected Salary", value: profile?.expected_salary, key: "expected_salary" as const },
++    {
++      icon: MapPin,
++      label: "Preferred Location",
++      value: profile?.preferred_location,
++      key: "preferred_location" as const,
++    },
++    {
++      icon: Laptop,
++      label: "Preferred Work Mode",
++      value: profile?.preferred_work_mode,
++      key: "preferred_work_mode" as const,
++    },
++    {
++      icon: Sparkles,
++      label: "Career Interests",
++      value: profile?.career_interests?.join(", "),
++      key: "career_interests" as const,
++    },
++  ];
++
+   return (
+     <motion.section
+       initial={{ opacity: 0, y: 12 }}
+@@ -24,37 +100,78 @@ export default function CareerGoals() {
+       <div className="flex items-center justify-between">
+         <h2 className="text-xl font-bold sm:text-2xl">Career Goals</h2>
+ 
+-        <motion.button
+-          whileHover={{ scale: 1.03 }}
+-          whileTap={{ scale: 0.97 }}
+-          className="flex items-center gap-1.5 rounded-2xl border border-neutral-300 px-4 py-2 text-sm font-medium transition-colors hover:border-black"
+-        >
+-          <Pencil size={14} />
+-          Edit Goal
+-        </motion.button>
+-      </div>
+-
+-      <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+-        {goals.map((goal, index) => {
+-          const Icon = goal.icon;
+-          return (
+-            <motion.div
+-              key={goal.label}
+-              initial={{ opacity: 0, y: 8 }}
+-              whileInView={{ opacity: 1, y: 0 }}
+-              viewport={{ once: true, margin: "-10% 0px" }}
+-              transition={{ duration: 0.35, delay: index * 0.05, ease: "easeOut" }}
+-              className="rounded-2xl border border-neutral-200 p-4"
++        {editing ? (
++          <div className="flex gap-2">
++            <motion.button
++              whileHover={{ scale: 1.03 }}
++              whileTap={{ scale: 0.97 }}
++              onClick={() => setEditing(false)}
++              className="rounded-2xl border border-neutral-300 px-4 py-2 text-sm font-medium"
++            >
++              Cancel
++            </motion.button>
++            <motion.button
++              whileHover={{ scale: 1.03 }}
++              whileTap={{ scale: 0.97 }}
++              disabled={saving}
++              onClick={handleSave}
++              className="rounded-2xl bg-black px-4 py-2 text-sm font-medium text-white disabled:opacity-60"
+             >
+-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-neutral-100">
+-                <Icon size={16} />
+-              </div>
+-              <p className="mt-3 text-xs text-neutral-500">{goal.label}</p>
+-              <p className="mt-1 font-medium">{goal.value}</p>
+-            </motion.div>
+-          );
+-        })}
++              {saving ? "Saving…" : "Save"}
++            </motion.button>
++          </div>
++        ) : (
++          <motion.button
++            whileHover={{ scale: 1.03 }}
++            whileTap={{ scale: 0.97 }}
++            onClick={() => setEditing(true)}
++            className="flex items-center gap-1.5 rounded-2xl border border-neutral-300 px-4 py-2 text-sm font-medium transition-colors hover:border-black"
++          >
++            <Pencil size={14} />
++            Edit Goal
++          </motion.button>
++        )}
+       </div>
++
++      {error && editing && <p className="mt-3 text-sm text-red-600">{error}</p>}
++
++      {loading ? (
++        <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
++          {Array.from({ length: 6 }).map((_, i) => (
++            <div key={i} className="h-20 animate-pulse rounded-2xl border border-neutral-200 bg-neutral-50" />
++          ))}
++        </div>
++      ) : (
++        <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
++          {goals.map((goal, index) => {
++            const Icon = goal.icon;
++            return (
++              <motion.div
++                key={goal.label}
++                initial={{ opacity: 0, y: 8 }}
++                whileInView={{ opacity: 1, y: 0 }}
++                viewport={{ once: true, margin: "-10% 0px" }}
++                transition={{ duration: 0.35, delay: index * 0.05, ease: "easeOut" }}
++                className="rounded-2xl border border-neutral-200 p-4"
++              >
++                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-neutral-100">
++                  <Icon size={16} />
++                </div>
++                <p className="mt-3 text-xs text-neutral-500">{goal.label}</p>
++                {editing ? (
++                  <input
++                    value={draft[goal.key]}
++                    onChange={(e) => setDraft((prev) => ({ ...prev, [goal.key]: e.target.value }))}
++                    className="mt-1 w-full rounded-md border border-neutral-300 px-1.5 py-0.5 font-medium outline-none focus:border-black"
++                  />
++                ) : (
++                  <p className="mt-1 font-medium">{goal.value || "—"}</p>
++                )}
++              </motion.div>
++            );
++          })}
++        </div>
++      )}
+     </motion.section>
+   );
+ }
+diff --git a/components/dashboard-v2/profile/certifications.tsx b/components/dashboard-v2/profile/certifications.tsx
+index f5b99eb..5bcbbfb 100644
+--- a/components/dashboard-v2/profile/certifications.tsx
++++ b/components/dashboard-v2/profile/certifications.tsx
+@@ -3,51 +3,63 @@
+ import { motion } from "framer-motion";
+ import { BadgeCheck, ExternalLink } from "lucide-react";
+ 
+-const certifications = [
+-  { name: "AWS Certified Cloud Practitioner", platform: "Amazon Web Services", issued: "Mar 2026", credentialId: "AWS-CCP-99213" },
+-  { name: "Deep Learning Specialization", platform: "Coursera (deeplearning.ai)", issued: "Nov 2025", credentialId: "DL-SPEC-44210" },
+-  { name: "Meta Front-End Developer", platform: "Meta / Coursera", issued: "Jul 2025", credentialId: "META-FE-11837" },
+-];
++import { useProfile } from "@/hooks/useProfile";
+ 
+ export default function Certifications() {
++  const { certifications, loading } = useProfile();
++
+   return (
+     <section className="mt-8">
+       <h2 className="text-xl font-bold sm:text-2xl">Certifications</h2>
+ 
+-      <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+-        {certifications.map((cert, index) => (
+-          <motion.div
+-            key={cert.name}
+-            initial={{ opacity: 0, y: 10 }}
+-            whileInView={{ opacity: 1, y: 0 }}
+-            viewport={{ once: true, margin: "-10% 0px" }}
+-            transition={{ duration: 0.4, delay: index * 0.06, ease: "easeOut" }}
+-            whileHover={{ y: -4 }}
+-            className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm transition-shadow duration-300 hover:shadow-lg"
+-          >
+-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-neutral-100">
+-              <BadgeCheck size={18} />
+-            </div>
+-
+-            <h3 className="mt-4 font-semibold leading-snug">{cert.name}</h3>
+-            <p className="mt-1 text-sm text-neutral-500">{cert.platform}</p>
+-
+-            <div className="mt-4 flex items-center justify-between text-xs text-neutral-400">
+-              <span>Issued {cert.issued}</span>
+-              <span className="truncate">{cert.credentialId}</span>
+-            </div>
+-
+-            <motion.button
+-              whileHover={{ scale: 1.02 }}
+-              whileTap={{ scale: 0.98 }}
+-              className="mt-4 flex w-full items-center justify-center gap-1.5 rounded-xl border border-neutral-300 py-2 text-sm font-medium transition-colors hover:border-black"
++      {loading ? (
++        <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
++          {Array.from({ length: 3 }).map((_, i) => (
++            <div key={i} className="h-44 animate-pulse rounded-2xl border border-neutral-200 bg-neutral-50" />
++          ))}
++        </div>
++      ) : certifications.length === 0 ? (
++        <p className="mt-5 text-sm text-neutral-400">No certifications added yet.</p>
++      ) : (
++        <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
++          {certifications.map((cert, index) => (
++            <motion.div
++              key={cert.id}
++              initial={{ opacity: 0, y: 10 }}
++              whileInView={{ opacity: 1, y: 0 }}
++              viewport={{ once: true, margin: "-10% 0px" }}
++              transition={{ duration: 0.4, delay: index * 0.06, ease: "easeOut" }}
++              whileHover={{ y: -4 }}
++              className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm transition-shadow duration-300 hover:shadow-lg"
+             >
+-              <ExternalLink size={14} />
+-              View Certificate
+-            </motion.button>
+-          </motion.div>
+-        ))}
+-      </div>
++              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-neutral-100">
++                <BadgeCheck size={18} />
++              </div>
++
++              <h3 className="mt-4 font-semibold leading-snug">{cert.name}</h3>
++              {cert.platform && <p className="mt-1 text-sm text-neutral-500">{cert.platform}</p>}
++
++              <div className="mt-4 flex items-center justify-between text-xs text-neutral-400">
++                {cert.issued_date && <span>Issued {cert.issued_date}</span>}
++                {cert.credential_id && <span className="truncate">{cert.credential_id}</span>}
++              </div>
++
++              <motion.a
++                href={cert.certificate_url ?? undefined}
++                target="_blank"
++                rel="noopener noreferrer"
++                whileHover={{ scale: 1.02 }}
++                whileTap={{ scale: 0.98 }}
++                className="mt-4 flex w-full items-center justify-center gap-1.5 rounded-xl border border-neutral-300 py-2 text-sm font-medium transition-colors hover:border-black aria-disabled:pointer-events-none aria-disabled:opacity-50"
++                aria-disabled={!cert.certificate_url}
++              >
++                <ExternalLink size={14} />
++                View Certificate
++              </motion.a>
++            </motion.div>
++          ))}
++        </div>
++      )}
+     </section>
+   );
+ }
+diff --git a/components/dashboard-v2/profile/education.tsx b/components/dashboard-v2/profile/education.tsx
+index 9ebc171..05fabaf 100644
+--- a/components/dashboard-v2/profile/education.tsx
++++ b/components/dashboard-v2/profile/education.tsx
+@@ -3,79 +3,82 @@
+ import { motion } from "framer-motion";
+ import { GraduationCap } from "lucide-react";
+ 
+-const education = [
+-  {
+-    college: "IIT Patna",
+-    degree: "B.Tech, Computer Science & Engineering",
+-    duration: "2022 — 2026",
+-    cgpa: "8.7 CGPA",
+-    coursework: "DSA, OS, DBMS, Computer Networks, Machine Learning",
+-    achievement: "Dean's List — 4 consecutive semesters",
+-  },
+-  {
+-    college: "DAV Public School, Patna",
+-    degree: "Class XII, PCM",
+-    duration: "2020 — 2022",
+-    cgpa: "94.2%",
+-    coursework: "Physics, Chemistry, Mathematics, Computer Science",
+-    achievement: "School topper in Computer Science",
+-  },
+-];
++import { useProfile } from "@/hooks/useProfile";
+ 
+ export default function Education() {
++  const { education, loading } = useProfile();
++
+   return (
+     <section className="mt-8 rounded-[24px] border border-neutral-200 bg-white p-5 sm:p-6 lg:rounded-[30px]">
+       <h2 className="text-xl font-bold sm:text-2xl">Education</h2>
+ 
+-      <div className="relative mt-6">
+-        <motion.div
+-          initial={{ scaleY: 0 }}
+-          whileInView={{ scaleY: 1 }}
+-          viewport={{ once: true }}
+-          transition={{ duration: 0.8, ease: "easeOut" }}
+-          style={{ transformOrigin: "top" }}
+-          className="absolute left-5 top-1 bottom-1 w-px bg-neutral-200"
+-        />
+-
+-        <div className="space-y-2">
+-          {education.map((item, index) => (
+-            <motion.div
+-              key={item.college}
+-              initial={{ opacity: 0, x: -8 }}
+-              whileInView={{ opacity: 1, x: 0 }}
+-              viewport={{ once: true }}
+-              transition={{ duration: 0.35, delay: index * 0.08, ease: "easeOut" }}
+-              className="group relative flex gap-4 rounded-xl px-2 py-3 transition-colors hover:bg-neutral-50"
+-            >
+-              <div className="z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 border-black bg-black text-white">
+-                <GraduationCap size={16} />
+-              </div>
++      {loading ? (
++        <div className="mt-6 space-y-3">
++          {Array.from({ length: 2 }).map((_, i) => (
++            <div key={i} className="h-20 animate-pulse rounded-xl bg-neutral-50" />
++          ))}
++        </div>
++      ) : education.length === 0 ? (
++        <p className="mt-6 text-sm text-neutral-400">No education added yet.</p>
++      ) : (
++        <div className="relative mt-6">
++          <motion.div
++            initial={{ scaleY: 0 }}
++            whileInView={{ scaleY: 1 }}
++            viewport={{ once: true }}
++            transition={{ duration: 0.8, ease: "easeOut" }}
++            style={{ transformOrigin: "top" }}
++            className="absolute left-5 top-1 bottom-1 w-px bg-neutral-200"
++          />
+ 
+-              <div className="min-w-0 flex-1 pt-1">
+-                <div className="flex flex-wrap items-center justify-between gap-2">
+-                  <span className="font-semibold">{item.college}</span>
+-                  <span className="text-xs tabular-nums text-neutral-400">{item.duration}</span>
++          <div className="space-y-2">
++            {education.map((item, index) => (
++              <motion.div
++                key={item.id}
++                initial={{ opacity: 0, x: -8 }}
++                whileInView={{ opacity: 1, x: 0 }}
++                viewport={{ once: true }}
++                transition={{ duration: 0.35, delay: index * 0.08, ease: "easeOut" }}
++                className="group relative flex gap-4 rounded-xl px-2 py-3 transition-colors hover:bg-neutral-50"
++              >
++                <div className="z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 border-black bg-black text-white">
++                  <GraduationCap size={16} />
+                 </div>
+ 
+-                <p className="mt-1 text-sm text-neutral-600">{item.degree}</p>
++                <div className="min-w-0 flex-1 pt-1">
++                  <div className="flex flex-wrap items-center justify-between gap-2">
++                    <span className="font-semibold">{item.college}</span>
++                    {item.duration && (
++                      <span className="text-xs tabular-nums text-neutral-400">{item.duration}</span>
++                    )}
++                  </div>
+ 
+-                <div className="mt-3 flex flex-wrap gap-2">
+-                  <span className="rounded-full bg-neutral-100 px-2.5 py-1 text-xs font-medium text-neutral-700">
+-                    {item.cgpa}
+-                  </span>
+-                  <span className="rounded-full bg-neutral-100 px-2.5 py-1 text-xs font-medium text-neutral-700">
+-                    {item.achievement}
+-                  </span>
+-                </div>
++                  <p className="mt-1 text-sm text-neutral-600">{item.degree}</p>
+ 
+-                <p className="mt-2 text-xs text-neutral-400">
+-                  Coursework: {item.coursework}
+-                </p>
+-              </div>
+-            </motion.div>
+-          ))}
++                  {(item.cgpa || item.achievement) && (
++                    <div className="mt-3 flex flex-wrap gap-2">
++                      {item.cgpa && (
++                        <span className="rounded-full bg-neutral-100 px-2.5 py-1 text-xs font-medium text-neutral-700">
++                          {item.cgpa}
++                        </span>
++                      )}
++                      {item.achievement && (
++                        <span className="rounded-full bg-neutral-100 px-2.5 py-1 text-xs font-medium text-neutral-700">
++                          {item.achievement}
++                        </span>
++                      )}
++                    </div>
++                  )}
++
++                  {item.coursework && (
++                    <p className="mt-2 text-xs text-neutral-400">Coursework: {item.coursework}</p>
++                  )}
++                </div>
++              </motion.div>
++            ))}
++          </div>
+         </div>
+-      </div>
++      )}
+     </section>
+   );
+ }
+diff --git a/components/dashboard-v2/profile/experience.tsx b/components/dashboard-v2/profile/experience.tsx
+index a2104b0..51c47b7 100644
+--- a/components/dashboard-v2/profile/experience.tsx
++++ b/components/dashboard-v2/profile/experience.tsx
+@@ -1,97 +1,87 @@
+ "use client";
+ 
+ import { motion } from "framer-motion";
+-import { Briefcase, Code2, Users, Heart } from "lucide-react";
++import { Briefcase, Code2, Users, Heart, type LucideIcon } from "lucide-react";
+ 
+-const experience = [
+-  {
+-    role: "Backend Developer Intern",
+-    org: "Zynthex Labs",
+-    duration: "May 2025 — Jul 2025",
+-    description: "Built REST APIs serving 50k+ daily requests; cut average response time by 30% through query optimization.",
+-    icon: Briefcase,
+-    type: "Internship",
+-  },
+-  {
+-    role: "Freelance Full-Stack Developer",
+-    org: "Self-employed",
+-    duration: "Jan 2025 — Present",
+-    description: "Delivered 5 client projects — landing pages, dashboards and booking systems — using Next.js and Supabase.",
+-    icon: Code2,
+-    type: "Freelance",
+-  },
+-  {
+-    role: "Team Lead — Smart India Hackathon",
+-    org: "National Level",
+-    duration: "Sep 2024",
+-    description: "Led a team of 4 to build a finalist solution for rural healthcare access, presented to a jury of 12 industry experts.",
+-    icon: Users,
+-    type: "Leadership",
+-  },
+-  {
+-    role: "Volunteer Mentor",
+-    org: "Code for Change",
+-    duration: "Jun 2024 — Present",
+-    description: "Mentor first-year students in DSA fundamentals through weekly peer-learning sessions.",
+-    icon: Heart,
+-    type: "Volunteer",
+-  },
+-];
++import { useProfile } from "@/hooks/useProfile";
++
++const iconByType: Record<string, LucideIcon> = {
++  Internship: Briefcase,
++  Freelance: Code2,
++  Leadership: Users,
++  Volunteer: Heart,
++};
+ 
+ export default function Experience() {
++  const { experience, loading } = useProfile();
++
+   return (
+     <section className="mt-8 rounded-[24px] border border-neutral-200 bg-white p-5 sm:p-6 lg:rounded-[30px]">
+       <h2 className="text-xl font-bold sm:text-2xl">Experience</h2>
+ 
+-      <div className="relative mt-6">
+-        <motion.div
+-          initial={{ scaleY: 0 }}
+-          whileInView={{ scaleY: 1 }}
+-          viewport={{ once: true }}
+-          transition={{ duration: 0.8, ease: "easeOut" }}
+-          style={{ transformOrigin: "top" }}
+-          className="absolute left-5 top-1 bottom-1 w-px bg-neutral-200"
+-        />
+-
+-        <div className="space-y-2">
+-          {experience.map((item, index) => {
+-            const Icon = item.icon;
+-            return (
+-              <motion.div
+-                key={item.role}
+-                initial={{ opacity: 0, x: -8 }}
+-                whileInView={{ opacity: 1, x: 0 }}
+-                viewport={{ once: true }}
+-                transition={{ duration: 0.35, delay: index * 0.06, ease: "easeOut" }}
+-                className="group relative flex gap-4 rounded-xl px-2 py-3 transition-colors hover:bg-neutral-50"
+-              >
+-                <div className="z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 border-black bg-white text-black">
+-                  <Icon size={16} />
+-                </div>
++      {loading ? (
++        <div className="mt-6 space-y-3">
++          {Array.from({ length: 3 }).map((_, i) => (
++            <div key={i} className="h-20 animate-pulse rounded-xl bg-neutral-50" />
++          ))}
++        </div>
++      ) : experience.length === 0 ? (
++        <p className="mt-6 text-sm text-neutral-400">No experience added yet.</p>
++      ) : (
++        <div className="relative mt-6">
++          <motion.div
++            initial={{ scaleY: 0 }}
++            whileInView={{ scaleY: 1 }}
++            viewport={{ once: true }}
++            transition={{ duration: 0.8, ease: "easeOut" }}
++            style={{ transformOrigin: "top" }}
++            className="absolute left-5 top-1 bottom-1 w-px bg-neutral-200"
++          />
+ 
+-                <div className="min-w-0 flex-1 pt-1">
+-                  <div className="flex flex-wrap items-center justify-between gap-2">
+-                    <span className="font-semibold">{item.role}</span>
+-                    <span className="rounded-full bg-neutral-100 px-2.5 py-1 text-xs font-medium text-neutral-500">
+-                      {item.type}
+-                    </span>
++          <div className="space-y-2">
++            {experience.map((item, index) => {
++              const Icon = iconByType[item.type] ?? Briefcase;
++              return (
++                <motion.div
++                  key={item.id}
++                  initial={{ opacity: 0, x: -8 }}
++                  whileInView={{ opacity: 1, x: 0 }}
++                  viewport={{ once: true }}
++                  transition={{ duration: 0.35, delay: index * 0.06, ease: "easeOut" }}
++                  className="group relative flex gap-4 rounded-xl px-2 py-3 transition-colors hover:bg-neutral-50"
++                >
++                  <div className="z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 border-black bg-white text-black">
++                    <Icon size={16} />
+                   </div>
+ 
+-                  <div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-neutral-500">
+-                    <span>{item.org}</span>
+-                    <span className="text-neutral-300">·</span>
+-                    <span className="tabular-nums">{item.duration}</span>
+-                  </div>
++                  <div className="min-w-0 flex-1 pt-1">
++                    <div className="flex flex-wrap items-center justify-between gap-2">
++                      <span className="font-semibold">{item.role}</span>
++                      <span className="rounded-full bg-neutral-100 px-2.5 py-1 text-xs font-medium text-neutral-500">
++                        {item.type}
++                      </span>
++                    </div>
++
++                    <div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-neutral-500">
++                      <span>{item.organization}</span>
++                      {item.duration && (
++                        <>
++                          <span className="text-neutral-300">·</span>
++                          <span className="tabular-nums">{item.duration}</span>
++                        </>
++                      )}
++                    </div>
+ 
+-                  <p className="mt-2 text-sm leading-relaxed text-neutral-600">
+-                    {item.description}
+-                  </p>
+-                </div>
+-              </motion.div>
+-            );
+-          })}
++                    {item.description && (
++                      <p className="mt-2 text-sm leading-relaxed text-neutral-600">{item.description}</p>
++                    )}
++                  </div>
++                </motion.div>
++              );
++            })}
++          </div>
+         </div>
+-      </div>
++      )}
+     </section>
+   );
+ }
+diff --git a/components/dashboard-v2/profile/hero.tsx b/components/dashboard-v2/profile/hero.tsx
+index 0ea76d0..1f5ac22 100644
+--- a/components/dashboard-v2/profile/hero.tsx
++++ b/components/dashboard-v2/profile/hero.tsx
+@@ -3,6 +3,8 @@
+ import { motion } from "framer-motion";
+ import { User, Laptop, FileText, Briefcase, Sparkles, TrendingUp } from "lucide-react";
+ 
++import { useProfile } from "@/hooks/useProfile";
++
+ const pills = [
+   { label: "Verified" },
+   { label: "Placement Ready" },
+@@ -82,6 +84,8 @@ function ProfileIllustration() {
+ }
+ 
+ export default function ProfileHero() {
++  const { setIsEditing } = useProfile();
++
+   return (
+     <motion.section
+       initial={{ opacity: 0, y: 12 }}
+@@ -125,6 +129,10 @@ export default function ProfileHero() {
+               whileHover={{ scale: 1.03 }}
+               whileTap={{ scale: 0.97 }}
+               transition={{ type: "spring", stiffness: 400, damping: 22 }}
++              onClick={() => {
++                setIsEditing(true);
++                document.getElementById("profile-overview")?.scrollIntoView({ behavior: "smooth" });
++              }}
+               className="flex items-center gap-2 rounded-2xl bg-black px-5 py-3 text-white shadow-sm transition-shadow hover:shadow-md sm:px-6"
+             >
+               <Sparkles size={16} />
+diff --git a/components/dashboard-v2/profile/profile-overview.tsx b/components/dashboard-v2/profile/profile-overview.tsx
+index c513109..93554df 100644
+--- a/components/dashboard-v2/profile/profile-overview.tsx
++++ b/components/dashboard-v2/profile/profile-overview.tsx
+@@ -1,5 +1,6 @@
+ "use client";
+ 
++import { useEffect, useState } from "react";
+ import { motion } from "framer-motion";
+ import {
+   Mail,
+@@ -12,47 +13,177 @@ import {
+   Calendar,
+ } from "lucide-react";
+ 
+-const details = [
+-  { icon: GraduationCap, label: "College", value: "IIT Patna" },
+-  { icon: GraduationCap, label: "Degree", value: "B.Tech, Computer Science" },
+-  { icon: Calendar, label: "Graduation Year", value: "2026" },
+-  { icon: MapPin, label: "Location", value: "Patna, Bihar, IN" },
+-  { icon: Mail, label: "Email", value: "rohit.raj@careersetu.ai" },
+-  { icon: Phone, label: "Phone", value: "+91 98765 43210" },
+-  { icon: Link2, label: "LinkedIn", value: "linkedin.com/in/rohitraj" },
+-  { icon: GitFork, label: "GitHub", value: "github.com/Rohitraj45592" },
+-  { icon: Globe, label: "Portfolio", value: "rohitraj.dev" },
+-];
++import { useProfile } from "@/hooks/useProfile";
++import type { ProfileUpdateInput } from "@/lib/profile";
++
++function initials(fullName: string | null) {
++  if (!fullName) return "?";
++  return fullName
++    .split(" ")
++    .filter(Boolean)
++    .slice(0, 2)
++    .map((part) => part[0]?.toUpperCase())
++    .join("");
++}
+ 
+ export default function ProfileOverview() {
++  const { profile, loading, error, saving, isEditing, setIsEditing, saveProfile } = useProfile();
++
++  const [draft, setDraft] = useState<ProfileUpdateInput>({});
++
++  useEffect(() => {
++    if (profile && isEditing) {
++      setDraft({
++        full_name: profile.full_name,
++        headline: profile.headline,
++        college: profile.college,
++        degree: profile.degree,
++        graduation_year: profile.graduation_year,
++        location: profile.location,
++        phone: profile.phone,
++        bio: profile.bio,
++        linkedin_url: profile.linkedin_url,
++        github_url: profile.github_url,
++        portfolio_url: profile.portfolio_url,
++      });
++    }
++  }, [profile, isEditing]);
++
++  function field(key: keyof ProfileUpdateInput, value: string) {
++    if (key === "graduation_year") {
++      setDraft((prev) => ({ ...prev, graduation_year: value ? Number(value) : null }));
++      return;
++    }
++    setDraft((prev) => ({ ...prev, [key]: value }));
++  }
++
++  async function handleSave() {
++    try {
++      await saveProfile(draft);
++    } catch {
++      // error surfaced via context `error` state below
++    }
++  }
++
++  if (loading) {
++    return (
++      <section className="mt-8 rounded-[24px] border border-neutral-200 bg-white p-5 sm:p-6 lg:rounded-[30px]">
++        <div className="flex animate-pulse flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
++          <div className="flex flex-col items-start gap-5 sm:flex-row sm:items-center">
++            <div className="h-20 w-20 shrink-0 rounded-full bg-neutral-200" />
++            <div className="space-y-2">
++              <div className="h-6 w-40 rounded bg-neutral-200" />
++              <div className="h-4 w-56 rounded bg-neutral-100" />
++              <div className="h-4 w-72 rounded bg-neutral-100" />
++            </div>
++          </div>
++        </div>
++        <div className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
++          {Array.from({ length: 6 }).map((_, i) => (
++            <div key={i} className="h-16 animate-pulse rounded-2xl border border-neutral-200 bg-neutral-50" />
++          ))}
++        </div>
++      </section>
++    );
++  }
++
++  if (error && !profile) {
++    return (
++      <section className="mt-8 rounded-[24px] border border-neutral-200 bg-white p-6 text-center text-sm text-neutral-500 lg:rounded-[30px]">
++        {error}
++      </section>
++    );
++  }
++
++  const details = [
++    { icon: GraduationCap, label: "College", value: profile?.college, key: "college" as const },
++    { icon: GraduationCap, label: "Degree", value: profile?.degree, key: "degree" as const },
++    {
++      icon: Calendar,
++      label: "Graduation Year",
++      value: profile?.graduation_year ? String(profile.graduation_year) : null,
++      key: "graduation_year" as const,
++    },
++    { icon: MapPin, label: "Location", value: profile?.location, key: "location" as const },
++    { icon: Mail, label: "Email", value: profile?.email, key: null },
++    { icon: Phone, label: "Phone", value: profile?.phone, key: "phone" as const },
++    { icon: Link2, label: "LinkedIn", value: profile?.linkedin_url, key: "linkedin_url" as const },
++    { icon: GitFork, label: "GitHub", value: profile?.github_url, key: "github_url" as const },
++    { icon: Globe, label: "Portfolio", value: profile?.portfolio_url, key: "portfolio_url" as const },
++  ];
++
+   return (
+-    <section className="mt-8 rounded-[24px] border border-neutral-200 bg-white p-5 sm:p-6 lg:rounded-[30px]">
++    <section id="profile-overview" className="mt-8 rounded-[24px] border border-neutral-200 bg-white p-5 sm:p-6 lg:rounded-[30px]">
+       <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
+         <div className="flex flex-col items-start gap-5 sm:flex-row sm:items-center">
+           <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-full bg-black text-2xl font-semibold text-white">
+-            RR
++            {initials(profile?.full_name ?? null)}
+           </div>
+ 
+-          <div>
+-            <h2 className="text-2xl font-bold">Rohit Raj</h2>
+-            <p className="mt-1 text-neutral-500">AI Engineer · Aspiring SDE</p>
+-            <p className="mt-3 max-w-lg text-sm leading-relaxed text-neutral-600">
+-              Final-year CS student building AI-powered products. Focused on
+-              full-stack development and applied ML, with a track record of
+-              shipping production-ready projects.
+-            </p>
++          <div className="min-w-0">
++            {isEditing ? (
++              <input
++                value={draft.full_name ?? ""}
++                onChange={(e) => field("full_name", e.target.value)}
++                placeholder="Full name"
++                className="w-full max-w-xs rounded-lg border border-neutral-300 px-2 py-1 text-2xl font-bold outline-none focus:border-black"
++              />
++            ) : (
++              <h2 className="text-2xl font-bold">{profile?.full_name || "Add your name"}</h2>
++            )}
++
++            {isEditing ? (
++              <input
++                value={draft.headline ?? ""}
++                onChange={(e) => field("headline", e.target.value)}
++                placeholder="Headline (e.g. AI Engineer · Aspiring SDE)"
++                className="mt-1 w-full max-w-xs rounded-lg border border-neutral-300 px-2 py-1 text-neutral-600 outline-none focus:border-black"
++              />
++            ) : (
++              <p className="mt-1 text-neutral-500">{profile?.headline || "Add a headline"}</p>
++            )}
++
++            {isEditing ? (
++              <textarea
++                value={draft.bio ?? ""}
++                onChange={(e) => field("bio", e.target.value)}
++                placeholder="Short bio"
++                rows={3}
++                className="mt-3 w-full max-w-lg rounded-lg border border-neutral-300 p-2 text-sm leading-relaxed text-neutral-600 outline-none focus:border-black"
++              />
++            ) : (
++              <p className="mt-3 max-w-lg text-sm leading-relaxed text-neutral-600">
++                {profile?.bio || "Add a short bio so recruiters know who you are."}
++              </p>
++            )}
+           </div>
+         </div>
+ 
+-        <motion.button
+-          whileHover={{ scale: 1.03, y: -2 }}
+-          whileTap={{ scale: 0.97 }}
+-          className="shrink-0 rounded-2xl bg-black px-5 py-3 text-sm font-medium text-white shadow-sm transition-shadow hover:shadow-md"
+-        >
+-          Edit Profile
+-        </motion.button>
++        <div className="flex shrink-0 gap-2">
++          {isEditing && (
++            <motion.button
++              whileHover={{ scale: 1.03, y: -2 }}
++              whileTap={{ scale: 0.97 }}
++              onClick={() => setIsEditing(false)}
++              className="rounded-2xl border border-neutral-300 px-5 py-3 text-sm font-medium"
++            >
++              Cancel
++            </motion.button>
++          )}
++          <motion.button
++            whileHover={{ scale: 1.03, y: -2 }}
++            whileTap={{ scale: 0.97 }}
++            disabled={saving}
++            onClick={() => (isEditing ? handleSave() : setIsEditing(true))}
++            className="shrink-0 rounded-2xl bg-black px-5 py-3 text-sm font-medium text-white shadow-sm transition-shadow hover:shadow-md disabled:opacity-60"
++          >
++            {isEditing ? (saving ? "Saving…" : "Save Profile") : "Edit Profile"}
++          </motion.button>
++        </div>
+       </div>
+ 
++      {error && isEditing && <p className="mt-3 text-sm text-red-600">{error}</p>}
++
+       <div className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+         {details.map((detail, index) => {
+           const Icon = detail.icon;
+@@ -68,9 +199,17 @@ export default function ProfileOverview() {
+               <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-neutral-100">
+                 <Icon size={16} />
+               </div>
+-              <div className="min-w-0">
++              <div className="min-w-0 flex-1">
+                 <p className="text-xs text-neutral-500">{detail.label}</p>
+-                <p className="truncate text-sm font-medium">{detail.value}</p>
++                {isEditing && detail.key ? (
++                  <input
++                    value={(draft[detail.key] as string) ?? ""}
++                    onChange={(e) => field(detail.key!, e.target.value)}
++                    className="w-full rounded-md border border-neutral-300 px-1.5 py-0.5 text-sm font-medium outline-none focus:border-black"
++                  />
++                ) : (
++                  <p className="truncate text-sm font-medium">{detail.value || "—"}</p>
++                )}
+               </div>
+             </motion.div>
+           );
+diff --git a/components/dashboard-v2/profile/projects.tsx b/components/dashboard-v2/profile/projects.tsx
+index c909412..9bc747e 100644
+--- a/components/dashboard-v2/profile/projects.tsx
++++ b/components/dashboard-v2/profile/projects.tsx
+@@ -3,36 +3,7 @@
+ import { motion } from "framer-motion";
+ import { GitFork, ExternalLink } from "lucide-react";
+ 
+-const projects = [
+-  {
+-    name: "CareerSetu AI",
+-    description: "AI-powered placement preparation platform with resume analysis, mock interviews and job matching.",
+-    stack: ["Next.js", "TypeScript", "FastAPI", "LangChain"],
+-    status: "In Progress",
+-    duration: "Jan 2026 — Present",
+-  },
+-  {
+-    name: "DevMatch",
+-    description: "Real-time collaborative code editor with AI pair-programming suggestions.",
+-    stack: ["React", "Node.js", "Socket.io", "Redis"],
+-    status: "Completed",
+-    duration: "Aug 2025 — Dec 2025",
+-  },
+-  {
+-    name: "CampusConnect",
+-    description: "Event and club management portal used by 2,000+ students across campus.",
+-    stack: ["Next.js", "PostgreSQL", "Prisma"],
+-    status: "Completed",
+-    duration: "Mar 2025 — Jun 2025",
+-  },
+-  {
+-    name: "SmartExpense",
+-    description: "Personal finance tracker with ML-based spending predictions.",
+-    stack: ["Python", "PyTorch", "Streamlit"],
+-    status: "Completed",
+-    duration: "Nov 2024 — Jan 2025",
+-  },
+-];
++import { useProfile } from "@/hooks/useProfile";
+ 
+ const statusStyle: Record<string, string> = {
+   "In Progress": "bg-black text-white",
+@@ -40,68 +11,96 @@ const statusStyle: Record<string, string> = {
+ };
+ 
+ export default function Projects() {
++  const { projects, loading } = useProfile();
++
+   return (
+     <section className="mt-8">
+       <h2 className="text-xl font-bold sm:text-2xl">Projects</h2>
+ 
+-      <div className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-2">
+-        {projects.map((project, index) => (
+-          <motion.div
+-            key={project.name}
+-            initial={{ opacity: 0, y: 12 }}
+-            whileInView={{ opacity: 1, y: 0 }}
+-            viewport={{ once: true, margin: "-10% 0px" }}
+-            transition={{ duration: 0.4, delay: index * 0.06, ease: "easeOut" }}
+-            whileHover={{ y: -4 }}
+-            className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm transition-shadow duration-300 hover:shadow-lg"
+-          >
+-            <div className="flex items-start justify-between gap-3">
+-              <h3 className="text-lg font-semibold">{project.name}</h3>
+-              <span className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-medium ${statusStyle[project.status]}`}>
+-                {project.status}
+-              </span>
+-            </div>
+-
+-            <p className="mt-2 text-sm leading-relaxed text-neutral-600">
+-              {project.description}
+-            </p>
+-
+-            <div className="mt-4 flex flex-wrap gap-2">
+-              {project.stack.map((tech) => (
++      {loading ? (
++        <div className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-2">
++          {Array.from({ length: 4 }).map((_, i) => (
++            <div key={i} className="h-48 animate-pulse rounded-2xl border border-neutral-200 bg-neutral-50" />
++          ))}
++        </div>
++      ) : projects.length === 0 ? (
++        <p className="mt-5 text-sm text-neutral-400">No projects added yet.</p>
++      ) : (
++        <div className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-2">
++          {projects.map((project, index) => (
++            <motion.div
++              key={project.id}
++              initial={{ opacity: 0, y: 12 }}
++              whileInView={{ opacity: 1, y: 0 }}
++              viewport={{ once: true, margin: "-10% 0px" }}
++              transition={{ duration: 0.4, delay: index * 0.06, ease: "easeOut" }}
++              whileHover={{ y: -4 }}
++              className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm transition-shadow duration-300 hover:shadow-lg"
++            >
++              <div className="flex items-start justify-between gap-3">
++                <h3 className="text-lg font-semibold">{project.name}</h3>
+                 <span
+-                  key={tech}
+-                  className="rounded-full bg-neutral-100 px-2.5 py-1 text-xs font-medium text-neutral-700"
++                  className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-medium ${
++                    statusStyle[project.status] ?? statusStyle.Completed
++                  }`}
+                 >
+-                  {tech}
++                  {project.status}
+                 </span>
+-              ))}
+-            </div>
++              </div>
+ 
+-            <div className="mt-5 flex items-center justify-between">
+-              <span className="text-xs text-neutral-400">{project.duration}</span>
++              {project.description && (
++                <p className="mt-2 text-sm leading-relaxed text-neutral-600">{project.description}</p>
++              )}
+ 
+-              <div className="flex gap-2">
+-                <motion.button
+-                  whileHover={{ scale: 1.05 }}
+-                  whileTap={{ scale: 0.95 }}
+-                  className="flex items-center gap-1.5 rounded-xl border border-neutral-300 px-3 py-1.5 text-xs font-medium transition-colors hover:border-black"
+-                >
+-                  <GitFork size={13} />
+-                  Code
+-                </motion.button>
+-                <motion.button
+-                  whileHover={{ scale: 1.05 }}
+-                  whileTap={{ scale: 0.95 }}
+-                  className="flex items-center gap-1.5 rounded-xl bg-black px-3 py-1.5 text-xs font-medium text-white"
+-                >
+-                  <ExternalLink size={13} />
+-                  Live
+-                </motion.button>
++              {project.tech_stack && project.tech_stack.length > 0 && (
++                <div className="mt-4 flex flex-wrap gap-2">
++                  {project.tech_stack.map((tech) => (
++                    <span
++                      key={tech}
++                      className="rounded-full bg-neutral-100 px-2.5 py-1 text-xs font-medium text-neutral-700"
++                    >
++                      {tech}
++                    </span>
++                  ))}
++                </div>
++              )}
++
++              <div className="mt-5 flex items-center justify-between">
++                <span className="text-xs text-neutral-400">{project.duration}</span>
++
++                <div className="flex gap-2">
++                  {project.github_url && (
++                    <motion.a
++                      href={project.github_url}
++                      target="_blank"
++                      rel="noopener noreferrer"
++                      whileHover={{ scale: 1.05 }}
++                      whileTap={{ scale: 0.95 }}
++                      className="flex items-center gap-1.5 rounded-xl border border-neutral-300 px-3 py-1.5 text-xs font-medium transition-colors hover:border-black"
++                    >
++                      <GitFork size={13} />
++                      Code
++                    </motion.a>
++                  )}
++                  {project.live_url && (
++                    <motion.a
++                      href={project.live_url}
++                      target="_blank"
++                      rel="noopener noreferrer"
++                      whileHover={{ scale: 1.05 }}
++                      whileTap={{ scale: 0.95 }}
++                      className="flex items-center gap-1.5 rounded-xl bg-black px-3 py-1.5 text-xs font-medium text-white"
++                    >
++                      <ExternalLink size={13} />
++                      Live
++                    </motion.a>
++                  )}
++                </div>
+               </div>
+-            </div>
+-          </motion.div>
+-        ))}
+-      </div>
++            </motion.div>
++          ))}
++        </div>
++      )}
+     </section>
+   );
+ }
+diff --git a/components/dashboard-v2/profile/recent-activity.tsx b/components/dashboard-v2/profile/recent-activity.tsx
+index 0210d27..733d8f4 100644
+--- a/components/dashboard-v2/profile/recent-activity.tsx
++++ b/components/dashboard-v2/profile/recent-activity.tsx
+@@ -1,59 +1,86 @@
+ "use client";
+ 
+ import { motion } from "framer-motion";
+-import { FileText, FolderPlus, Award, Mic, Route } from "lucide-react";
++import { FileText, FolderPlus, Award, Mic, UserRound, type LucideIcon } from "lucide-react";
+ 
+-const events = [
+-  { icon: FileText, title: "Resume Updated", time: "3 hours ago" },
+-  { icon: FolderPlus, title: "Project Added — DevMatch", time: "1 day ago" },
+-  { icon: Award, title: "Certificate Uploaded — AWS Cloud Practitioner", time: "4 days ago" },
+-  { icon: Mic, title: "Interview Completed — Mock DSA Round", time: "6 days ago" },
+-  { icon: Route, title: "Roadmap Updated", time: "1 week ago" },
+-];
++import { useProfile } from "@/hooks/useProfile";
++
++const iconByEventType: Record<string, LucideIcon> = {
++  resume: FileText,
++  project: FolderPlus,
++  certification: Award,
++  interview: Mic,
++  profile: UserRound,
++};
++
++function timeAgo(iso: string) {
++  const diffMs = Date.now() - new Date(iso).getTime();
++  const minutes = Math.floor(diffMs / 60000);
++  if (minutes < 1) return "just now";
++  if (minutes < 60) return `${minutes} minute${minutes === 1 ? "" : "s"} ago`;
++  const hours = Math.floor(minutes / 60);
++  if (hours < 24) return `${hours} hour${hours === 1 ? "" : "s"} ago`;
++  const days = Math.floor(hours / 24);
++  if (days < 7) return `${days} day${days === 1 ? "" : "s"} ago`;
++  const weeks = Math.floor(days / 7);
++  return `${weeks} week${weeks === 1 ? "" : "s"} ago`;
++}
+ 
+ export default function RecentActivity() {
++  const { activity, loading } = useProfile();
++
+   return (
+     <section className="mt-8 rounded-[24px] border border-neutral-200 bg-white p-5 sm:p-6 lg:rounded-[30px]">
+       <h2 className="text-xl font-bold sm:text-2xl">Recent Activity</h2>
+ 
+-      <div className="relative mt-6">
+-        <motion.div
+-          initial={{ scaleY: 0 }}
+-          whileInView={{ scaleY: 1 }}
+-          viewport={{ once: true }}
+-          transition={{ duration: 0.6, ease: "easeOut" }}
+-          style={{ transformOrigin: "top" }}
+-          className="absolute left-5 top-1 bottom-1 w-px bg-neutral-200"
+-        />
+-
+-        <div className="space-y-1">
+-          {events.map((event, index) => {
+-            const Icon = event.icon;
+-
+-            return (
+-              <motion.div
+-                key={index}
+-                initial={{ opacity: 0, x: -8 }}
+-                whileInView={{ opacity: 1, x: 0 }}
+-                viewport={{ once: true }}
+-                transition={{ duration: 0.35, delay: index * 0.08, ease: "easeOut" }}
+-                className="group relative flex items-center gap-4 rounded-xl px-2 py-2.5 transition-colors hover:bg-neutral-50"
+-              >
+-                <div className="z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-neutral-200 bg-white transition-transform duration-300 group-hover:scale-110 group-hover:border-black">
+-                  <Icon size={16} />
+-                </div>
+-
+-                <div className="flex min-w-0 flex-1 items-center justify-between gap-3">
+-                  <span className="truncate font-medium">{event.title}</span>
+-                  <span className="shrink-0 text-xs tabular-nums text-neutral-400">
+-                    {event.time}
+-                  </span>
+-                </div>
+-              </motion.div>
+-            );
+-          })}
++      {loading ? (
++        <div className="mt-6 space-y-2">
++          {Array.from({ length: 5 }).map((_, i) => (
++            <div key={i} className="h-14 animate-pulse rounded-xl bg-neutral-50" />
++          ))}
++        </div>
++      ) : activity.length === 0 ? (
++        <p className="mt-6 text-sm text-neutral-400">No activity yet — it'll show up here as you use CareerSetu AI.</p>
++      ) : (
++        <div className="relative mt-6">
++          <motion.div
++            initial={{ scaleY: 0 }}
++            whileInView={{ scaleY: 1 }}
++            viewport={{ once: true }}
++            transition={{ duration: 0.6, ease: "easeOut" }}
++            style={{ transformOrigin: "top" }}
++            className="absolute left-5 top-1 bottom-1 w-px bg-neutral-200"
++          />
++
++          <div className="space-y-1">
++            {activity.map((event, index) => {
++              const Icon = iconByEventType[event.event_type] ?? FileText;
++
++              return (
++                <motion.div
++                  key={`${event.event_type}-${event.occurred_at}-${index}`}
++                  initial={{ opacity: 0, x: -8 }}
++                  whileInView={{ opacity: 1, x: 0 }}
++                  viewport={{ once: true }}
++                  transition={{ duration: 0.35, delay: index * 0.08, ease: "easeOut" }}
++                  className="group relative flex items-center gap-4 rounded-xl px-2 py-2.5 transition-colors hover:bg-neutral-50"
++                >
++                  <div className="z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-neutral-200 bg-white transition-transform duration-300 group-hover:scale-110 group-hover:border-black">
++                    <Icon size={16} />
++                  </div>
++
++                  <div className="flex min-w-0 flex-1 items-center justify-between gap-3">
++                    <span className="truncate font-medium">{event.title}</span>
++                    <span className="shrink-0 text-xs tabular-nums text-neutral-400">
++                      {timeAgo(event.occurred_at)}
++                    </span>
++                  </div>
++                </motion.div>
++              );
++            })}
++          </div>
+         </div>
+-      </div>
++      )}
+     </section>
+   );
+ }
+diff --git a/components/dashboard-v2/profile/skills.tsx b/components/dashboard-v2/profile/skills.tsx
+index e4a13e2..f144f45 100644
+--- a/components/dashboard-v2/profile/skills.tsx
++++ b/components/dashboard-v2/profile/skills.tsx
+@@ -2,100 +2,83 @@
+ 
+ import { motion } from "framer-motion";
+ 
+-const groups = [
+-  {
+-    title: "Programming Languages",
+-    skills: [
+-      { name: "Python", level: 90, tag: "Advanced" },
+-      { name: "JavaScript / TypeScript", level: 85, tag: "Advanced" },
+-      { name: "Java", level: 62, tag: "Intermediate" },
+-    ],
+-  },
+-  {
+-    title: "Frameworks",
+-    skills: [
+-      { name: "React / Next.js", level: 88, tag: "Advanced" },
+-      { name: "FastAPI", level: 74, tag: "Intermediate" },
+-      { name: "Node.js", level: 70, tag: "Intermediate" },
+-    ],
+-  },
+-  {
+-    title: "Databases & Cloud",
+-    skills: [
+-      { name: "PostgreSQL", level: 76, tag: "Intermediate" },
+-      { name: "MongoDB", level: 68, tag: "Intermediate" },
+-      { name: "AWS", level: 55, tag: "Beginner" },
+-    ],
+-  },
+-  {
+-    title: "AI & ML",
+-    skills: [
+-      { name: "PyTorch", level: 72, tag: "Intermediate" },
+-      { name: "LangChain", level: 66, tag: "Intermediate" },
+-    ],
+-  },
+-  {
+-    title: "Soft Skills",
+-    skills: [
+-      { name: "Communication", level: 88, tag: "Advanced" },
+-      { name: "Leadership", level: 74, tag: "Intermediate" },
+-    ],
+-  },
+-];
++import { useProfile } from "@/hooks/useProfile";
++import type { Skill } from "@/lib/profile";
++
++function groupByCategory(skills: Skill[]) {
++  const groups = new Map<string, Skill[]>();
++  for (const skill of skills) {
++    const list = groups.get(skill.category) ?? [];
++    list.push(skill);
++    groups.set(skill.category, list);
++  }
++  return Array.from(groups.entries()).map(([title, items]) => ({ title, skills: items }));
++}
+ 
+ export default function Skills() {
++  const { skills, loading } = useProfile();
++  const groups = groupByCategory(skills);
++
+   return (
+     <section className="mt-8 rounded-[24px] border border-neutral-200 bg-white p-5 sm:p-6 lg:rounded-[30px]">
+       <h2 className="text-xl font-bold sm:text-2xl">Skills</h2>
+ 
+-      <div className="mt-6 grid grid-cols-1 gap-8 lg:grid-cols-2">
+-        {groups.map((group, groupIndex) => (
+-          <div key={group.title}>
+-            <h3 className="mb-4 text-sm font-semibold uppercase tracking-wide text-neutral-500">
+-              {group.title}
+-            </h3>
++      {loading ? (
++        <div className="mt-6 grid grid-cols-1 gap-8 lg:grid-cols-2">
++          {Array.from({ length: 4 }).map((_, i) => (
++            <div key={i} className="h-24 animate-pulse rounded-xl bg-neutral-50" />
++          ))}
++        </div>
++      ) : groups.length === 0 ? (
++        <p className="mt-6 text-sm text-neutral-400">No skills added yet.</p>
++      ) : (
++        <div className="mt-6 grid grid-cols-1 gap-8 lg:grid-cols-2">
++          {groups.map((group, groupIndex) => (
++            <div key={group.title}>
++              <h3 className="mb-4 text-sm font-semibold uppercase tracking-wide text-neutral-500">
++                {group.title}
++              </h3>
+ 
+-            <div className="space-y-5">
+-              {group.skills.map((skill, index) => (
+-                <div key={skill.name}>
+-                  <div className="mb-2 flex items-center justify-between">
+-                    <span className="font-medium">{skill.name}</span>
+-                    <div className="flex items-center gap-2">
+-                      <span className="rounded-full bg-neutral-100 px-2 py-0.5 text-[11px] font-medium text-neutral-500">
+-                        {skill.tag}
+-                      </span>
+-                      <span className="text-sm tabular-nums text-neutral-500">
+-                        {skill.level}%
+-                      </span>
++              <div className="space-y-5">
++                {group.skills.map((skill, index) => (
++                  <div key={skill.id}>
++                    <div className="mb-2 flex items-center justify-between">
++                      <span className="font-medium">{skill.name}</span>
++                      <div className="flex items-center gap-2">
++                        <span className="rounded-full bg-neutral-100 px-2 py-0.5 text-[11px] font-medium text-neutral-500">
++                          {skill.proficiency_label}
++                        </span>
++                        <span className="text-sm tabular-nums text-neutral-500">{skill.level}%</span>
++                      </div>
+                     </div>
+-                  </div>
+ 
+-                  <div className="relative h-2 overflow-hidden rounded-full bg-neutral-200">
+-                    <motion.div
+-                      className="relative h-2 overflow-hidden rounded-full bg-black"
+-                      initial={{ width: 0 }}
+-                      whileInView={{ width: `${skill.level}%` }}
+-                      viewport={{ once: true, margin: "-10% 0px" }}
+-                      transition={{
+-                        duration: 0.8,
+-                        delay: groupIndex * 0.05 + index * 0.06,
+-                        ease: "easeOut",
+-                      }}
+-                    >
+-                      <span
+-                        className="absolute inset-y-0 left-0 w-1/3 -skew-x-12 bg-gradient-to-r from-transparent via-white/25 to-transparent"
+-                        style={{
+-                          animation: `profileSkillShine 2.6s ease-in-out ${1 + (groupIndex * 2 + index) * 0.15}s infinite`,
++                    <div className="relative h-2 overflow-hidden rounded-full bg-neutral-200">
++                      <motion.div
++                        className="relative h-2 overflow-hidden rounded-full bg-black"
++                        initial={{ width: 0 }}
++                        whileInView={{ width: `${skill.level}%` }}
++                        viewport={{ once: true, margin: "-10% 0px" }}
++                        transition={{
++                          duration: 0.8,
++                          delay: groupIndex * 0.05 + index * 0.06,
++                          ease: "easeOut",
+                         }}
+-                      />
+-                    </motion.div>
++                      >
++                        <span
++                          className="absolute inset-y-0 left-0 w-1/3 -skew-x-12 bg-gradient-to-r from-transparent via-white/25 to-transparent"
++                          style={{
++                            animation: `profileSkillShine 2.6s ease-in-out ${1 + (groupIndex * 2 + index) * 0.15}s infinite`,
++                          }}
++                        />
++                      </motion.div>
++                    </div>
+                   </div>
+-                </div>
+-              ))}
++                ))}
++              </div>
+             </div>
+-          </div>
+-        ))}
+-      </div>
++          ))}
++        </div>
++      )}
+ 
+       <style>{`
+         @keyframes profileSkillShine {
+diff --git a/components/dashboard-v2/profile/snapshot.tsx b/components/dashboard-v2/profile/snapshot.tsx
+index 2c6e063..7de6bdf 100644
+--- a/components/dashboard-v2/profile/snapshot.tsx
++++ b/components/dashboard-v2/profile/snapshot.tsx
+@@ -10,44 +10,51 @@ import {
+   Target,
+ } from "lucide-react";
+ import AnimatedNumber from "../shared/animated-number";
+-
+-const stats = [
+-  { icon: CircleCheck, value: 92, suffix: "%", label: "Profile Completion" },
+-  { icon: FileText, value: 82, suffix: "", label: "Resume Score" },
+-  { icon: FolderKanban, value: 6, suffix: "", label: "Projects" },
+-  { icon: Award, value: 3, suffix: "", label: "Certificates" },
+-  { icon: Boxes, value: 14, suffix: "", label: "Skills" },
+-  { icon: Target, value: 82, suffix: "%", label: "Placement Readiness" },
+-];
++import { useProfile } from "@/hooks/useProfile";
+ 
+ export default function CareerSnapshot() {
++  const { snapshot, loading } = useProfile();
++
++  const stats = [
++    { icon: CircleCheck, value: snapshot?.profile_completion ?? 0, suffix: "%", label: "Profile Completion" },
++    { icon: FileText, value: snapshot?.resume_score ?? 0, suffix: "", label: "Resume Score" },
++    { icon: FolderKanban, value: snapshot?.projects_count ?? 0, suffix: "", label: "Projects" },
++    { icon: Award, value: snapshot?.certificates_count ?? 0, suffix: "", label: "Certificates" },
++    { icon: Boxes, value: snapshot?.skills_count ?? 0, suffix: "", label: "Skills" },
++    { icon: Target, value: snapshot?.placement_readiness ?? 0, suffix: "%", label: "Placement Readiness" },
++  ];
++
+   return (
+     <section className="mt-8">
+       <h2 className="text-xl font-bold sm:text-2xl">Career Snapshot</h2>
+ 
+       <div className="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
+-        {stats.map((item, index) => {
+-          const Icon = item.icon;
+-          return (
+-            <motion.div
+-              key={item.label}
+-              initial={{ opacity: 0, y: 14 }}
+-              whileInView={{ opacity: 1, y: 0 }}
+-              viewport={{ once: true, margin: "-10% 0px" }}
+-              transition={{ duration: 0.4, delay: index * 0.05, ease: [0.22, 1, 0.36, 1] }}
+-              whileHover={{ y: -4 }}
+-              className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm transition-shadow duration-300 hover:shadow-lg"
+-            >
+-              <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-neutral-100">
+-                <Icon size={18} />
+-              </div>
++        {loading
++          ? Array.from({ length: 6 }).map((_, i) => (
++              <div key={i} className="h-28 animate-pulse rounded-2xl border border-neutral-200 bg-neutral-50" />
++            ))
++          : stats.map((item, index) => {
++              const Icon = item.icon;
++              return (
++                <motion.div
++                  key={item.label}
++                  initial={{ opacity: 0, y: 14 }}
++                  whileInView={{ opacity: 1, y: 0 }}
++                  viewport={{ once: true, margin: "-10% 0px" }}
++                  transition={{ duration: 0.4, delay: index * 0.05, ease: [0.22, 1, 0.36, 1] }}
++                  whileHover={{ y: -4 }}
++                  className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm transition-shadow duration-300 hover:shadow-lg"
++                >
++                  <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-neutral-100">
++                    <Icon size={18} />
++                  </div>
+ 
+-              <AnimatedNumber value={item.value} suffix={item.suffix} />
++                  <AnimatedNumber value={item.value} suffix={item.suffix} />
+ 
+-              <p className="mt-1 text-sm text-neutral-500">{item.label}</p>
+-            </motion.div>
+-          );
+-        })}
++                  <p className="mt-1 text-sm text-neutral-500">{item.label}</p>
++                </motion.div>
++              );
++            })}
+       </div>
+     </section>
+   );
+diff --git a/components/dashboard-v2/profile/social-profiles.tsx b/components/dashboard-v2/profile/social-profiles.tsx
+index deaf84f..3d7b341 100644
+--- a/components/dashboard-v2/profile/social-profiles.tsx
++++ b/components/dashboard-v2/profile/social-profiles.tsx
+@@ -1,66 +1,97 @@
+ "use client";
+ 
+ import { motion } from "framer-motion";
+-import { Link2, GitFork, Globe, Code2, Trophy, Terminal } from "lucide-react";
++import { Link2, GitFork, Globe, Code2, Trophy, Terminal, type LucideIcon } from "lucide-react";
+ 
+-const profiles = [
+-  { icon: Link2, name: "LinkedIn", username: "rohitraj", status: "Connected" },
+-  { icon: GitFork, name: "GitHub", username: "Rohitraj45592", status: "Connected" },
+-  { icon: Globe, name: "Portfolio", username: "rohitraj.dev", status: "Connected" },
+-  { icon: Code2, name: "LeetCode", username: "rohitraj45", status: "Connected" },
+-  { icon: Trophy, name: "Codeforces", username: "rohit_r", status: "Not Linked" },
+-  { icon: Terminal, name: "HackerRank", username: "rohitraj", status: "Connected" },
+-];
++import { useProfile } from "@/hooks/useProfile";
++
++const socialIconByPlatform: Record<string, LucideIcon> = {
++  leetcode: Code2,
++  codeforces: Trophy,
++  hackerrank: Terminal,
++};
++
++function usernameFromUrl(url: string | null) {
++  if (!url) return "";
++  return url.replace(/^https?:\/\//, "").replace(/\/$/, "");
++}
+ 
+ export default function SocialProfiles() {
++  const { profile, socialLinks, loading } = useProfile();
++
++  const profiles = [
++    { icon: Link2, name: "LinkedIn", username: usernameFromUrl(profile?.linkedin_url ?? null), connected: !!profile?.linkedin_url, url: profile?.linkedin_url },
++    { icon: GitFork, name: "GitHub", username: usernameFromUrl(profile?.github_url ?? null), connected: !!profile?.github_url, url: profile?.github_url },
++    { icon: Globe, name: "Portfolio", username: usernameFromUrl(profile?.portfolio_url ?? null), connected: !!profile?.portfolio_url, url: profile?.portfolio_url },
++    ...socialLinks.map((link) => ({
++      icon: socialIconByPlatform[link.platform] ?? Link2,
++      name: link.platform.charAt(0).toUpperCase() + link.platform.slice(1),
++      username: link.username ?? "",
++      connected: link.is_connected,
++      url: link.url,
++    })),
++  ];
++
+   return (
+     <section className="mt-8">
+       <h2 className="text-xl font-bold sm:text-2xl">Social Profiles</h2>
+ 
+-      <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+-        {profiles.map((profile, index) => {
+-          const Icon = profile.icon;
+-          const connected = profile.status === "Connected";
+-          return (
+-            <motion.div
+-              key={profile.name}
+-              initial={{ opacity: 0, y: 10 }}
+-              whileInView={{ opacity: 1, y: 0 }}
+-              viewport={{ once: true, margin: "-10% 0px" }}
+-              transition={{ duration: 0.4, delay: index * 0.05, ease: "easeOut" }}
+-              whileHover={{ y: -4 }}
+-              className="flex items-center justify-between rounded-2xl border border-neutral-200 bg-white p-4 shadow-sm transition-shadow duration-300 hover:shadow-lg"
+-            >
+-              <div className="flex items-center gap-3">
+-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-neutral-100">
+-                  <Icon size={18} />
+-                </div>
+-                <div>
+-                  <p className="font-medium">{profile.name}</p>
+-                  <p className="text-sm text-neutral-500">@{profile.username}</p>
+-                  <span
+-                    className={`mt-1 inline-block rounded-full px-2 py-0.5 text-[11px] font-medium ${
+-                      connected ? "bg-neutral-100 text-neutral-600" : "bg-neutral-100 text-neutral-400"
+-                    }`}
+-                  >
+-                    {profile.status}
+-                  </span>
++      {loading ? (
++        <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
++          {Array.from({ length: 6 }).map((_, i) => (
++            <div key={i} className="h-24 animate-pulse rounded-2xl border border-neutral-200 bg-neutral-50" />
++          ))}
++        </div>
++      ) : (
++        <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
++          {profiles.map((profileLink, index) => {
++            const Icon = profileLink.icon;
++            return (
++              <motion.div
++                key={profileLink.name}
++                initial={{ opacity: 0, y: 10 }}
++                whileInView={{ opacity: 1, y: 0 }}
++                viewport={{ once: true, margin: "-10% 0px" }}
++                transition={{ duration: 0.4, delay: index * 0.05, ease: "easeOut" }}
++                whileHover={{ y: -4 }}
++                className="flex items-center justify-between rounded-2xl border border-neutral-200 bg-white p-4 shadow-sm transition-shadow duration-300 hover:shadow-lg"
++              >
++                <div className="flex items-center gap-3">
++                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-neutral-100">
++                    <Icon size={18} />
++                  </div>
++                  <div>
++                    <p className="font-medium">{profileLink.name}</p>
++                    <p className="text-sm text-neutral-500">{profileLink.username || "Not linked"}</p>
++                    <span
++                      className={`mt-1 inline-block rounded-full px-2 py-0.5 text-[11px] font-medium ${
++                        profileLink.connected ? "bg-neutral-100 text-neutral-600" : "bg-neutral-100 text-neutral-400"
++                      }`}
++                    >
++                      {profileLink.connected ? "Connected" : "Not Linked"}
++                    </span>
++                  </div>
+                 </div>
+-              </div>
+ 
+-              <motion.button
+-                whileHover={{ scale: 1.05 }}
+-                whileTap={{ scale: 0.95 }}
+-                className={`shrink-0 rounded-xl px-3 py-2 text-xs font-medium ${
+-                  connected ? "border border-neutral-300 hover:border-black" : "bg-black text-white"
+-                }`}
+-              >
+-                {connected ? "Visit" : "Link"}
+-              </motion.button>
+-            </motion.div>
+-          );
+-        })}
+-      </div>
++                <motion.a
++                  href={profileLink.url ?? undefined}
++                  target="_blank"
++                  rel="noopener noreferrer"
++                  whileHover={{ scale: 1.05 }}
++                  whileTap={{ scale: 0.95 }}
++                  className={`shrink-0 rounded-xl px-3 py-2 text-xs font-medium ${
++                    profileLink.connected
++                      ? "border border-neutral-300 hover:border-black"
++                      : "pointer-events-none bg-black text-white opacity-60"
++                  }`}
++                >
++                  {profileLink.connected ? "Visit" : "Link"}
++                </motion.a>
++              </motion.div>
++            );
++          })}
++        </div>
++      )}
+     </section>
+   );
+ }
+diff --git a/hooks/useProfile.ts b/hooks/useProfile.ts
+new file mode 100644
+index 0000000..bac7608
+--- /dev/null
++++ b/hooks/useProfile.ts
+@@ -0,0 +1,199 @@
++"use client";
++
++import {
++  createElement,
++  createContext,
++  useCallback,
++  useContext,
++  useEffect,
++  useState,
++  type ReactNode,
++} from "react";
++
++import { ApiError } from "@/lib/api";
++import * as profileApi from "@/lib/profile";
++import type {
++  AccountStatistics,
++  Achievement,
++  ActivityEvent,
++  CareerSnapshot,
++  Certification,
++  Education,
++  Experience,
++  Profile,
++  ProfileInsights,
++  ProfileUpdateInput,
++  Project,
++  Skill,
++  SocialLink,
++} from "@/lib/profile";
++
++interface ProfileState {
++  profile: Profile | null;
++  education: Education[];
++  skills: Skill[];
++  projects: Project[];
++  experience: Experience[];
++  certifications: Certification[];
++  achievements: Achievement[];
++  socialLinks: SocialLink[];
++  snapshot: CareerSnapshot | null;
++  insights: ProfileInsights | null;
++  activity: ActivityEvent[];
++  stats: AccountStatistics | null;
++}
++
++interface ProfileContextValue extends ProfileState {
++  loading: boolean;
++  error: string | null;
++  saving: boolean;
++  saveSuccess: boolean;
++  isEditing: boolean;
++  setIsEditing: (value: boolean) => void;
++  refetch: () => void;
++  saveProfile: (patch: ProfileUpdateInput) => Promise<void>;
++}
++
++const ProfileContext = createContext<ProfileContextValue | null>(null);
++
++const emptyState: ProfileState = {
++  profile: null,
++  education: [],
++  skills: [],
++  projects: [],
++  experience: [],
++  certifications: [],
++  achievements: [],
++  socialLinks: [],
++  snapshot: null,
++  insights: null,
++  activity: [],
++  stats: null,
++};
++
++export function ProfileProvider({ children }: { children: ReactNode }) {
++  const [state, setState] = useState<ProfileState>(emptyState);
++  const [loading, setLoading] = useState(true);
++  const [error, setError] = useState<string | null>(null);
++  const [saving, setSaving] = useState(false);
++  const [saveSuccess, setSaveSuccess] = useState(false);
++  const [isEditing, setIsEditing] = useState(false);
++  const [refetchToken, setRefetchToken] = useState(0);
++
++  useEffect(() => {
++    let cancelled = false;
++
++    async function load() {
++      setLoading(true);
++      setError(null);
++
++      try {
++        const [
++          profile,
++          education,
++          skills,
++          projects,
++          experience,
++          certifications,
++          achievements,
++          socialLinks,
++          snapshot,
++          insights,
++          activity,
++          stats,
++        ] = await Promise.all([
++          profileApi.getProfile(),
++          profileApi.getEducation(),
++          profileApi.getSkills(),
++          profileApi.getProjects(),
++          profileApi.getExperience(),
++          profileApi.getCertifications(),
++          profileApi.getAchievements(),
++          profileApi.getSocialLinks(),
++          profileApi.getCareerSnapshot(),
++          profileApi.getProfileInsights(),
++          profileApi.getRecentActivity(),
++          profileApi.getAccountStatistics(),
++        ]);
++
++        if (cancelled) return;
++
++        setState({
++          profile,
++          education,
++          skills,
++          projects,
++          experience,
++          certifications,
++          achievements,
++          socialLinks,
++          snapshot,
++          insights,
++          activity,
++          stats,
++        });
++      } catch (err) {
++        if (cancelled) return;
++        setError(err instanceof ApiError ? err.message : "Couldn't load your profile. Please try again.");
++      } finally {
++        if (!cancelled) setLoading(false);
++      }
++    }
++
++    load();
++    return () => {
++      cancelled = true;
++    };
++  }, [refetchToken]);
++
++  const refetch = useCallback(() => setRefetchToken((t) => t + 1), []);
++
++  const saveProfile = useCallback(async (patch: ProfileUpdateInput) => {
++    setSaving(true);
++    setError(null);
++    setSaveSuccess(false);
++
++    try {
++      const updated = await profileApi.updateProfile(patch);
++      setState((prev) => ({ ...prev, profile: updated }));
++      // Profile completion (and other snapshot fields) can shift after an edit.
++      profileApi.getCareerSnapshot().then((snapshot) => {
++        setState((prev) => ({ ...prev, snapshot }));
++      });
++      setSaveSuccess(true);
++      setIsEditing(false);
++      setTimeout(() => setSaveSuccess(false), 2500);
++    } catch (err) {
++      setError(err instanceof ApiError ? err.message : "Couldn't save your changes. Please try again.");
++      throw err;
++    } finally {
++      setSaving(false);
++    }
++  }, []);
++
++  return createElement(
++    ProfileContext.Provider,
++    {
++      value: {
++        ...state,
++        loading,
++        error,
++        saving,
++        saveSuccess,
++        isEditing,
++        setIsEditing,
++        refetch,
++        saveProfile,
++      },
++    },
++    children,
++  );
++}
++
++export function useProfile() {
++  const ctx = useContext(ProfileContext);
++  if (!ctx) {
++    throw new Error("useProfile must be used inside <ProfileProvider>");
++  }
++  return ctx;
++}
+diff --git a/lib/profile.ts b/lib/profile.ts
+new file mode 100644
+index 0000000..ab46030
+--- /dev/null
++++ b/lib/profile.ts
+@@ -0,0 +1,201 @@
++import { apiFetch } from "@/lib/api";
++
++// --- Types (mirror backend/app/schemas/profile.py + profile_sections.py exactly) ---
++
++export interface Profile {
++  id: string;
++  user_id: string;
++  email: string | null;
++  full_name: string | null;
++  headline: string | null;
++  college: string | null;
++  degree: string | null;
++  graduation_year: number | null;
++  location: string | null;
++  bio: string | null;
++  phone: string | null;
++  target_role: string | null;
++  dream_companies: string[] | null;
++  expected_salary: string | null;
++  preferred_location: string | null;
++  preferred_work_mode: string | null;
++  career_interests: string[] | null;
++  linkedin_url: string | null;
++  github_url: string | null;
++  portfolio_url: string | null;
++  created_at: string;
++  updated_at: string;
++}
++
++export type ProfileUpdateInput = Partial<
++  Omit<Profile, "id" | "user_id" | "email" | "created_at" | "updated_at">
++>;
++
++export interface Education {
++  id: string;
++  college: string;
++  degree: string;
++  duration: string | null;
++  cgpa: string | null;
++  coursework: string | null;
++  achievement: string | null;
++  order_index: number;
++}
++export type EducationInput = Omit<Education, "id">;
++
++export interface Skill {
++  id: string;
++  category: string;
++  name: string;
++  level: number;
++  proficiency_label: string;
++  order_index: number;
++}
++export type SkillInput = Omit<Skill, "id">;
++
++export interface Project {
++  id: string;
++  name: string;
++  description: string | null;
++  tech_stack: string[] | null;
++  github_url: string | null;
++  live_url: string | null;
++  status: string;
++  duration: string | null;
++  order_index: number;
++}
++export type ProjectInput = Omit<Project, "id">;
++
++export interface Experience {
++  id: string;
++  role: string;
++  organization: string;
++  duration: string | null;
++  description: string | null;
++  type: string;
++  order_index: number;
++}
++export type ExperienceInput = Omit<Experience, "id">;
++
++export interface Certification {
++  id: string;
++  name: string;
++  platform: string | null;
++  issued_date: string | null;
++  credential_id: string | null;
++  certificate_url: string | null;
++  order_index: number;
++}
++export type CertificationInput = Omit<Certification, "id">;
++
++export interface Achievement {
++  id: string;
++  type: string;
++  label: string;
++  value: number;
++  icon_key: string;
++  order_index: number;
++}
++export type AchievementInput = Omit<Achievement, "id">;
++
++export interface SocialLink {
++  id: string;
++  platform: string;
++  username: string | null;
++  url: string | null;
++  is_connected: boolean;
++}
++export type SocialLinkInput = Omit<SocialLink, "id">;
++
++export interface CareerSnapshot {
++  profile_completion: number;
++  resume_score: number | null;
++  projects_count: number;
++  certificates_count: number;
++  skills_count: number;
++  placement_readiness: number | null;
++}
++
++export interface ProfileInsights {
++  insights: string[];
++}
++
++export interface ActivityEvent {
++  title: string;
++  event_type: string;
++  occurred_at: string;
++}
++
++export interface AccountStatistics {
++  profile_views: number;
++  resume_downloads: number;
++  portfolio_visits: number;
++  interview_invitations: number;
++  job_matches: number;
++  applications: number;
++}
++
++export type AccountStatMetric =
++  | "profile_views"
++  | "resume_downloads"
++  | "portfolio_visits"
++  | "interview_invitations";
++
++// --- Core profile ---
++
++export function getProfile(): Promise<Profile> {
++  return apiFetch<Profile>("/api/v1/profile/me");
++}
++
++export function updateProfile(patch: ProfileUpdateInput): Promise<Profile> {
++  return apiFetch<Profile>("/api/v1/profile/me", {
++    method: "PUT",
++    body: JSON.stringify(patch),
++  });
++}
++
++// --- List sections (replace-all PUT) ---
++
++export const getEducation = () => apiFetch<Education[]>("/api/v1/profile/education");
++export const updateEducation = (items: EducationInput[]) =>
++  apiFetch<Education[]>("/api/v1/profile/education", { method: "PUT", body: JSON.stringify(items) });
++
++export const getSkills = () => apiFetch<Skill[]>("/api/v1/profile/skills");
++export const updateSkills = (items: SkillInput[]) =>
++  apiFetch<Skill[]>("/api/v1/profile/skills", { method: "PUT", body: JSON.stringify(items) });
++
++export const getProjects = () => apiFetch<Project[]>("/api/v1/profile/projects");
++export const updateProjects = (items: ProjectInput[]) =>
++  apiFetch<Project[]>("/api/v1/profile/projects", { method: "PUT", body: JSON.stringify(items) });
++
++export const getExperience = () => apiFetch<Experience[]>("/api/v1/profile/experience");
++export const updateExperience = (items: ExperienceInput[]) =>
++  apiFetch<Experience[]>("/api/v1/profile/experience", { method: "PUT", body: JSON.stringify(items) });
++
++export const getCertifications = () => apiFetch<Certification[]>("/api/v1/profile/certifications");
++export const updateCertifications = (items: CertificationInput[]) =>
++  apiFetch<Certification[]>("/api/v1/profile/certifications", {
++    method: "PUT",
++    body: JSON.stringify(items),
++  });
++
++export const getAchievements = () => apiFetch<Achievement[]>("/api/v1/profile/achievements");
++export const updateAchievements = (items: AchievementInput[]) =>
++  apiFetch<Achievement[]>("/api/v1/profile/achievements", { method: "PUT", body: JSON.stringify(items) });
++
++export const getSocialLinks = () => apiFetch<SocialLink[]>("/api/v1/profile/social-links");
++export const updateSocialLinks = (items: SocialLinkInput[]) =>
++  apiFetch<SocialLink[]>("/api/v1/profile/social-links", { method: "PUT", body: JSON.stringify(items) });
++
++// --- Computed / read-only sections ---
++
++export const getCareerSnapshot = () => apiFetch<CareerSnapshot>("/api/v1/profile/snapshot");
++export const getProfileInsights = () => apiFetch<ProfileInsights>("/api/v1/profile/insights");
++export const getRecentActivity = () => apiFetch<ActivityEvent[]>("/api/v1/profile/activity");
++export const getAccountStatistics = () => apiFetch<AccountStatistics>("/api/v1/profile/stats");
++
++export const incrementAccountStat = (metric: AccountStatMetric) =>
++  apiFetch<AccountStatistics>("/api/v1/profile/stats/increment", {
++    method: "POST",
++    body: JSON.stringify({ metric }),
++  });

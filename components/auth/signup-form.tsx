@@ -40,7 +40,7 @@ export function SignupForm() {
       email: values.email,
       password: values.password,
       options: {
-        emailRedirectTo: getAuthCallbackUrl('/dashboard'),
+        emailRedirectTo: getAuthCallbackUrl('/dashboard-v2'),
         data: { full_name: values.fullName },
       },
     })
@@ -52,7 +52,7 @@ export function SignupForm() {
 
     // If email confirmation is required there is no active session yet.
     if (data.session) {
-      router.push('/dashboard')
+      router.push('/dashboard-v2')
       router.refresh()
       return
     }
@@ -62,7 +62,7 @@ export function SignupForm() {
 
   return (
     <div className="flex flex-col gap-6">
-      <OAuthButtons next="/dashboard" />
+      <OAuthButtons next="/dashboard-v2" />
       <AuthDivider />
 
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5" noValidate>

@@ -1,0 +1,1393 @@
+From 11cea5f96b3f404a60a6a5f97d53307de0c91153 Mon Sep 17 00:00:00 2001
+From: Sandbox <sandbox@local>
+Date: Fri, 17 Jul 2026 15:12:42 +0000
+Subject: [PATCH] feat: add Settings page as the central control panel
+
+New route at /dashboard-v2/settings, built with the existing
+DashboardLayout, Header and the same monochrome design language used
+across every other Dashboard V2 module - no layout, header, colors,
+radius, shadows or motion conventions changed.
+
+16 sections per spec: hero with monochrome settings illustration and
+floating status pills, account settings, preferences, notification
+toggles (8 categories), privacy settings, security overview,
+connected accounts, AI preferences toggles, dashboard preferences
+toggles, data & storage breakdown, activity log, appearance (UI only),
+help & support, about, a clearly separated danger zone with restrained
+red accents, and quick navigation linking to all 8 other modules.
+
+Added a small shared ToggleSwitch primitive (spring-animated, used by
+Notifications / Privacy / AI Preferences / Dashboard Preferences)
+instead of duplicating toggle markup four times.
+
+Sidebar updated directly (Settings item now links to its route).
+
+UI only - no backend, API, auth, or real settings persistence -
+realistic dummy data throughout.
+---
+ app/dashboard-v2/settings/page.tsx            |  45 ++++++
+ components/dashboard-v2/settings/about.tsx    |  43 ++++++
+ .../settings/account-settings.tsx             |  59 +++++++
+ .../dashboard-v2/settings/activity-log.tsx    |  59 +++++++
+ .../dashboard-v2/settings/ai-preferences.tsx  |  62 ++++++++
+ .../dashboard-v2/settings/appearance.tsx      |  93 +++++++++++
+ .../settings/connected-accounts.tsx           |  65 ++++++++
+ .../dashboard-v2/settings/danger-zone.tsx     |  71 +++++++++
+ .../settings/dashboard-preferences.tsx        |  57 +++++++
+ .../dashboard-v2/settings/data-storage.tsx    |  70 +++++++++
+ .../dashboard-v2/settings/help-support.tsx    |  52 +++++++
+ components/dashboard-v2/settings/hero.tsx     | 146 ++++++++++++++++++
+ .../dashboard-v2/settings/notifications.tsx   |  68 ++++++++
+ .../dashboard-v2/settings/preferences.tsx     |  49 ++++++
+ components/dashboard-v2/settings/privacy.tsx  |  75 +++++++++
+ .../settings/quick-navigation.tsx             |  50 ++++++
+ components/dashboard-v2/settings/security.tsx | 112 ++++++++++++++
+ .../dashboard-v2/shared/toggle-switch.tsx     |  28 ++++
+ components/dashboard-v2/sidebar/sidebar.tsx   |   1 +
+ 19 files changed, 1205 insertions(+)
+ create mode 100644 app/dashboard-v2/settings/page.tsx
+ create mode 100644 components/dashboard-v2/settings/about.tsx
+ create mode 100644 components/dashboard-v2/settings/account-settings.tsx
+ create mode 100644 components/dashboard-v2/settings/activity-log.tsx
+ create mode 100644 components/dashboard-v2/settings/ai-preferences.tsx
+ create mode 100644 components/dashboard-v2/settings/appearance.tsx
+ create mode 100644 components/dashboard-v2/settings/connected-accounts.tsx
+ create mode 100644 components/dashboard-v2/settings/danger-zone.tsx
+ create mode 100644 components/dashboard-v2/settings/dashboard-preferences.tsx
+ create mode 100644 components/dashboard-v2/settings/data-storage.tsx
+ create mode 100644 components/dashboard-v2/settings/help-support.tsx
+ create mode 100644 components/dashboard-v2/settings/hero.tsx
+ create mode 100644 components/dashboard-v2/settings/notifications.tsx
+ create mode 100644 components/dashboard-v2/settings/preferences.tsx
+ create mode 100644 components/dashboard-v2/settings/privacy.tsx
+ create mode 100644 components/dashboard-v2/settings/quick-navigation.tsx
+ create mode 100644 components/dashboard-v2/settings/security.tsx
+ create mode 100644 components/dashboard-v2/shared/toggle-switch.tsx
+
+diff --git a/app/dashboard-v2/settings/page.tsx b/app/dashboard-v2/settings/page.tsx
+new file mode 100644
+index 0000000..cf3dd79
+--- /dev/null
++++ b/app/dashboard-v2/settings/page.tsx
+@@ -0,0 +1,45 @@
++import DashboardLayout from "@/components/dashboard-v2/layout/dashboard-layout";
++import Header from "@/components/dashboard-v2/header/header";
++import SettingsHero from "@/components/dashboard-v2/settings/hero";
++import AccountSettings from "@/components/dashboard-v2/settings/account-settings";
++import Preferences from "@/components/dashboard-v2/settings/preferences";
++import NotificationSettings from "@/components/dashboard-v2/settings/notifications";
++import PrivacySettings from "@/components/dashboard-v2/settings/privacy";
++import Security from "@/components/dashboard-v2/settings/security";
++import ConnectedAccounts from "@/components/dashboard-v2/settings/connected-accounts";
++import AiPreferences from "@/components/dashboard-v2/settings/ai-preferences";
++import DashboardPreferences from "@/components/dashboard-v2/settings/dashboard-preferences";
++import DataStorage from "@/components/dashboard-v2/settings/data-storage";
++import ActivityLog from "@/components/dashboard-v2/settings/activity-log";
++import Appearance from "@/components/dashboard-v2/settings/appearance";
++import HelpSupport from "@/components/dashboard-v2/settings/help-support";
++import About from "@/components/dashboard-v2/settings/about";
++import DangerZone from "@/components/dashboard-v2/settings/danger-zone";
++import QuickNavigation from "@/components/dashboard-v2/settings/quick-navigation";
++
++export default function SettingsPage() {
++  return (
++    <DashboardLayout>
++      <Header />
++
++      <div className="p-4 sm:p-6 lg:p-8">
++        <SettingsHero />
++        <AccountSettings />
++        <Preferences />
++        <NotificationSettings />
++        <PrivacySettings />
++        <Security />
++        <ConnectedAccounts />
++        <AiPreferences />
++        <DashboardPreferences />
++        <DataStorage />
++        <ActivityLog />
++        <Appearance />
++        <HelpSupport />
++        <About />
++        <DangerZone />
++        <QuickNavigation />
++      </div>
++    </DashboardLayout>
++  );
++}
+diff --git a/components/dashboard-v2/settings/about.tsx b/components/dashboard-v2/settings/about.tsx
+new file mode 100644
+index 0000000..1cb5862
+--- /dev/null
++++ b/components/dashboard-v2/settings/about.tsx
+@@ -0,0 +1,43 @@
++"use client";
++
++import { motion } from "framer-motion";
++
++const details = [
++  { label: "Current Version", value: "v2.4.0" },
++  { label: "Release Date", value: "July 2026" },
++  { label: "Build", value: "20260712-rc3" },
++  { label: "License", value: "Proprietary" },
++  { label: "Developer", value: "CareerSetu AI Team" },
++];
++
++export default function About() {
++  return (
++    <motion.section
++      initial={{ opacity: 0, y: 12 }}
++      whileInView={{ opacity: 1, y: 0 }}
++      viewport={{ once: true, margin: "-40px" }}
++      transition={{ duration: 0.4, ease: "easeOut" }}
++      className="mt-8 rounded-[24px] border border-neutral-200 bg-white p-5 sm:p-6 lg:rounded-[30px]"
++    >
++      <h2 className="text-xl font-bold sm:text-2xl">About CareerSetu AI</h2>
++
++      <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
++        {details.map((detail) => (
++          <div key={detail.label} className="rounded-2xl border border-neutral-200 p-4">
++            <p className="text-xs text-neutral-500">{detail.label}</p>
++            <p className="mt-1 font-medium">{detail.value}</p>
++          </div>
++        ))}
++      </div>
++
++      <div className="mt-5 flex flex-wrap gap-x-6 gap-y-2 text-sm">
++        <button className="font-medium text-neutral-500 underline-offset-4 transition-colors hover:text-black hover:underline">
++          Privacy Policy
++        </button>
++        <button className="font-medium text-neutral-500 underline-offset-4 transition-colors hover:text-black hover:underline">
++          Terms of Service
++        </button>
++      </div>
++    </motion.section>
++  );
++}
+diff --git a/components/dashboard-v2/settings/account-settings.tsx b/components/dashboard-v2/settings/account-settings.tsx
+new file mode 100644
+index 0000000..c578be3
+--- /dev/null
++++ b/components/dashboard-v2/settings/account-settings.tsx
+@@ -0,0 +1,59 @@
++"use client";
++
++import { motion } from "framer-motion";
++import { Pencil } from "lucide-react";
++
++const fields = [
++  { label: "Full Name", value: "Rohit Raj" },
++  { label: "Username", value: "@rohitraj" },
++  { label: "Email", value: "rohit.raj@careersetu.ai" },
++  { label: "Phone", value: "+91 98765 43210" },
++  { label: "College", value: "IIT Patna" },
++  { label: "Branch", value: "Computer Science & Engineering" },
++  { label: "Graduation Year", value: "2026" },
++];
++
++export default function AccountSettings() {
++  return (
++    <section className="mt-8 rounded-[24px] border border-neutral-200 bg-white p-5 sm:p-6 lg:rounded-[30px]">
++      <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
++        <div className="flex items-center gap-5">
++          <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-full bg-black text-2xl font-semibold text-white">
++            RR
++          </div>
++          <div>
++            <h2 className="text-xl font-bold sm:text-2xl">Account Settings</h2>
++            <p className="mt-1 text-sm text-neutral-500">
++              Manage your profile photo and personal details.
++            </p>
++          </div>
++        </div>
++
++        <motion.button
++          whileHover={{ scale: 1.03, y: -2 }}
++          whileTap={{ scale: 0.97 }}
++          className="flex shrink-0 items-center gap-1.5 rounded-2xl bg-black px-5 py-3 text-sm font-medium text-white shadow-sm transition-shadow hover:shadow-md"
++        >
++          <Pencil size={14} />
++          Edit
++        </motion.button>
++      </div>
++
++      <div className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
++        {fields.map((field, index) => (
++          <motion.div
++            key={field.label}
++            initial={{ opacity: 0, y: 8 }}
++            whileInView={{ opacity: 1, y: 0 }}
++            viewport={{ once: true, margin: "-10% 0px" }}
++            transition={{ duration: 0.35, delay: index * 0.04, ease: "easeOut" }}
++            className="rounded-2xl border border-neutral-200 p-4"
++          >
++            <p className="text-xs text-neutral-500">{field.label}</p>
++            <p className="mt-1 truncate font-medium">{field.value}</p>
++          </motion.div>
++        ))}
++      </div>
++    </section>
++  );
++}
+diff --git a/components/dashboard-v2/settings/activity-log.tsx b/components/dashboard-v2/settings/activity-log.tsx
+new file mode 100644
+index 0000000..7bbabd8
+--- /dev/null
++++ b/components/dashboard-v2/settings/activity-log.tsx
+@@ -0,0 +1,59 @@
++"use client";
++
++import { motion } from "framer-motion";
++import { KeyRound, FileText, User, Mic, SlidersHorizontal } from "lucide-react";
++
++const events = [
++  { icon: KeyRound, title: "Password Changed", time: "2 months ago" },
++  { icon: FileText, title: "Resume Updated", time: "3 weeks ago" },
++  { icon: User, title: "Profile Edited", time: "5 days ago" },
++  { icon: Mic, title: "Interview Completed", time: "6 days ago" },
++  { icon: SlidersHorizontal, title: "Settings Updated", time: "Just now" },
++];
++
++export default function ActivityLog() {
++  return (
++    <section className="mt-8 rounded-[24px] border border-neutral-200 bg-white p-5 sm:p-6 lg:rounded-[30px]">
++      <h2 className="text-xl font-bold sm:text-2xl">Activity Log</h2>
++
++      <div className="relative mt-6">
++        <motion.div
++          initial={{ scaleY: 0 }}
++          whileInView={{ scaleY: 1 }}
++          viewport={{ once: true }}
++          transition={{ duration: 0.6, ease: "easeOut" }}
++          style={{ transformOrigin: "top" }}
++          className="absolute left-5 top-1 bottom-1 w-px bg-neutral-200"
++        />
++
++        <div className="space-y-1">
++          {events.map((event, index) => {
++            const Icon = event.icon;
++
++            return (
++              <motion.div
++                key={index}
++                initial={{ opacity: 0, x: -8 }}
++                whileInView={{ opacity: 1, x: 0 }}
++                viewport={{ once: true }}
++                transition={{ duration: 0.35, delay: index * 0.08, ease: "easeOut" }}
++                className="group relative flex items-center gap-4 rounded-xl px-2 py-2.5 transition-colors hover:bg-neutral-50"
++              >
++                <div className="z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-neutral-200 bg-white transition-transform duration-300 group-hover:scale-110 group-hover:border-black">
++                  <Icon size={16} />
++                </div>
++
++                <div className="flex min-w-0 flex-1 items-center justify-between gap-3">
++                  <span className="truncate font-medium">{event.title}</span>
++                  <span className="shrink-0 text-xs tabular-nums text-neutral-400">
++                    {event.time}
++                  </span>
++                </div>
++              </motion.div>
++            );
++          })}
++        </div>
++      </div>
++    </section>
++  );
++}
+diff --git a/components/dashboard-v2/settings/ai-preferences.tsx b/components/dashboard-v2/settings/ai-preferences.tsx
+new file mode 100644
+index 0000000..e86779d
+--- /dev/null
++++ b/components/dashboard-v2/settings/ai-preferences.tsx
+@@ -0,0 +1,62 @@
++"use client";
++
++import { useState } from "react";
++import { motion } from "framer-motion";
++import { Sparkles, FileText, BriefcaseBusiness, Mic, GraduationCap, Compass } from "lucide-react";
++import ToggleSwitch from "../shared/toggle-switch";
++
++const initial = [
++  { id: "career", icon: Sparkles, label: "AI Career Suggestions", desc: "Personalized guidance from Career Twin.", on: true },
++  { id: "resume", icon: FileText, label: "Resume Analysis", desc: "Automatic ATS scoring and feedback.", on: true },
++  { id: "jobs", icon: BriefcaseBusiness, label: "Job Recommendations", desc: "AI-matched roles based on your profile.", on: true },
++  { id: "interview", icon: Mic, label: "Interview Coaching", desc: "Real-time feedback during mock interviews.", on: true },
++  { id: "learning", icon: GraduationCap, label: "Learning Recommendations", desc: "Suggested courses and resources.", on: false },
++  { id: "insights", icon: Compass, label: "Career Insights", desc: "Weekly AI-generated career insights.", on: true },
++];
++
++export default function AiPreferences() {
++  const [items, setItems] = useState(initial);
++
++  function toggle(id: string) {
++    setItems((prev) => prev.map((item) => (item.id === id ? { ...item, on: !item.on } : item)));
++  }
++
++  return (
++    <section className="mt-8 rounded-[24px] border border-neutral-200 bg-white p-5 sm:p-6 lg:rounded-[30px]">
++      <div className="flex items-center gap-3">
++        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-black text-white">
++          <Sparkles size={18} />
++        </div>
++        <h2 className="text-xl font-bold sm:text-2xl">AI Preferences</h2>
++      </div>
++
++      <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
++        {items.map((item, index) => {
++          const Icon = item.icon;
++          return (
++            <motion.div
++              key={item.id}
++              initial={{ opacity: 0, y: 8 }}
++              whileInView={{ opacity: 1, y: 0 }}
++              viewport={{ once: true, margin: "-10% 0px" }}
++              transition={{ duration: 0.35, delay: index * 0.05, ease: "easeOut" }}
++              className="flex items-center justify-between gap-4 rounded-2xl border border-neutral-200 p-4"
++            >
++              <div className="flex items-center gap-3">
++                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-neutral-100">
++                  <Icon size={16} />
++                </div>
++                <div className="min-w-0">
++                  <p className="font-medium">{item.label}</p>
++                  <p className="truncate text-xs text-neutral-500">{item.desc}</p>
++                </div>
++              </div>
++
++              <ToggleSwitch checked={item.on} onChange={() => toggle(item.id)} />
++            </motion.div>
++          );
++        })}
++      </div>
++    </section>
++  );
++}
+diff --git a/components/dashboard-v2/settings/appearance.tsx b/components/dashboard-v2/settings/appearance.tsx
+new file mode 100644
+index 0000000..cdfb8d3
+--- /dev/null
++++ b/components/dashboard-v2/settings/appearance.tsx
+@@ -0,0 +1,93 @@
++"use client";
++
++import { useState } from "react";
++import { motion } from "framer-motion";
++import { Sun, Moon, MonitorCog, Check } from "lucide-react";
++
++const modes = [
++  { id: "light", icon: Sun, label: "Light Mode" },
++  { id: "dark", icon: Moon, label: "Dark Mode" },
++  { id: "system", icon: MonitorCog, label: "System Default" },
++];
++
++const fontSizes = ["Small", "Medium", "Large"];
++const densities = ["Comfortable", "Compact"];
++
++export default function Appearance() {
++  const [mode, setMode] = useState("light");
++  const [fontSize, setFontSize] = useState("Medium");
++  const [density, setDensity] = useState("Comfortable");
++
++  return (
++    <section className="mt-8 rounded-[24px] border border-neutral-200 bg-white p-5 sm:p-6 lg:rounded-[30px]">
++      <h2 className="text-xl font-bold sm:text-2xl">Appearance</h2>
++
++      <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-3">
++        {modes.map((item, index) => {
++          const Icon = item.icon;
++          const active = mode === item.id;
++          return (
++            <motion.button
++              key={item.id}
++              onClick={() => setMode(item.id)}
++              initial={{ opacity: 0, y: 10 }}
++              whileInView={{ opacity: 1, y: 0 }}
++              viewport={{ once: true, margin: "-10% 0px" }}
++              transition={{ duration: 0.35, delay: index * 0.06, ease: "easeOut" }}
++              whileHover={{ y: -3 }}
++              className={`relative flex flex-col items-center gap-3 rounded-2xl border p-6 transition-colors ${
++                active ? "border-black" : "border-neutral-200 hover:border-neutral-300"
++              }`}
++            >
++              {active && (
++                <span className="absolute right-3 top-3 flex h-5 w-5 items-center justify-center rounded-full bg-black text-white">
++                  <Check size={12} />
++                </span>
++              )}
++              <div className={`flex h-12 w-12 items-center justify-center rounded-full ${active ? "bg-black text-white" : "bg-neutral-100"}`}>
++                <Icon size={20} />
++              </div>
++              <span className="font-medium">{item.label}</span>
++            </motion.button>
++          );
++        })}
++      </div>
++
++      <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
++        <div className="rounded-2xl border border-neutral-200 p-4">
++          <p className="text-sm font-medium">Font Size</p>
++          <div className="mt-3 flex gap-2">
++            {fontSizes.map((size) => (
++              <button
++                key={size}
++                onClick={() => setFontSize(size)}
++                className={`rounded-xl px-3 py-2 text-sm font-medium transition-colors ${
++                  fontSize === size ? "bg-black text-white" : "border border-neutral-300 hover:border-black"
++                }`}
++              >
++                {size}
++              </button>
++            ))}
++          </div>
++        </div>
++
++        <div className="rounded-2xl border border-neutral-200 p-4">
++          <p className="text-sm font-medium">Display Density</p>
++          <div className="mt-3 flex gap-2">
++            {densities.map((d) => (
++              <button
++                key={d}
++                onClick={() => setDensity(d)}
++                className={`rounded-xl px-3 py-2 text-sm font-medium transition-colors ${
++                  density === d ? "bg-black text-white" : "border border-neutral-300 hover:border-black"
++                }`}
++              >
++                {d}
++              </button>
++            ))}
++          </div>
++        </div>
++      </div>
++    </section>
++  );
++}
+diff --git a/components/dashboard-v2/settings/connected-accounts.tsx b/components/dashboard-v2/settings/connected-accounts.tsx
+new file mode 100644
+index 0000000..93f911c
+--- /dev/null
++++ b/components/dashboard-v2/settings/connected-accounts.tsx
+@@ -0,0 +1,65 @@
++"use client";
++
++import { motion } from "framer-motion";
++import { Mail, GitFork, Link2, Globe, Code2, Terminal } from "lucide-react";
++
++const accounts = [
++  { icon: Mail, name: "Google", status: "Connected" },
++  { icon: GitFork, name: "GitHub", status: "Connected" },
++  { icon: Link2, name: "LinkedIn", status: "Connected" },
++  { icon: Globe, name: "Portfolio", status: "Connected" },
++  { icon: Code2, name: "LeetCode", status: "Connected" },
++  { icon: Terminal, name: "HackerRank", status: "Not Connected" },
++];
++
++export default function ConnectedAccounts() {
++  return (
++    <section className="mt-8">
++      <h2 className="text-xl font-bold sm:text-2xl">Connected Accounts</h2>
++
++      <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
++        {accounts.map((account, index) => {
++          const Icon = account.icon;
++          const connected = account.status === "Connected";
++          return (
++            <motion.div
++              key={account.name}
++              initial={{ opacity: 0, y: 10 }}
++              whileInView={{ opacity: 1, y: 0 }}
++              viewport={{ once: true, margin: "-10% 0px" }}
++              transition={{ duration: 0.4, delay: index * 0.05, ease: "easeOut" }}
++              whileHover={{ y: -4 }}
++              className="flex items-center justify-between rounded-2xl border border-neutral-200 bg-white p-4 shadow-sm transition-shadow duration-300 hover:shadow-lg"
++            >
++              <div className="flex items-center gap-3">
++                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-neutral-100">
++                  <Icon size={18} />
++                </div>
++                <div>
++                  <p className="font-medium">{account.name}</p>
++                  <span
++                    className={`mt-1 inline-block rounded-full px-2 py-0.5 text-[11px] font-medium ${
++                      connected ? "bg-neutral-100 text-neutral-600" : "bg-neutral-100 text-neutral-400"
++                    }`}
++                  >
++                    {account.status}
++                  </span>
++                </div>
++              </div>
++
++              <motion.button
++                whileHover={{ scale: 1.05 }}
++                whileTap={{ scale: 0.95 }}
++                className={`shrink-0 rounded-xl px-3 py-2 text-xs font-medium ${
++                  connected ? "border border-neutral-300 hover:border-black" : "bg-black text-white"
++                }`}
++              >
++                {connected ? "Disconnect" : "Connect"}
++              </motion.button>
++            </motion.div>
++          );
++        })}
++      </div>
++    </section>
++  );
++}
+diff --git a/components/dashboard-v2/settings/danger-zone.tsx b/components/dashboard-v2/settings/danger-zone.tsx
+new file mode 100644
+index 0000000..c5f38b5
+--- /dev/null
++++ b/components/dashboard-v2/settings/danger-zone.tsx
+@@ -0,0 +1,71 @@
++"use client";
++
++import { motion } from "framer-motion";
++import { AlertTriangle, Eraser, RotateCcw, UserX, FileDown } from "lucide-react";
++
++const actions = [
++  { icon: Eraser, label: "Clear Cache", desc: "Free up local storage used by the app.", danger: false },
++  { icon: RotateCcw, label: "Reset Preferences", desc: "Restore all settings to their defaults.", danger: false },
++  { icon: FileDown, label: "Export Account Data", desc: "Download a full copy of your data.", danger: false },
++  { icon: UserX, label: "Delete Account", desc: "Permanently remove your account and all data.", danger: true },
++];
++
++export default function DangerZone() {
++  return (
++    <section className="mt-8 rounded-[24px] border border-red-200 bg-white p-5 sm:p-6 lg:rounded-[30px]">
++      <div className="flex items-center gap-3">
++        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-red-50 text-red-600">
++          <AlertTriangle size={18} />
++        </div>
++        <div>
++          <h2 className="text-xl font-bold text-red-600 sm:text-2xl">Danger Zone</h2>
++          <p className="text-sm text-neutral-500">These actions are irreversible. Proceed with caution.</p>
++        </div>
++      </div>
++
++      <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
++        {actions.map((action, index) => {
++          const Icon = action.icon;
++          return (
++            <motion.div
++              key={action.label}
++              initial={{ opacity: 0, y: 8 }}
++              whileInView={{ opacity: 1, y: 0 }}
++              viewport={{ once: true, margin: "-10% 0px" }}
++              transition={{ duration: 0.35, delay: index * 0.05, ease: "easeOut" }}
++              className={`flex items-center justify-between gap-4 rounded-2xl border p-4 ${
++                action.danger ? "border-red-200" : "border-neutral-200"
++              }`}
++            >
++              <div className="flex items-center gap-3">
++                <div
++                  className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${
++                    action.danger ? "bg-red-50 text-red-600" : "bg-neutral-100"
++                  }`}
++                >
++                  <Icon size={16} />
++                </div>
++                <div>
++                  <p className="font-medium">{action.label}</p>
++                  <p className="text-xs text-neutral-500">{action.desc}</p>
++                </div>
++              </div>
++
++              <motion.button
++                whileHover={{ scale: 1.04 }}
++                whileTap={{ scale: 0.96 }}
++                className={`shrink-0 rounded-xl px-4 py-2 text-sm font-medium ${
++                  action.danger
++                    ? "bg-red-600 text-white hover:bg-red-700"
++                    : "border border-neutral-300 hover:border-black"
++                }`}
++              >
++                {action.danger ? "Delete" : "Run"}
++              </motion.button>
++            </motion.div>
++          );
++        })}
++      </div>
++    </section>
++  );
++}
+diff --git a/components/dashboard-v2/settings/dashboard-preferences.tsx b/components/dashboard-v2/settings/dashboard-preferences.tsx
+new file mode 100644
+index 0000000..580f03d
+--- /dev/null
++++ b/components/dashboard-v2/settings/dashboard-preferences.tsx
+@@ -0,0 +1,57 @@
++"use client";
++
++import { useState } from "react";
++import { motion } from "framer-motion";
++import { Minimize2, TrendingUp, Sparkles, PanelLeftClose, Wand2, Zap } from "lucide-react";
++import ToggleSwitch from "../shared/toggle-switch";
++
++const initial = [
++  { id: "compact", icon: Minimize2, label: "Compact Mode", desc: "Reduce spacing across the dashboard.", on: false },
++  { id: "progress", icon: TrendingUp, label: "Show Progress Cards", desc: "Display progress widgets on Overview.", on: true },
++  { id: "widgets", icon: Sparkles, label: "Show AI Widgets", desc: "Career Twin suggestions on every page.", on: true },
++  { id: "sidebar", icon: PanelLeftClose, label: "Sidebar Collapse", desc: "Start with a collapsed sidebar.", on: false },
++  { id: "animations", icon: Wand2, label: "Animations", desc: "Enable motion and transitions.", on: true },
++  { id: "quickaccess", icon: Zap, label: "Quick Access Panel", desc: "Keep shortcuts pinned to the header.", on: true },
++];
++
++export default function DashboardPreferences() {
++  const [items, setItems] = useState(initial);
++
++  function toggle(id: string) {
++    setItems((prev) => prev.map((item) => (item.id === id ? { ...item, on: !item.on } : item)));
++  }
++
++  return (
++    <section className="mt-8 rounded-[24px] border border-neutral-200 bg-white p-5 sm:p-6 lg:rounded-[30px]">
++      <h2 className="text-xl font-bold sm:text-2xl">Dashboard Preferences</h2>
++
++      <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
++        {items.map((item, index) => {
++          const Icon = item.icon;
++          return (
++            <motion.div
++              key={item.id}
++              initial={{ opacity: 0, y: 8 }}
++              whileInView={{ opacity: 1, y: 0 }}
++              viewport={{ once: true, margin: "-10% 0px" }}
++              transition={{ duration: 0.35, delay: index * 0.05, ease: "easeOut" }}
++              className="flex items-center justify-between gap-4 rounded-2xl border border-neutral-200 p-4"
++            >
++              <div className="flex items-center gap-3">
++                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-neutral-100">
++                  <Icon size={16} />
++                </div>
++                <div className="min-w-0">
++                  <p className="font-medium">{item.label}</p>
++                  <p className="truncate text-xs text-neutral-500">{item.desc}</p>
++                </div>
++              </div>
++
++              <ToggleSwitch checked={item.on} onChange={() => toggle(item.id)} />
++            </motion.div>
++          );
++        })}
++      </div>
++    </section>
++  );
++}
+diff --git a/components/dashboard-v2/settings/data-storage.tsx b/components/dashboard-v2/settings/data-storage.tsx
+new file mode 100644
+index 0000000..2b6bdbd
+--- /dev/null
++++ b/components/dashboard-v2/settings/data-storage.tsx
+@@ -0,0 +1,70 @@
++"use client";
++
++import { motion } from "framer-motion";
++import { FileText, FolderKanban, Award, BarChart3, Download } from "lucide-react";
++
++const categories = [
++  { icon: FileText, label: "Resume Files", size: "12 MB", percent: 18 },
++  { icon: FolderKanban, label: "Projects", size: "34 MB", percent: 51 },
++  { icon: Award, label: "Certificates", size: "9 MB", percent: 13 },
++  { icon: BarChart3, label: "Analytics Reports", size: "12 MB", percent: 18 },
++];
++
++export default function DataStorage() {
++  return (
++    <section className="mt-8 rounded-[24px] border border-neutral-200 bg-white p-5 sm:p-6 lg:rounded-[30px]">
++      <div className="flex flex-wrap items-center justify-between gap-4">
++        <div>
++          <h2 className="text-xl font-bold sm:text-2xl">Data & Storage</h2>
++          <p className="mt-1 text-sm text-neutral-500">67 MB of 500 MB used</p>
++        </div>
++
++        <motion.button
++          whileHover={{ scale: 1.03, y: -2 }}
++          whileTap={{ scale: 0.97 }}
++          className="flex items-center gap-2 rounded-2xl border border-neutral-300 px-5 py-3 text-sm font-medium transition-colors hover:border-black"
++        >
++          <Download size={16} />
++          Download All Data
++        </motion.button>
++      </div>
++
++      <div className="mt-5 flex h-2.5 overflow-hidden rounded-full bg-neutral-100">
++        {categories.map((cat, index) => (
++          <motion.div
++            key={cat.label}
++            initial={{ width: 0 }}
++            whileInView={{ width: `${cat.percent}%` }}
++            viewport={{ once: true }}
++            transition={{ duration: 0.7, delay: index * 0.08, ease: "easeOut" }}
++            className={index % 2 === 0 ? "bg-black" : "bg-neutral-400"}
++          />
++        ))}
++      </div>
++
++      <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
++        {categories.map((cat, index) => {
++          const Icon = cat.icon;
++          return (
++            <motion.div
++              key={cat.label}
++              initial={{ opacity: 0, y: 8 }}
++              whileInView={{ opacity: 1, y: 0 }}
++              viewport={{ once: true, margin: "-10% 0px" }}
++              transition={{ duration: 0.35, delay: index * 0.05, ease: "easeOut" }}
++              className="flex items-center gap-3 rounded-2xl border border-neutral-200 p-4"
++            >
++              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-neutral-100">
++                <Icon size={16} />
++              </div>
++              <div className="flex min-w-0 flex-1 items-center justify-between">
++                <span className="font-medium">{cat.label}</span>
++                <span className="text-sm text-neutral-500">{cat.size}</span>
++              </div>
++            </motion.div>
++          );
++        })}
++      </div>
++    </section>
++  );
++}
+diff --git a/components/dashboard-v2/settings/help-support.tsx b/components/dashboard-v2/settings/help-support.tsx
+new file mode 100644
+index 0000000..2010d46
+--- /dev/null
++++ b/components/dashboard-v2/settings/help-support.tsx
+@@ -0,0 +1,52 @@
++"use client";
++
++import { motion } from "framer-motion";
++import { LifeBuoy, HelpCircle, MessageCircle, Bug, Lightbulb, BookOpen, ArrowUpRight } from "lucide-react";
++
++const items = [
++  { icon: LifeBuoy, label: "Help Center", desc: "Browse guides and walkthroughs." },
++  { icon: HelpCircle, label: "FAQs", desc: "Answers to common questions." },
++  { icon: MessageCircle, label: "Contact Support", desc: "Reach our team directly." },
++  { icon: Bug, label: "Report Bug", desc: "Let us know what went wrong." },
++  { icon: Lightbulb, label: "Feature Request", desc: "Suggest something new." },
++  { icon: BookOpen, label: "Documentation", desc: "Technical docs and API reference." },
++];
++
++export default function HelpSupport() {
++  return (
++    <section className="mt-8">
++      <h2 className="text-xl font-bold sm:text-2xl">Help & Support</h2>
++
++      <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
++        {items.map((item, index) => {
++          const Icon = item.icon;
++          return (
++            <motion.button
++              key={item.label}
++              initial={{ opacity: 0, y: 10 }}
++              whileInView={{ opacity: 1, y: 0 }}
++              viewport={{ once: true, margin: "-10% 0px" }}
++              transition={{ duration: 0.4, delay: index * 0.05, ease: "easeOut" }}
++              whileHover={{ y: -4 }}
++              className="group flex w-full items-start justify-between rounded-2xl border border-neutral-200 bg-white p-5 text-left shadow-sm transition-shadow duration-300 hover:shadow-lg"
++            >
++              <div className="flex items-start gap-3">
++                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-neutral-100">
++                  <Icon size={18} />
++                </div>
++                <div>
++                  <p className="font-medium">{item.label}</p>
++                  <p className="mt-1 text-sm text-neutral-500">{item.desc}</p>
++                </div>
++              </div>
++              <ArrowUpRight
++                size={16}
++                className="mt-1 shrink-0 text-neutral-300 transition-all duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-black"
++              />
++            </motion.button>
++          );
++        })}
++      </div>
++    </section>
++  );
++}
+diff --git a/components/dashboard-v2/settings/hero.tsx b/components/dashboard-v2/settings/hero.tsx
+new file mode 100644
+index 0000000..83bd414
+--- /dev/null
++++ b/components/dashboard-v2/settings/hero.tsx
+@@ -0,0 +1,146 @@
++"use client";
++
++import { motion } from "framer-motion";
++import { Settings as SettingsIcon, Shield, Bell, User, LayoutDashboard, RotateCcw, Save } from "lucide-react";
++
++const pills = [
++  { label: "Secure" },
++  { label: "AI Powered" },
++  { label: "Synced" },
++  { label: "Private" },
++];
++
++const nodes = [
++  { icon: LayoutDashboard, top: "6%", left: "18%" },
++  { icon: Shield, top: "42%", left: "70%" },
++  { icon: Bell, top: "72%", left: "16%" },
++  { icon: User, top: "20%", left: "78%" },
++];
++
++function SettingsIllustration() {
++  return (
++    <div className="relative flex h-full min-h-[280px] items-center justify-center py-6">
++      <motion.div
++        animate={{ rotate: 360 }}
++        transition={{ duration: 22, repeat: Infinity, ease: "linear" }}
++        className="flex h-28 w-28 items-center justify-center rounded-full border-2 border-dashed border-neutral-300 sm:h-32 sm:w-32"
++      >
++        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-black text-white sm:h-20 sm:w-20">
++          <SettingsIcon size={28} />
++        </div>
++      </motion.div>
++
++      {nodes.map((node, index) => {
++        const Icon = node.icon;
++        return (
++          <motion.div
++            key={index}
++            style={{ top: node.top, left: node.left }}
++            animate={{ y: [0, -8, 0] }}
++            transition={{ duration: 4 + index * 0.5, repeat: Infinity, ease: "easeInOut", delay: index * 0.4 }}
++            className="absolute flex h-11 w-11 items-center justify-center rounded-2xl border border-neutral-200 bg-white shadow-md"
++          >
++            <Icon size={18} />
++          </motion.div>
++        );
++      })}
++
++      {pills.map((pill, index) => {
++        const positions = [
++          "left-0 top-2 sm:left-1",
++          "right-0 top-20 sm:right-1",
++          "left-1 bottom-16",
++          "right-2 bottom-2",
++        ];
++        return (
++          <motion.span
++            key={pill.label}
++            initial={{ opacity: 0, y: 8 }}
++            animate={{ opacity: 1, y: [8, 0, -4, 0] }}
++            transition={{
++              opacity: { duration: 0.4, delay: 0.3 + index * 0.1 },
++              y: { duration: 3.4, repeat: Infinity, ease: "easeInOut", delay: index * 0.4 },
++            }}
++            className={`absolute ${positions[index]} rounded-full border border-neutral-200 bg-white px-3 py-1.5 text-xs font-medium text-neutral-600 shadow-sm`}
++          >
++            {pill.label}
++          </motion.span>
++        );
++      })}
++    </div>
++  );
++}
++
++export default function SettingsHero() {
++  return (
++    <motion.section
++      initial={{ opacity: 0, y: 12 }}
++      animate={{ opacity: 1, y: 0 }}
++      transition={{ duration: 0.5, ease: "easeOut" }}
++      className="rounded-2xl border border-neutral-200 bg-white p-5 sm:p-6 lg:rounded-[32px] lg:p-8"
++    >
++      <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1.2fr_0.8fr] lg:items-center">
++        <div>
++          <div className="flex items-center gap-2 text-sm font-medium text-neutral-500">
++            <SettingsIcon size={16} />
++            Settings
++          </div>
++
++          <motion.h1
++            initial={{ opacity: 0, y: 8 }}
++            animate={{ opacity: 1, y: 0 }}
++            transition={{ duration: 0.5, delay: 0.08, ease: "easeOut" }}
++            className="mt-3 text-3xl font-bold leading-tight sm:text-4xl lg:text-5xl"
++          >
++            Manage Your CareerSetu Experience
++          </motion.h1>
++
++          <motion.p
++            initial={{ opacity: 0, y: 8 }}
++            animate={{ opacity: 1, y: 0 }}
++            transition={{ duration: 0.5, delay: 0.16, ease: "easeOut" }}
++            className="mt-6 max-w-xl text-base text-neutral-600 sm:text-lg"
++          >
++            Customize your account, privacy, notifications and preferences
++            from one centralized dashboard.
++          </motion.p>
++
++          <motion.div
++            initial={{ opacity: 0, y: 8 }}
++            animate={{ opacity: 1, y: 0 }}
++            transition={{ duration: 0.5, delay: 0.24, ease: "easeOut" }}
++            className="mt-8 flex flex-wrap gap-3 sm:gap-4"
++          >
++            <motion.button
++              whileHover={{ scale: 1.03 }}
++              whileTap={{ scale: 0.97 }}
++              transition={{ type: "spring", stiffness: 400, damping: 22 }}
++              className="flex items-center gap-2 rounded-2xl bg-black px-5 py-3 text-white shadow-sm transition-shadow hover:shadow-md sm:px-6"
++            >
++              <Save size={16} />
++              Save Changes
++            </motion.button>
++
++            <motion.button
++              whileHover={{ scale: 1.03, borderColor: "#000" }}
++              whileTap={{ scale: 0.97 }}
++              transition={{ type: "spring", stiffness: 400, damping: 22 }}
++              className="flex items-center gap-2 rounded-2xl border border-neutral-300 px-5 py-3 sm:px-6"
++            >
++              <RotateCcw size={16} />
++              Reset Settings
++            </motion.button>
++          </motion.div>
++        </div>
++
++        <motion.div
++          initial={{ opacity: 0, scale: 0.96 }}
++          animate={{ opacity: 1, scale: 1 }}
++          transition={{ duration: 0.6, delay: 0.15, ease: "easeOut" }}
++        >
++          <SettingsIllustration />
++        </motion.div>
++      </div>
++    </motion.section>
++  );
++}
+diff --git a/components/dashboard-v2/settings/notifications.tsx b/components/dashboard-v2/settings/notifications.tsx
+new file mode 100644
+index 0000000..9dd20a5
+--- /dev/null
++++ b/components/dashboard-v2/settings/notifications.tsx
+@@ -0,0 +1,68 @@
++"use client";
++
++import { useState } from "react";
++import { motion } from "framer-motion";
++import {
++  Mail,
++  Bell,
++  Mic,
++  BriefcaseBusiness,
++  Route,
++  FileText,
++  Target,
++  BarChart3,
++} from "lucide-react";
++import ToggleSwitch from "../shared/toggle-switch";
++
++const initial = [
++  { id: "email", icon: Mail, label: "Email Notifications", desc: "Get updates delivered to your inbox.", on: true },
++  { id: "push", icon: Bell, label: "Push Notifications", desc: "Real-time alerts on this device.", on: true },
++  { id: "interview", icon: Mic, label: "Interview Alerts", desc: "Reminders before scheduled mock interviews.", on: true },
++  { id: "jobs", icon: BriefcaseBusiness, label: "Job Alerts", desc: "New matching job postings.", on: true },
++  { id: "roadmap", icon: Route, label: "Roadmap Reminders", desc: "Nudges to stay on track with your plan.", on: false },
++  { id: "resume", icon: FileText, label: "Resume Updates", desc: "ATS score changes and suggestions.", on: true },
++  { id: "placement", icon: Target, label: "Placement Alerts", desc: "Offers, interview calls and deadlines.", on: true },
++  { id: "weekly", icon: BarChart3, label: "Weekly Reports", desc: "A summary of your progress every Monday.", on: false },
++];
++
++export default function NotificationSettings() {
++  const [items, setItems] = useState(initial);
++
++  function toggle(id: string) {
++    setItems((prev) => prev.map((item) => (item.id === id ? { ...item, on: !item.on } : item)));
++  }
++
++  return (
++    <section className="mt-8 rounded-[24px] border border-neutral-200 bg-white p-5 sm:p-6 lg:rounded-[30px]">
++      <h2 className="text-xl font-bold sm:text-2xl">Notification Settings</h2>
++
++      <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
++        {items.map((item, index) => {
++          const Icon = item.icon;
++          return (
++            <motion.div
++              key={item.id}
++              initial={{ opacity: 0, y: 8 }}
++              whileInView={{ opacity: 1, y: 0 }}
++              viewport={{ once: true, margin: "-10% 0px" }}
++              transition={{ duration: 0.35, delay: index * 0.04, ease: "easeOut" }}
++              className="flex items-center justify-between gap-4 rounded-2xl border border-neutral-200 p-4"
++            >
++              <div className="flex items-center gap-3">
++                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-neutral-100">
++                  <Icon size={16} />
++                </div>
++                <div className="min-w-0">
++                  <p className="font-medium">{item.label}</p>
++                  <p className="truncate text-xs text-neutral-500">{item.desc}</p>
++                </div>
++              </div>
++
++              <ToggleSwitch checked={item.on} onChange={() => toggle(item.id)} />
++            </motion.div>
++          );
++        })}
++      </div>
++    </section>
++  );
++}
+diff --git a/components/dashboard-v2/settings/preferences.tsx b/components/dashboard-v2/settings/preferences.tsx
+new file mode 100644
+index 0000000..46ae6ac
+--- /dev/null
++++ b/components/dashboard-v2/settings/preferences.tsx
+@@ -0,0 +1,49 @@
++"use client";
++
++import { motion } from "framer-motion";
++import { Palette, Globe, Clock, CalendarDays, LayoutDashboard, Home, ChevronDown } from "lucide-react";
++
++const preferences = [
++  { icon: Palette, label: "Theme", value: "Light" },
++  { icon: Globe, label: "Language", value: "English (India)" },
++  { icon: Clock, label: "Timezone", value: "GMT+5:30 — Kolkata" },
++  { icon: CalendarDays, label: "Date Format", value: "DD/MM/YYYY" },
++  { icon: LayoutDashboard, label: "Default Dashboard", value: "Overview" },
++  { icon: Home, label: "Start Page", value: "Career Twin" },
++];
++
++export default function Preferences() {
++  return (
++    <section className="mt-8">
++      <h2 className="text-xl font-bold sm:text-2xl">Preferences</h2>
++
++      <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
++        {preferences.map((pref, index) => {
++          const Icon = pref.icon;
++          return (
++            <motion.button
++              key={pref.label}
++              initial={{ opacity: 0, y: 10 }}
++              whileInView={{ opacity: 1, y: 0 }}
++              viewport={{ once: true, margin: "-10% 0px" }}
++              transition={{ duration: 0.4, delay: index * 0.05, ease: "easeOut" }}
++              whileHover={{ y: -4 }}
++              className="flex w-full items-center justify-between rounded-2xl border border-neutral-200 bg-white p-4 text-left shadow-sm transition-shadow duration-300 hover:shadow-lg"
++            >
++              <div className="flex items-center gap-3">
++                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-neutral-100">
++                  <Icon size={16} />
++                </div>
++                <div>
++                  <p className="text-xs text-neutral-500">{pref.label}</p>
++                  <p className="text-sm font-medium">{pref.value}</p>
++                </div>
++              </div>
++              <ChevronDown size={16} className="shrink-0 text-neutral-400" />
++            </motion.button>
++          );
++        })}
++      </div>
++    </section>
++  );
++}
+diff --git a/components/dashboard-v2/settings/privacy.tsx b/components/dashboard-v2/settings/privacy.tsx
+new file mode 100644
+index 0000000..7d50431
+--- /dev/null
++++ b/components/dashboard-v2/settings/privacy.tsx
+@@ -0,0 +1,75 @@
++"use client";
++
++import { useState } from "react";
++import { motion } from "framer-motion";
++import { Eye, Globe2, FileText, BarChart3, Download, Trash2 } from "lucide-react";
++import ToggleSwitch from "../shared/toggle-switch";
++
++const initial = [
++  { id: "public", icon: Eye, label: "Public Profile", desc: "Make your profile visible to recruiters.", on: true },
++  { id: "portfolio", icon: Globe2, label: "Portfolio Visibility", desc: "Show your portfolio link on your profile.", on: true },
++  { id: "resume", icon: FileText, label: "Resume Visibility", desc: "Allow recruiters to view your resume.", on: true },
++  { id: "analytics", icon: BarChart3, label: "Analytics Sharing", desc: "Share anonymized usage data to improve AI.", on: false },
++];
++
++export default function PrivacySettings() {
++  const [items, setItems] = useState(initial);
++
++  function toggle(id: string) {
++    setItems((prev) => prev.map((item) => (item.id === id ? { ...item, on: !item.on } : item)));
++  }
++
++  return (
++    <section className="mt-8 rounded-[24px] border border-neutral-200 bg-white p-5 sm:p-6 lg:rounded-[30px]">
++      <h2 className="text-xl font-bold sm:text-2xl">Privacy Settings</h2>
++
++      <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
++        {items.map((item, index) => {
++          const Icon = item.icon;
++          return (
++            <motion.div
++              key={item.id}
++              initial={{ opacity: 0, y: 8 }}
++              whileInView={{ opacity: 1, y: 0 }}
++              viewport={{ once: true, margin: "-10% 0px" }}
++              transition={{ duration: 0.35, delay: index * 0.05, ease: "easeOut" }}
++              className="flex items-center justify-between gap-4 rounded-2xl border border-neutral-200 p-4"
++            >
++              <div className="flex items-center gap-3">
++                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-neutral-100">
++                  <Icon size={16} />
++                </div>
++                <div className="min-w-0">
++                  <p className="font-medium">{item.label}</p>
++                  <p className="truncate text-xs text-neutral-500">{item.desc}</p>
++                </div>
++              </div>
++
++              <ToggleSwitch checked={item.on} onChange={() => toggle(item.id)} />
++            </motion.div>
++          );
++        })}
++      </div>
++
++      <div className="mt-6 flex flex-wrap gap-3 border-t border-neutral-100 pt-6">
++        <motion.button
++          whileHover={{ scale: 1.03, y: -2 }}
++          whileTap={{ scale: 0.97 }}
++          className="flex items-center gap-2 rounded-2xl border border-neutral-300 px-5 py-3 text-sm font-medium transition-colors hover:border-black"
++        >
++          <Download size={16} />
++          Download Data
++        </motion.button>
++
++        <motion.button
++          whileHover={{ scale: 1.03, y: -2 }}
++          whileTap={{ scale: 0.97 }}
++          className="flex items-center gap-2 rounded-2xl border border-neutral-300 px-5 py-3 text-sm font-medium text-neutral-600 transition-colors hover:border-black hover:text-black"
++        >
++          <Trash2 size={16} />
++          Delete Data
++        </motion.button>
++      </div>
++    </section>
++  );
++}
+diff --git a/components/dashboard-v2/settings/quick-navigation.tsx b/components/dashboard-v2/settings/quick-navigation.tsx
+new file mode 100644
+index 0000000..af6931d
+--- /dev/null
++++ b/components/dashboard-v2/settings/quick-navigation.tsx
+@@ -0,0 +1,50 @@
++"use client";
++
++import Link from "next/link";
++import { motion } from "framer-motion";
++import {
++  LayoutDashboard,
++  Sparkles,
++  FileText,
++  BriefcaseBusiness,
++  Route,
++  GraduationCap,
++  BarChart3,
++  User,
++} from "lucide-react";
++
++const links = [
++  { icon: LayoutDashboard, label: "Overview", href: "/dashboard-v2" },
++  { icon: Sparkles, label: "Career Twin", href: "/dashboard-v2/career-twin" },
++  { icon: FileText, label: "Resume Studio", href: "/dashboard-v2/resume-studio" },
++  { icon: BriefcaseBusiness, label: "Job Hub", href: "/dashboard-v2/job-hub" },
++  { icon: Route, label: "Roadmap", href: "/dashboard-v2/roadmap" },
++  { icon: GraduationCap, label: "Mock Interview", href: "/dashboard-v2/mock-interview" },
++  { icon: BarChart3, label: "Analytics", href: "/dashboard-v2/analytics" },
++  { icon: User, label: "Profile", href: "/dashboard-v2/profile" },
++];
++
++export default function QuickNavigation() {
++  return (
++    <section className="mt-8 rounded-[24px] border border-neutral-200 bg-white p-5 sm:p-6 lg:rounded-[30px]">
++      <h2 className="text-xl font-bold sm:text-2xl">Quick Navigation</h2>
++
++      <div className="mt-5 flex flex-wrap gap-3">
++        {links.map((link) => {
++          const Icon = link.icon;
++          return (
++            <motion.div key={link.label} whileHover={{ scale: 1.03, y: -2 }} whileTap={{ scale: 0.97 }}>
++              <Link
++                href={link.href}
++                className="flex items-center gap-2 rounded-2xl border border-neutral-300 px-5 py-3 text-sm font-medium transition-colors hover:border-black"
++              >
++                <Icon size={16} />
++                {link.label}
++              </Link>
++            </motion.div>
++          );
++        })}
++      </div>
++    </section>
++  );
++}
+diff --git a/components/dashboard-v2/settings/security.tsx b/components/dashboard-v2/settings/security.tsx
+new file mode 100644
+index 0000000..53e49d2
+--- /dev/null
++++ b/components/dashboard-v2/settings/security.tsx
+@@ -0,0 +1,112 @@
++"use client";
++
++import { motion } from "framer-motion";
++import { useState } from "react";
++import { KeyRound, ShieldCheck, Monitor, Smartphone, History, ShieldAlert } from "lucide-react";
++import AnimatedNumber from "../shared/animated-number";
++import ToggleSwitch from "../shared/toggle-switch";
++
++const sessions = [
++  { device: "MacBook Pro — Chrome", location: "Patna, IN", time: "Active now", icon: Monitor },
++  { device: "iPhone 15 — Safari", location: "Patna, IN", time: "2 hours ago", icon: Smartphone },
++];
++
++export default function Security() {
++  const [twoFA, setTwoFA] = useState(false);
++
++  return (
++    <section className="mt-8 rounded-[24px] border border-neutral-200 bg-white p-5 sm:p-6 lg:rounded-[30px]">
++      <div className="flex flex-wrap items-center justify-between gap-4">
++        <h2 className="text-xl font-bold sm:text-2xl">Security</h2>
++
++        <div className="flex items-center gap-3 rounded-2xl border border-neutral-200 px-4 py-2.5">
++          <ShieldCheck size={16} />
++          <span className="text-sm text-neutral-500">Security Score</span>
++          <AnimatedNumber value={78} suffix="%" className="text-sm font-bold tabular-nums" />
++        </div>
++      </div>
++
++      <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
++        <div className="rounded-2xl border border-neutral-200 p-4">
++          <div className="flex items-center gap-3">
++            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-neutral-100">
++              <KeyRound size={16} />
++            </div>
++            <div>
++              <p className="font-medium">Password</p>
++              <p className="text-xs text-neutral-500">Last changed 2 months ago</p>
++            </div>
++          </div>
++          <motion.button
++            whileHover={{ scale: 1.02 }}
++            whileTap={{ scale: 0.98 }}
++            className="mt-4 w-full rounded-xl border border-neutral-300 py-2.5 text-sm font-medium transition-colors hover:border-black"
++          >
++            Change Password
++          </motion.button>
++        </div>
++
++        <div className="rounded-2xl border border-neutral-200 p-4">
++          <div className="flex items-center justify-between gap-3">
++            <div className="flex items-center gap-3">
++              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-neutral-100">
++                <ShieldAlert size={16} />
++              </div>
++              <div>
++                <p className="font-medium">Two-Factor Authentication</p>
++                <p className="text-xs text-neutral-500">
++                  {twoFA ? "Enabled — your account is protected" : "Add an extra layer of security"}
++                </p>
++              </div>
++            </div>
++            <ToggleSwitch checked={twoFA} onChange={() => setTwoFA((v) => !v)} />
++          </div>
++          <motion.button
++            whileHover={{ scale: 1.02 }}
++            whileTap={{ scale: 0.98 }}
++            className="mt-4 w-full rounded-xl bg-black py-2.5 text-sm font-medium text-white"
++          >
++            {twoFA ? "Manage 2FA" : "Enable 2FA"}
++          </motion.button>
++        </div>
++      </div>
++
++      <div className="mt-6 border-t border-neutral-100 pt-6">
++        <div className="flex items-center justify-between">
++          <div className="flex items-center gap-2 font-medium">
++            <History size={16} />
++            Recent Login Activity
++          </div>
++          <button className="text-sm font-medium text-neutral-500 transition-colors hover:text-black">
++            View Sessions
++          </button>
++        </div>
++
++        <div className="mt-4 space-y-3">
++          {sessions.map((session, index) => {
++            const Icon = session.icon;
++            return (
++              <motion.div
++                key={session.device}
++                initial={{ opacity: 0, y: 8 }}
++                whileInView={{ opacity: 1, y: 0 }}
++                viewport={{ once: true }}
++                transition={{ duration: 0.35, delay: index * 0.06, ease: "easeOut" }}
++                className="flex items-center gap-3 rounded-2xl border border-neutral-200 p-4"
++              >
++                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-neutral-100">
++                  <Icon size={16} />
++                </div>
++                <div className="min-w-0 flex-1">
++                  <p className="truncate font-medium">{session.device}</p>
++                  <p className="text-xs text-neutral-500">{session.location}</p>
++                </div>
++                <span className="shrink-0 text-xs tabular-nums text-neutral-400">{session.time}</span>
++              </motion.div>
++            );
++          })}
++        </div>
++      </div>
++    </section>
++  );
++}
+diff --git a/components/dashboard-v2/shared/toggle-switch.tsx b/components/dashboard-v2/shared/toggle-switch.tsx
+new file mode 100644
+index 0000000..50754e5
+--- /dev/null
++++ b/components/dashboard-v2/shared/toggle-switch.tsx
+@@ -0,0 +1,28 @@
++"use client";
++
++import { motion } from "framer-motion";
++
++export default function ToggleSwitch({
++  checked,
++  onChange,
++}: {
++  checked: boolean;
++  onChange: () => void;
++}) {
++  return (
++    <button
++      onClick={onChange}
++      aria-pressed={checked}
++      className={`relative h-7 w-12 shrink-0 rounded-full border transition-colors duration-200 ${
++        checked ? "border-black bg-black" : "border-neutral-300 bg-neutral-100"
++      }`}
++    >
++      <motion.span
++        layout
++        transition={{ type: "spring", stiffness: 500, damping: 30 }}
++        className="absolute top-[3px] h-[22px] w-[22px] rounded-full bg-white shadow-sm"
++        style={{ left: checked ? "calc(100% - 25px)" : "3px" }}
++      />
++    </button>
++  );
++}
+diff --git a/components/dashboard-v2/sidebar/sidebar.tsx b/components/dashboard-v2/sidebar/sidebar.tsx
+index 408c2ac..920868e 100644
+--- a/components/dashboard-v2/sidebar/sidebar.tsx
++++ b/components/dashboard-v2/sidebar/sidebar.tsx
+@@ -58,6 +58,7 @@ const items = [
+   {
+     title: "Settings",
+     icon: Settings,
++    href: "/dashboard-v2/settings",
+   },
+ ];
+ 
+-- 
+2.43.0
+
